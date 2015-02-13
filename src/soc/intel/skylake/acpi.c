@@ -356,6 +356,138 @@ static int generate_c_state_entries(int s0ix_enable, int max_cstate)
 	/* Generate C-state tables */
 	return acpigen_write_CST_package(map, ARRAY_SIZE(map));
 }
+
+static int calculate_power(int tdp, int p1_ratio, int ratio)
+{
+	u32 m;
+	u32 power;
+
+	/*
+	 * M = ((1.1 - ((p1_ratio - ratio) * 0.00625)) / 1.1) ^ 2
+	 *
+	 * Power = (ratio / p1_ratio) * m * tdp
+	 */
+
+	m = (110000 - ((p1_ratio - ratio) * 625)) / 11;
+	m = (m * m) / 1000;
+
+	power = ((ratio * 100000 / p1_ratio) / 100);
+	power *= (m / 100) * (tdp / 1000);
+	power /= 1000;
+
+	return (int)power;
+}
+
+static int generate_p_state_entries(int core, int cores_per_package)
+{
+	int len, len_pss;
+	int ratio_min, ratio_max, ratio_turbo, ratio_step;
+	int coord_type, power_max, power_unit, num_entries;
+	int ratio, power, clock, clock_max;
+	msr_t msr;
+
+	/* Determine P-state coordination type from MISC_PWR_MGMT[0] */
+	msr = rdmsr(MSR_MISC_PWR_MGMT);
+	if (msr.lo & MISC_PWR_MGMT_EIST_HW_DIS)
+		coord_type = SW_ANY;
+	else
+		coord_type = HW_ALL;
+
+	/* Get bus ratio limits and calculate clock speeds */
+	msr = rdmsr(MSR_PLATFORM_INFO);
+	ratio_min = (msr.hi >> (40-32)) & 0xff; /* Max Efficiency Ratio */
+
+	/* Determine if this CPU has configurable TDP */
+	if (cpu_config_tdp_levels()) {
+		/* Set max ratio to nominal TDP ratio */
+		msr = rdmsr(MSR_CONFIG_TDP_NOMINAL);
+		ratio_max = msr.lo & 0xff;
+	} else {
+		/* Max Non-Turbo Ratio */
+		ratio_max = (msr.lo >> 8) & 0xff;
+	}
+	clock_max = ratio_max * CPU_BCLK;
+
+	/* Calculate CPU TDP in mW */
+	msr = rdmsr(MSR_PKG_POWER_SKU_UNIT);
+	power_unit = 2 << ((msr.lo & 0xf) - 1);
+	msr = rdmsr(MSR_PKG_POWER_SKU);
+	power_max = ((msr.lo & 0x7fff) / power_unit) * 1000;
+
+	/* Write _PCT indicating use of FFixedHW */
+	len = acpigen_write_empty_PCT();
+
+	/* Write _PPC with no limit on supported P-state */
+	len += acpigen_write_PPC_NVS();
+
+	/* Write PSD indicating configured coordination type */
+	len += acpigen_write_PSD_package(core, 1, coord_type);
+
+	/* Add P-state entries in _PSS table */
+	len += acpigen_write_name("_PSS");
+
+	/* Determine ratio points */
+	ratio_step = PSS_RATIO_STEP;
+	num_entries = ((ratio_max - ratio_min) / ratio_step) + 1;
+	if (num_entries > PSS_MAX_ENTRIES) {
+		ratio_step += 1;
+		num_entries = ((ratio_max - ratio_min) / ratio_step) + 1;
+	}
+
+	/* P[T] is Turbo state if enabled */
+	if (get_turbo_state() == TURBO_ENABLED) {
+		/* _PSS package count including Turbo */
+		len_pss = acpigen_write_package(num_entries + 2);
+
+		msr = rdmsr(MSR_TURBO_RATIO_LIMIT);
+		ratio_turbo = msr.lo & 0xff;
+
+		/* Add entry for Turbo ratio */
+		len_pss += acpigen_write_PSS_package(
+			clock_max + 1,		/* MHz */
+			power_max,		/* mW */
+			PSS_LATENCY_TRANSITION,	/* lat1 */
+			PSS_LATENCY_BUSMASTER,	/* lat2 */
+			ratio_turbo << 8,	/* control */
+			ratio_turbo << 8);	/* status */
+	} else {
+		/* _PSS package count without Turbo */
+		len_pss = acpigen_write_package(num_entries + 1);
+	}
+
+	/* First regular entry is max non-turbo ratio */
+	len_pss += acpigen_write_PSS_package(
+		clock_max,		/* MHz */
+		power_max,		/* mW */
+		PSS_LATENCY_TRANSITION,	/* lat1 */
+		PSS_LATENCY_BUSMASTER,	/* lat2 */
+		ratio_max << 8,		/* control */
+		ratio_max << 8);	/* status */
+
+	/* Generate the remaining entries */
+	for (ratio = ratio_min + ((num_entries - 1) * ratio_step);
+	     ratio >= ratio_min; ratio -= ratio_step) {
+
+		/* Calculate power at this ratio */
+		power = calculate_power(power_max, ratio_max, ratio);
+		clock = ratio * CPU_BCLK;
+
+		len_pss += acpigen_write_PSS_package(
+			clock,			/* MHz */
+			power,			/* mW */
+			PSS_LATENCY_TRANSITION,	/* lat1 */
+			PSS_LATENCY_BUSMASTER,	/* lat2 */
+			ratio << 8,		/* control */
+			ratio << 8);		/* status */
+	}
+
+	/* Fix package length */
+	len_pss--;
+	acpigen_patch_len(len_pss);
+
+	return len + len_pss;
+}
+
 void generate_cpu_entries(void)
 {
 	int len_pr;
@@ -390,6 +522,10 @@ void generate_cpu_entries(void)
 			/* Generate C-state tables */
 			len_pr += generate_c_state_entries
 					(is_s0ix_enable, max_c_state);
+
+			/* Generate P-state tables */
+			len_pr += generate_p_state_entries(
+				core_id-1, cores_per_package);
 
 			len_pr--;
 			acpigen_patch_len(len_pr);
