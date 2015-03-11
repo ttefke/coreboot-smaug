@@ -319,6 +319,16 @@ struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs)
 
 	spi->rw = SPI_READ_FLAG;
 
+	if (spi->ops && spi->ops->probe) {
+		flash = spi->ops->probe(spi);
+		if (!flash) {
+			printk(BIOS_WARNING, "SF: Unsupported manufacturer\n");
+			goto err_manufacturer_probe;
+		} else {
+			goto hwseq_done;
+		}
+	}
+
 	/* Read the ID codes */
 	ret = spi_flash_cmd(spi, CMD_READ_ID, idcode, sizeof(idcode));
 	if (ret)
@@ -355,6 +365,7 @@ struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs)
 		goto err_manufacturer_probe;
 	}
 
+hwseq_done:
 #if CONFIG_SMM_TSEG && defined(__SMM__)
 	/* Ensure flash handlers are valid for TSEG */
 	tseg_relocate((void **)&flash->read);

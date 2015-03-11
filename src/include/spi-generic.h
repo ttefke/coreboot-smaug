@@ -35,6 +35,12 @@
 #define SPI_READ_FLAG	0x01
 #define SPI_WRITE_FLAG	0x02
 
+struct spi_slave;
+
+struct spi_controller_ops {
+	struct spi_flash *(*probe)(struct spi_slave *spi);
+};
+
 /*-----------------------------------------------------------------------
  * Representation of a SPI slave, i.e. what we're communicating with.
  *
@@ -47,12 +53,14 @@
  *              read or write transaction, usually this is a controller
  *              property, kept in the slave structure for convenience. Zero in
  *              this field means 'unlimited'.
+ *   ops:	SPI controller ops structure for this slave.
  */
 struct spi_slave {
 	unsigned bus;
 	unsigned cs;
 	unsigned rw;
 	unsigned max_transfer_size;
+	const struct spi_controller_ops *ops;
 };
 
 /*-----------------------------------------------------------------------
