@@ -25,13 +25,13 @@
  * - GPIO number encoding - if -1 not a valid gpio
  * - Chipset Name
  *
- * Note: We need to encode gpios within the 3 separate banks
- * with the MMIO offset of each banks space. e.g. GPIO_SUS[8] would be encoded
- * as 0x2008 where the SUS offset (IO_BASE_OFFSET_GPSSUS) is 0x2000.
+ * Note: We need to encode gpios within the 4 separate banks
+ * with the MMIO offset of each banks space. e.g. MF_ISH_GPIO_4 would be encoded
+ * as 0x10016 where the SUS offset (COMMUNITY_OFFSET_GPEAST) is 0x10000.
  */
 
 Name(OIPG, Package() {
 	/* No physical recovery button */
 	Package () { 0x0001, 0, 0xFFFFFFFF, "Braswell" },
-	Package () { 0x0003, 1, 0x2006, "Braswell" },
+	Package () { 0x0003, 1, 0x10016, "Braswell" },
 })
