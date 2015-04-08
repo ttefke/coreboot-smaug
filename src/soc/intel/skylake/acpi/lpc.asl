@@ -19,6 +19,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <soc/iomap.h>
+
 // Intel LPC Bus Device  - 0:1f.0
 
 Device (LPCB)
@@ -34,16 +36,7 @@ Device (LPCB)
 		PMBS,	16,	// PMBASE
 		Offset (0x48),
 		GPBS,	16,	// GPIOBASE
-		Offset (0x60),	// Interrupt Routing Registers
-		PRTA,	8,
-		PRTB,	8,
-		PRTC,	8,
-		PRTD,	8,
-		Offset (0x68),
-		PRTE,	8,
-		PRTF,	8,
-		PRTG,	8,
-		PRTH,	8,
+
 
 		Offset (0x80),	// IO Decode Ranges
 		IOD0,	8,
@@ -70,6 +63,28 @@ Device (LPCB)
 		{
 			Memory32Fixed(ReadOnly, 0xff000000, 0x01000000)
 		})
+	}
+
+	Device (HPET)
+	{
+		Name (_HID, EISAID("PNP0103"))
+		Name (BUF0, ResourceTemplate()
+		{
+			Memory32Fixed(ReadOnly, HPET_BASE_ADDRESS, 0x400, FED0)
+		})
+
+		Method (_STA, 0)	// Device Status
+		{
+			Return (0xf)
+		}
+		Method (_CRS, 0, Serialized) // Current resources
+		{
+			CreateDWordField (BUF0, ^FED0._BAS, HPT0)
+			/* TODO: Base address configured need to pass as GNVS */
+			Store(HPET_BASE_ADDRESS, HPT0)
+
+			Return(BUF0)
+		}
 	}
 
 	Device(PIC)	// 8259 Interrupt Controller

@@ -1,7 +1,5 @@
 /*
  * This file is part of the coreboot project.
- *
- * Copyright (C) 2014 Google Inc.
  * Copyright (C) 2015 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -12,18 +10,23 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-/* Included in each PCIe Root Port device */
+/* ITSS */
+/* Define the needed ITSS registers used by ASL on Interrupt */
 
-OperationRegion (RPCS, PCI_Config, 0x00, 0x380)
-Field (RPCS, AnyAcc, NoLock, Preserve)
+Scope (\_SB)
 {
-	Offset (0x4c),	// Link Capabilities
-	, 24,
-	RPPN, 8,	// Root Port Number
+	OperationRegion (ITSS, SystemMemory, 0xfdc43100, 0x8)
+	Field (ITSS, ByteAcc, NoLock, Preserve)
+	{
+		PARC, 8,
+		PBRC, 8,
+		PCRC, 8,
+		PDRC, 8,
+		PERC, 8,
+		PFRC, 8,
+		PGRC, 8,
+		PHRC, 8,
+	}
 }

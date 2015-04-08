@@ -23,45 +23,40 @@
 
 Scope (\)
 {
-	// IO-Trap at 0x800. This is the ACPI->SMI communication interface.
+	/* IO-Trap at 0x800.
+	 * This is the ACPI->SMI communication interface.
+	 */
 	OperationRegion (IO_T, SystemIO, 0x800, 0x10)
 	Field (IO_T, ByteAcc, NoLock, Preserve)
 	{
 		Offset (0x8),
-		TRP0, 8		// IO-Trap at 0x808
+		TRP0, 8		/* IO-Trap at 0x808 */
 	}
-
-	// Root Complex Register Block
-	OperationRegion (RCRB, SystemMemory, RCBA_BASE_ADDRESS, RCBA_BASE_SIZE)
-	Field (RCRB, DWordAcc, Lock, Preserve)
-	{
-		Offset (0x3404), // High Performance Timer Configuration
-		HPAS, 2, 	// Address Select
-		, 5,
-		HPTE, 1,	// Address Enable
-	}
-
 }
 
-// PCI Express Ports 0:1c.x
+/* PCI Express Ports 0:1c.x */
 #include "pcie.asl"
 
-// USB XHCI 0:14.0
+/* USB XHCI 0:14.0 */
 #include "xhci.asl"
 
-// LPC Bridge 0:1f.0
+/* LPC Bridge 0:1f.0 */
 #include "lpc.asl"
 
-// SMBus 0:1f.3
+/* SMBus 0:1f.3 */
 #include "smbus.asl"
 
-// Serial IO
+/* Serial IO */
 #include "serialio.asl"
+
+/* Interrupt Routing */
+#include "itss.asl"
+#include "irqlinks.asl"
 
 Method (_OSC, 4)
 {
 	/* Check for proper GUID */
-	If (LEqual (Arg0, ToUUID("33DB4D5B-1FF7-401C-9657-7441C03DD766")))
+	If (LEqual (Arg0, ToUUID ("33DB4D5B-1FF7-401C-9657-7441C03DD766")))
 	{
 		/* Let OS control everything */
 		Return (Arg3)

@@ -62,7 +62,26 @@ Field (GNVS, ByteAcc, NoLock, Preserve)
 	CBMC,	32,	// 0x1c - 0x1f - Coreboot Memory Console
 	PM1I,	64,	// 0x20 - 0x27 - PM1 wake status bit
 	GPEI,	64,	// 0x28 - 0x2f - GPE wake status bit
-
+	RPA1,	32,	// Root port address 1
+	RPA2,	32,
+	RPA3,	32,
+	RPA4,	32,
+	RPA5,	32,
+	RPA6,	32,
+	RPA7,	32,
+	RPA8,	32,
+	RPA9,	32,
+	RPAA,	32,
+	RPAB,	32,
+	RPAC,	32,
+	PRTA,	8,
+	PRTB,	8,
+	PRTC,	8,
+	PRTD,	8,
+	PRTE,	8,
+	PRTF,	8,
+	PRTG,	8,
+	PRTH,	8,
 	/* ChromeOS specific */
 	Offset (0x100),
 	#include <vendorcode/google/chromeos/acpi/gnvs.asl>

@@ -136,7 +136,9 @@ Device (I2C1)
 		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {11}
 	})
 
-	/* DMA channels are only used if Serial IO DMA controller is enabled*/
+	/* DMA channels are only used if
+	 * Serial IO DMA controller is enabled
+	 */
 	Name (DBUF, ResourceTemplate ()
 	{
 		FixedDMA (0x1A, 6, Width32Bit, DMA1) // Tx
@@ -144,7 +146,7 @@ Device (I2C1)
 	})
 	Method (_CRS, 0, NotSerialized)
 	{
-		// Update BAR0 address and length if set in NVS
+		/* Update BAR0 address and length if set in NVS */
 		If (LNotEqual (\S1B0, Zero)) {
 			CreateDwordField (^RBUF, ^BAR0._BAS, B0AD)
 			CreateDwordField (^RBUF, ^BAR0._LEN, B0LN)
@@ -176,7 +178,9 @@ Device (I2C2)
 		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {12}
 	})
 
-	/* DMA channels are only used if Serial IO DMA controller is enabled */
+	/* DMA channels are only used if
+	 * Serial IO DMA controller is enabled
+	 */
 	Name (DBUF, ResourceTemplate ()
 	{
 		FixedDMA (0x1A, 6, Width32Bit, DMA1)
@@ -219,7 +223,9 @@ Device (I2C3)
                 Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {13}
         })
 
-        /* DMA channels are only used if Serial IO DMA controller is enabled */
+        /* DMA channels are only used if
+	 * Serial IO DMA controller is enabled
+	 */
         Name (DBUF, ResourceTemplate ()
         {
                 FixedDMA (0x1A, 6, Width32Bit, DMA1)
@@ -261,7 +267,9 @@ Device (I2C4)
                 Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {22}
         })
 
-        /* DMA channels are only used if Serial IO DMA controller is enabled */
+        /* DMA channels are only used if
+	 * Serial IO DMA controller is enabled
+	 */
         Name (DBUF, ResourceTemplate ()
         {
                 FixedDMA (0x1A, 6, Width32Bit, DMA1)
@@ -302,7 +310,9 @@ Device (I2C5)
 		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {21}
 	})
 
-        /* DMA channels are only used if Serial IO DMA controller is enabled */
+        /* DMA channels are only used if
+	 * Serial IO DMA controller is enabled
+	 */
         Name (DBUF, ResourceTemplate ()
         {
                 FixedDMA (0x1A, 6, Width32Bit, DMA1)
@@ -335,7 +345,7 @@ Device (SPI0)
 	Name (_UID, 1)
 	Name (_ADR, 0x001E0002)
 
-	// BAR0 is assigned during PCI enumeration and saved into NVS
+	/* BAR0 is assigned during PCI enumeration and saved into NVS */
 	Name (RBUF, ResourceTemplate ()
 	{
 		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
@@ -344,7 +354,7 @@ Device (SPI0)
 
 	Method (_CRS, 0, NotSerialized)
 	{
-		// Update BAR0 address and length if set in NVS
+		/* Update BAR0 address and length if set in NVS */
 		If (LNotEqual (\S6B0, Zero)) {
 			CreateDwordField (^RBUF, ^BAR0._BAS, B0AD)
 			CreateDwordField (^RBUF, ^BAR0._LEN, B0LN)
@@ -363,23 +373,23 @@ Device (SPI0)
 
 Device (SPI1)
 {
-	// Serial IO SPI1 Controller
+	/* Serial IO SPI1 Controller */
 	Name (_HID,"INT3441")
 	Name (_UID, 1)
 	Name (_ADR, 0x001E0003)
 
-	// BAR0 is assigned during PCI enumeration and saved into NVS
+	/* BAR0 is assigned during PCI enumeration and saved into NVS */
 	Name (RBUF, ResourceTemplate ()
 	{
 		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
 		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {7}
 	})
 
-	// DMA channels are only used if Serial IO DMA controller is enabled
+	/* DMA channels are only used if Serial IO DMA controller is enabled */
 	Name (DBUF, ResourceTemplate ()
 	{
-		FixedDMA (0x10, 0, Width32Bit, DMA1) // Tx
-		FixedDMA (0x11, 1, Width32Bit, DMA2) // Rx
+		FixedDMA (0x10, 0, Width32Bit, DMA1) /* Tx */
+		FixedDMA (0x11, 1, Width32Bit, DMA2) /* Rx */
 	})
 	Method (_CRS, 0, NotSerialized)
 	{
@@ -413,7 +423,9 @@ Device (UAR0)
 		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {13}
 	})
 
-	/* DMA channels are only used if Serial IO DMA controller is enabled */
+	/* DMA channels are only used if
+	 * Serial IO DMA controller is enabled
+	 */
 	Name (DBUF, ResourceTemplate ()
 	{
 		FixedDMA (0x16, 2, Width32Bit, DMA1) 
@@ -476,10 +488,11 @@ Device (UAR1)
 
 Device (UAR2)
 {
-        // Serial IO UART1 Controller
+        /* Serial IO UART1 Controller */
         Name (_HID,"INT344A")
         Name (_UID, 1)
         Name (_ADR, 0x00190000)
+
  	/* BAR0 is assigned during PCI enumeration and saved into NVS */
         Name (RBUF, ResourceTemplate ()
         {
@@ -488,7 +501,7 @@ Device (UAR2)
         })
         Method (_CRS, 0, NotSerialized)
         {
-                // Update BAR0 address and length if set in NVS
+                /* Update BAR0 address and length if set in NVS */
                 If (LNotEqual (\SAB0, Zero)) {
                         CreateDwordField (^RBUF, ^BAR0._BAS, B0AD)
                         CreateDwordField (^RBUF, ^BAR0._LEN, B0LN)
@@ -504,71 +517,31 @@ Device (UAR2)
         }
 }
 
-Device (SDIO)
-{
-	/* Serial IO SDIO Controller */
-	Name (_HID,"INT344D")
-	Name (_CID, "PNP0D40")
-	Name (_UID, 1)
-	Name (_ADR, 0x001E0005)
-	/* BAR0 is assigned during PCI enumeration and saved into NVS */
-	Name (RBUF, ResourceTemplate ()
-	{
-		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {5}
-	})
-	Method (_CRS, 0, NotSerialized)
-	{
-		/* Update BAR0 address and length if set in NVS */
-		If (LNotEqual (\S7B0, Zero)) {
-			CreateDwordField (^RBUF, ^BAR0._BAS, B0AD)
-			CreateDwordField (^RBUF, ^BAR0._LEN, B0LN)
-			Store (\S7B0, B0AD)
-			Store (SIO_BAR_LEN, B0LN)
-		}
-		Return (RBUF)
-	}
-	Method (_STA, 0, NotSerialized)
-	{
-		Return (0xF)
-	}
-}
 
-Device(PEMC)
+Device (PEMC)
 {
-	Name(_ADR, 0x001E0004)
+	Name (_ADR, 0x001E0004)
 	Device (CARD)
 	{
 		Name (_ADR, 0x00000008)
-		Method(_RMV, 0x0, NotSerialized)
+		Method (_RMV, 0x0, NotSerialized)
 		{
 			Return (0)
 		} 
 	}
 }
 
-Device(SCSR)
+/* SD controller */
+Device (PSDC)
 {
-	Name(_HID,EISAID("PNP0C02"))
-	Name(_STA,0x3)
-	Name(_UID,6)
-	Name (RBUF, ResourceTemplate ()
+	Name (_ADR, 0x001E0006)
+	Device (CARD)
 	{
-		Memory32Fixed (ReadWrite, 0x00000000, 0x0000000C, SBA0)
-		/* System Device Range 0 
-		@todo SKL PCH : Platform that is having SDIO WIFI to manipulate SBA0 
-		reducing it's size to 0x4 if WIFI is connected */
-		Memory32Fixed (ReadWrite, 0x00000000, 0x000007F4, SBA1)
-		/* System Device Range 1 */
-		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR1)
-		 /* SCS SDIO BAR1 */
-	})
-	Method (_CRS, 0x0, NotSerialized)
-	{
-		CreateDWordField(^RBUF,^SBA0._BAS,SBV0)
-		CreateDWordField(^RBUF,^SBA1._BAS,SBV1)
-		CreateDWordField(^RBUF,^BAR1._BAS,BVAL)
-		CreateDWordField(^RBUF,^BAR1._LEN,BLEN)
-		Return(RBUF)
+		Name (_ADR, 0x00000008)
+		Method (_RMV, 0x0, NotSerialized)
+		{
+			Return (1)
+		}
 	}
 }
+
