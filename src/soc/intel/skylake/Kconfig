@@ -41,6 +41,7 @@ config CPU_SPECIFIC_OPTIONS
 	select SMM_MODULES
 	select SMM_TSEG
 	select SMP
+	select SPI_FLASH
 	select SSE2
 	select TSC_CONSTANT_RATE
 	select TSC_SYNC_MFENCE

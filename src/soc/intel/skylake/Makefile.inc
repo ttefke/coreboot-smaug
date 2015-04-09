@@ -41,6 +41,7 @@ ramstage-y += smbus.c
 ramstage-y += smbus_common.c
 ramstage-y += smi.c
 ramstage-y += smmrelocate.c
+ramstage-y += flash_controller.c
 ramstage-y += stage_cache.c
 ramstage-y += systemagent.c
 ramstage-y += tsc_freq.c
@@ -52,7 +53,7 @@ smm-y += gpio.c
 smm-y += pcr.c
 smm-y += pmutil.c
 smm-y += smihandler.c
-smm-$(CONFIG_SPI_FLASH_SMM) += spi.c
+smm-$(CONFIG_SPI_FLASH_SMM) += flash_controller.c
 smm-y += tsc_freq.c
 smm-y += xhci.c
 

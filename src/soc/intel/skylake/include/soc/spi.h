@@ -29,11 +29,9 @@
 
 #define B_PCH_SPI_BAR0_MASK	0x0FFF
 #define PCH_SPI_BASE_ADDRESS	0x10
+#define  SPIBAR_MEMBAR_MASK	0xFFFFF000
 /* Reigsters within the SPIBAR */
 #define SPIBAR_SSFC		0xA1
-#define SPIBAR_FDOC		0xb4
-#define SPIBAR_FDOD		0xb8
-
 
 #define SPIBAR_PREOP		0xA4
 #define SPIBAR_OPTYPE		0xA6
@@ -86,6 +84,8 @@
 #define  SPIBAR_HSFS_AEL	(1 << 2) /* SPI Access Error Log */
 #define  SPIBAR_HSFS_FCERR	(1 << 1) /* SPI Flash Cycle Error */
 #define  SPIBAR_HSFS_FDONE	(1 << 0) /* SPI Flash Cycle Done */
+#define  SPIBAR_HSFS_BERASE_MASK	3 /* Block/Sector Erase MASK */
+#define  SPIBAR_HSFS_BERASE_OFFSET	3 /* Block/Sector Erase OFFSET */
 #define SPIBAR_HSFC		0x06	 /* SPI hardware sequence control */
 #define  SPIBAR_HSFC_BYTE_COUNT(c)	(((c - 1) & 0x3f) << 8)
 #define  SPIBAR_HSFC_CYCLE_READ		(0 << 1) /* Read cycle */
@@ -93,6 +93,8 @@
 #define  SPIBAR_HSFC_CYCLE_ERASE	(3 << 1) /* Erase cycle */
 #define  SPIBAR_HSFC_GO		(1 << 0) /* GO: start SPI transaction */
 #define SPIBAR_FADDR		0x08	 /* SPI flash address */
+#define  SPIBAR_FADDR_MASK	0x7FFFFFF
+
 #define SPIBAR_FDATA(n)		(0x10 + (4 * n)) /* SPI flash data */
 #define SPIBAR_FPR(n)		(0x84 + (4 * n)) /* SPI flash protected range */
 #define SPIBAR_FPR_WPE		(1 << 31) /* Flash Write protected */
@@ -102,6 +104,20 @@
 #define SPIBAR_SSFC		0xA1
 #define  SPIBAR_SSFC_DATA	(1 << 14)
 #define  SPIBAR_SSFC_GO		(1 << 1)
+
+#define SPIBAR_FDOC		0xB4
+#define  SPIBAR_FDOC_COMPONENT	(1 << 12)
+#define  SPIBAR_FDOC_FDSI_1	(1 << 2)
+
+#define SPIBAR_FDOD		0xB8
+#define  FLCOMP_C0DEN_MASK	0xF
+#define  FLCOMP_C0DEN_8MB	4
+#define  FLCOMP_C0DEN_16MB	5
+#define  FLCOMP_C0DEN_32MB	6
+
+#define SPIBAR_BIOS_CNTL	0xDC
+#define  SPIBAR_BC_WPD		(1 << 0)
+#define  SPIBAR_BC_EISS		(1 << 5)
 
 void *get_spi_bar(void);
 #endif
