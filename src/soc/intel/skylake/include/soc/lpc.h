@@ -51,6 +51,8 @@
 #define PIRQH_ROUT		0x6B
 
 #define LPC_IO_DEC		0x80 /* IO Decode Ranges Register */
+#define  COMA_RANGE		0x0 /* 0x3F8 - 0x3FF COM1*/
+#define  COMB_RANGE		0x1 /* 0x2F8 - 0x2FF COM2*/
 #define LPC_EN			0x82 /* LPC IF Enables Register */
 #define  CNF2_LPC_EN		(1 << 13) /* 0x4e/0x4f */
 #define  CNF1_LPC_EN		(1 << 12) /* 0x2e/0x2f */

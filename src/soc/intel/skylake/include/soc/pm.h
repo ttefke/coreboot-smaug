@@ -153,7 +153,8 @@ void disable_smi(uint32_t mask);
 
 /* ALT_GP_SMI */
 uint32_t clear_alt_smi_status(void);
-void enable_alt_smi(uint32_t mask);
+void enable_alt_smi(int gpionum, u32 mask);
+void reset_alt_smi_status(void);
 
 /* TCO */
 uint32_t clear_tco_status(void);

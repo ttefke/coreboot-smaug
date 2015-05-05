@@ -27,42 +27,67 @@
 #include <spi-generic.h>
 #include <stdlib.h>
 #include <soc/pci_devs.h>
-#include <soc/lpc.h>
-#include <soc/rcba.h>
+#include <soc/pch.h>
+#include <soc/pcr.h>
+#include <soc/pmc.h>
 #include <soc/spi.h>
 #include <soc/systemagent.h>
+#include <device/pci.h>
 
-const struct reg_script system_agent_finalize_script[] = {
-	REG_PCI_OR16(0x50, 1 << 0),				/* GGC */
-	REG_PCI_OR32(0x5c, 1 << 0),				/* DPR */
-	REG_PCI_OR32(0x78, 1 << 10),				/* ME */
-	REG_PCI_OR32(0x90, 1 << 0),				/* REMAPBASE */
-	REG_PCI_OR32(0x98, 1 << 0),				/* REMAPLIMIT */
-	REG_PCI_OR32(0xa0, 1 << 0),				/* TOM */
-	REG_PCI_OR32(0xa8, 1 << 0),				/* TOUUD */
-	REG_PCI_OR32(0xb0, 1 << 0),				/* BDSM */
-	REG_PCI_OR32(0xb4, 1 << 0),				/* BGSM */
-	REG_PCI_OR32(0xb8, 1 << 0),				/* TSEGMB */
-	REG_PCI_OR32(0xbc, 1 << 0),				/* TOLUD */
-	REG_MMIO_OR32(MCH_BASE_ADDRESS + 0x5500, 1 << 0),	/* PAVP */
-	REG_MMIO_OR32(MCH_BASE_ADDRESS + 0x5f00, 1 << 31),	/* SA PM */
-	REG_MMIO_OR32(MCH_BASE_ADDRESS + 0x6020, 1 << 0),	/* UMA GFX */
-	REG_MMIO_OR32(MCH_BASE_ADDRESS + 0x63fc, 1 << 0),	/* VTDTRK */
-	REG_MMIO_OR32(MCH_BASE_ADDRESS + 0x6800, 1 << 31),
-	REG_MMIO_OR32(MCH_BASE_ADDRESS + 0x7000, 1 << 31),
-	REG_MMIO_OR32(MCH_BASE_ADDRESS + 0x77fc, 1 << 0),
-	REG_MMIO_OR32(MCH_BASE_ADDRESS + 0x50fc, 0x8f),
-	REG_MMIO_OR32(MCH_BASE_ADDRESS + 0x7ffc, 1 << 0),
-	REG_MMIO_OR32(MCH_BASE_ADDRESS + 0x5880, 1 << 5),
-	REG_MMIO_WRITE8(MCH_BASE_ADDRESS + 0x50fc, 0x8f),	/* MC */
+static void pch_finalize_script(void)
+{
+	device_t dev;
+	uint32_t reg32, hsfs, tcobase;
+	void *spibar = get_spi_bar();
+	u8 reg8;
+	u16 reg16;
+	u16 tcocnt = 0;
+	uint32_t pmcbase;
+	u32 pmsyncreg = 0;
 
-	REG_SCRIPT_END
-};
+	/* Set SPI opcode menu */
+	write16(spibar + SPIBAR_PREOP, SPI_OPPREFIX);
+	write16(spibar + SPIBAR_OPTYPE, SPI_OPTYPE);
+	write32(spibar + SPIBAR_OPMENU_LOWER, SPI_OPMENU_LOWER);
+	write32(spibar + SPIBAR_OPMENU_UPPER, SPI_OPMENU_UPPER);
+	/* Lock SPIBAR */
+	hsfs = read32(spibar + SPIBAR_HSFS);
+	hsfs |= SPIBAR_HSFS_FLOCKDN;
+	write32(spibar + SPIBAR_HSFS, hsfs);
 
+	/*TCO Lock down*/
+	dev = PCH_DEV_SMBUS;
+	reg16 = pci_read_config16(dev, PCH_SMBUS_TCOBASE);
+	tcobase = reg16 & PCH_SMBUS_TCOBASE_BAR;
+	tcocnt = inw(tcobase + PCH_TCO1_CNT);
+	tcocnt |= PCH_TCO_LOCK;
+	outw(tcocnt, tcobase + PCH_TCO1_CNT);
+
+	/*Global SMI Lock*/
+	/*PMC Controller Device 0x1F, Func 02*/
+	dev = PCH_DEV_PMC;
+	reg8 = pci_read_config8(dev, GEN_PMCON_A_1);
+	reg8 |= SMI_LOCK;
+	pci_write_config8(dev, GEN_PMCON_A_1, reg8);
+
+	/*GEN_PMCON Lock*/
+	reg8 = pci_read_config8(dev, GEN_PMCON_LOCK_B_2);
+	reg8 |= (SLP_STR_POL_LOCK | ACPI_BASE_LOCK);
+	pci_write_config8(dev, GEN_PMCON_LOCK_B_2, reg8);
+
+	/* PMSYNC */
+	dev = PCH_DEV_PMC;
+	reg32 = pci_read_config32(dev, PCH_MBASE);
+	pmcbase = reg32 & B_PCH_PMC_BAR0_MASK;
+	pmsyncreg = read32(&pmcbase + PCH_PWRM_PMSYNC_TPR_CONFIG);
+	pmsyncreg |= PMSYNC_LOCK;
+	write32(&pmcbase + PCH_PWRM_PMSYNC_TPR_CONFIG, pmsyncreg);
+}
 
 static void skylake_finalize(void *unused)
 {
 	printk(BIOS_DEBUG, "Finalizing chipset.\n");
+	pch_finalize_script();
 
 	/* Indicate finalize step with post code */
 	post_code(POST_OS_BOOT);

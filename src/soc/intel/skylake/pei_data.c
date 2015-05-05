@@ -40,7 +40,6 @@ void skylake_fill_pei_data(struct pei_data *pei_data)
 	pei_data->xhcibar = EARLY_XHCI_BAR;
 	pei_data->gttbar = EARLY_GTT_BAR;
 	pei_data->pmbase = ACPI_BASE_ADDRESS;
-	pei_data->gpiobase = GPIO_BASE_ADDRESS;
 	pei_data->tseg_size = smm_region_size();
 	pei_data->temp_mmio_base = EARLY_TEMP_MMIO;
 	pei_data->tx_byte = &send_to_console;

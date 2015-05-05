@@ -98,9 +98,7 @@ struct pei_data {
 	uint16_t smbusbar;
 	uint32_t xhcibar;
 	uint32_t gttbar;
-	uint32_t rcba;
 	uint32_t pmbase;
-	uint32_t gpiobase;
 	uint32_t temp_mmio_base;
 	uint32_t tseg_size;
 

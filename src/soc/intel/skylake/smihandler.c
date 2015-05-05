@@ -30,12 +30,14 @@
 #include <spi-generic.h>
 #include <elog.h>
 #include <pc80/mc146818rtc.h>
+#include <soc/iomap.h>
 #include <soc/lpc.h>
 #include <soc/nvs.h>
 #include <soc/pci_devs.h>
+#include <soc/pch.h>
+#include <soc/pcr.h>
 #include <soc/pm.h>
 #include <soc/pmc.h>
-#include <soc/rcba.h>
 #include <soc/smm.h>
 #include <soc/xhci.h>
 
@@ -159,7 +161,8 @@ static void southbridge_smi_sleep(void)
 		break;
 	case SLP_TYP_S5:
 		printk(BIOS_DEBUG, "SMI#: Entering S5 (Soft Power off)\n");
-
+		/*TODO: cmos_layout.bin need to verify; cause wrong CMOS setup*/
+		s5pwr = MAINBOARD_POWER_ON;
 		/* Disable all GPE */
 		disable_all_gpe();
 
@@ -375,7 +378,7 @@ static void southbridge_smi_tco(void)
 		return;
 
 	if (tco_sts & (1 << 8)) { /* BIOSWR */
-		u8 bios_cntl = pci_read_config16(PCH_DEV_LPC, BIOS_CNTL);
+		u8 bios_cntl = pci_read_config16(PCH_DEV_SPI, BIOS_CNTL);
 
 		if (bios_cntl & 1) {
 			/*
@@ -389,7 +392,7 @@ static void southbridge_smi_tco(void)
 			 * box.
 			 */
 			printk(BIOS_DEBUG, "Switching back to RO\n");
-			pci_write_config32(PCH_DEV_LPC, BIOS_CNTL,
+			pci_write_config32(PCH_DEV_SPI, BIOS_CNTL,
 					   (bios_cntl & ~1));
 		} /* No else for now? */
 	} else if (tco_sts & (1 << 3)) { /* TIMEOUT */
@@ -415,11 +418,13 @@ static void southbridge_smi_monitor(void)
 	u32 trap_sts, trap_cycle;
 	u32 data, mask = 0;
 	int i;
+	/* TRSR - Trap Status Register */
+	pcr_read32(PID_PSTH, R_PCH_PCR_PSTH_TRPST, &trap_sts);
+	/* Clear trap(s) in TRSR */
+	pcr_write8(PID_PSTH, R_PCH_PCR_PSTH_TRPST, trap_sts);
 
-	trap_sts = RCBA32(0x1e00); /* TRSR - Trap Status Register */
-	RCBA32(0x1e00) = trap_sts; /* Clear trap(s) in TRSR */
-
-	trap_cycle = RCBA32(0x1e10);
+	/* TRPC - Trapped cycle */
+	pcr_read32(PID_PSTH, R_PCH_PCR_PSTH_TRPC, &trap_cycle);
 	for (i = 16; i < 20; i++) {
 		if (trap_cycle & (1 << i))
 			mask |= (0xff << ((i - 16) << 2));
@@ -442,7 +447,8 @@ static void southbridge_smi_monitor(void)
 	if (IOTRAP(0)) {
 		if (!(trap_cycle & (1 << 24))) { /* It's a write */
 			printk(BIOS_DEBUG, "SMI1 command\n");
-			data = RCBA32(0x1e18);
+			/* Trapped write data */
+			pcr_read32(PID_PSTH, R_PCH_PCR_PSTH_TRPD, &data);
 			data &= mask;
 		}
 	}
@@ -459,7 +465,7 @@ static void southbridge_smi_monitor(void)
 
 	if (!(trap_cycle & (1 << 24))) {
 		/* Write Cycle */
-		data = RCBA32(0x1e18);
+		pcr_read32(PID_PSTH, R_PCH_PCR_PSTH_TRPD, &data);
 		printk(BIOS_DEBUG, "  iotrap written data = 0x%08x\n", data);
 	}
 #undef IOTRAP

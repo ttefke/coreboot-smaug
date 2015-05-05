@@ -140,6 +140,9 @@ typedef struct {
 #define V_PCH_GPIO_GPP_G_PAD_MAX	8
 #define V_PCH_GPIO_GPD_PAD_MAX		12
 
+/* Skylake has 8 GPIO communities GPP A~G, GPD */
+#define SKL_GPIO_COMMUNITY_MAX		8
+
 #define GPIO_GET_GROUP_INDEX(group)	(group & 0xFF)
 #define GPIO_GET_GROUP_INDEX_FROM_PAD(pad)	(\
 				GPIO_GET_GROUP_INDEX((pad >> 16)))
@@ -425,7 +428,7 @@ typedef int gpio_t;
 void clear_all_smi(void);
 
 /* Get GPIO SMI Status */
-int get_smi_status(u32 *status);
+void get_smi_status(u32 status[SKL_GPIO_COMMUNITY_MAX]);
 
 /* Enable GPIO SMI  */
 void enable_all_smi(void);

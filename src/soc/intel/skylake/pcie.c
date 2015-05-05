@@ -29,7 +29,6 @@
 #include <soc/lpc.h>
 #include <soc/pch.h>
 #include <soc/pci_devs.h>
-#include <soc/rcba.h>
 #include <soc/intel/skylake/chip.h>
 #include <soc/cpu.h>
 #include <delay.h>

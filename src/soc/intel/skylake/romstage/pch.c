@@ -26,44 +26,25 @@
 #include <soc/iomap.h>
 #include <soc/lpc.h>
 #include <soc/pch.h>
+#include <soc/pcr.h>
 #include <soc/pci_devs.h>
 #include <soc/pm.h>
-#include <soc/rcba.h>
 #include <soc/romstage.h>
 #include <soc/smbus.h>
 #include <soc/intel/skylake/chip.h>
 
-const struct reg_script pch_early_init_script[] = {
-	/* Setup southbridge BARs */
-	REG_PCI_WRITE32(RCBA, RCBA_BASE_ADDRESS | 1),
-	REG_PCI_WRITE32(PMBASE, ACPI_BASE_ADDRESS | 1),
-	REG_PCI_WRITE8(ACPI_CNTL, ACPI_EN),
-	REG_PCI_WRITE32(GPIO_BASE, GPIO_BASE_ADDRESS | 1),
-	REG_PCI_WRITE8(GPIO_CNTL, GPIO_EN),
+/* Max PXRC registers in ITSS*/
+#define MAX_PXRC_CONFIG		0x08
 
-	/* Set COM1/COM2 decode range */
-	REG_PCI_WRITE16(LPC_IO_DEC, 0x0010),
-	/* Enable legacy decode ranges */
-	REG_PCI_WRITE16(LPC_EN, CNF1_LPC_EN | CNF2_LPC_EN | GAMEL_LPC_EN |
-			COMA_LPC_EN | KBC_LPC_EN | MC_LPC_EN),
-
-	/* Enable IOAPIC */
-	REG_MMIO_WRITE16(RCBA_BASE_ADDRESS + OIC, 0x0100),
-	/* Read back for posted write */
-	REG_MMIO_READ16(RCBA_BASE_ADDRESS + OIC),
-
-	/* Disable reset */
-	REG_MMIO_OR32(RCBA_BASE_ADDRESS + GCS, (1 << 5)),
-	/* TCO timer halt */
-	REG_IO_OR16(ACPI_BASE_ADDRESS + TCO1_CNT, TCO_TMR_HLT),
-
-	/* Enable upper 128 bytes of CMOS */
-	REG_MMIO_OR32(RCBA_BASE_ADDRESS + RC, (1 << 2)),
-
-	/* Disable unused device (always) */
-	REG_MMIO_OR32(RCBA_BASE_ADDRESS + FD, PCH_DISABLE_ALWAYS),
-
-	REG_SCRIPT_END
+static const u8 pch_interrupt_routing[] = {
+		11,	/* PARC: PIRQA -> IRQ11 */
+		10,	/* PBRC: PIRQB -> IRQ10 */
+		11,	/* PCRC: PIRQC -> IRQ11 */
+		11,	/* PDRC: PIRQD -> IRQ11 */
+		11,	/* PERC: PIRQE -> IRQ11 */
+		11,	/* PFRC: PIRQF -> IRQ11 */
+		11,	/* PGRC: PIRQG -> IRQ11 */
+		11	/* PHRC: PIRQH -> IRQ11 */
 };
 
 static void pch_enable_lpc(void)
@@ -83,12 +64,56 @@ static void pch_enable_lpc(void)
 	pci_write_config32(PCH_DEV_LPC, LPC_GEN4_DEC, config->gen4_dec);
 }
 
+static void pch_device_init(void)
+{
+	device_t dev;
+	u32 reg32 = 0;
+	u16 reg16 = 0;
+	uint32_t tcobase;
+	u16 tcocnt = 0;
+
+	/* Enable ACPI in PMC Config*/
+	dev = PCH_DEV_PMC;
+	reg32 = pci_read_config32(dev, ACPI_CNTL);
+	reg32 |= ACPI_EN;
+	pci_write_config32(dev, ACPI_CNTL, reg32);
+
+	/* TCO timer halt */
+	dev = PCH_DEV_SMBUS;
+	reg16 = pci_read_config16(dev, PCH_SMBUS_TCOBASE);
+	tcobase = reg16 & PCH_SMBUS_TCOBASE_BAR;
+	tcocnt = inw(tcobase + PCH_TCO1_CNT);
+	tcocnt |= TCO_TMR_HLT;
+	outw(tcocnt, tcobase + PCH_TCO1_CNT);
+
+	/* Enable upper 128 bytes of CMOS */
+	pcr_andthenor32(PID_RTC, R_PCH_PCR_RTC_CONF, (u32)~0,
+			B_PCH_PCR_RTC_CONF_UCMOS_EN);
+}
+
+static void pch_interrupt_init(void)
+{
+	u8 index = 0;
+
+	for (index = 0; index < MAX_PXRC_CONFIG; index++) {
+		if (pch_interrupt_routing[index] < 16 &&
+			pch_interrupt_routing[index] > 2 &&
+			pch_interrupt_routing[index] != 8 &&
+			pch_interrupt_routing[index] != 13) {
+				pcr_write8(PID_ITSS,
+					(R_PCH_PCR_ITSS_PIRQA_ROUT + index),
+					pch_interrupt_routing[index]);
+		}
+	}
+}
+
 void pch_early_init(void)
 {
-	reg_script_run_on_dev(PCH_DEV_LPC, pch_early_init_script);
+	pch_device_init();
+
+	pch_interrupt_init();
 
 	pch_enable_lpc();
 
 	enable_smbus();
-
 }

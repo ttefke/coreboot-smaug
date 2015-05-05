@@ -28,8 +28,22 @@
 #define PCH_SPT_LP		0x9d41
 
 /* Power Management Control and Status */
-#define PCH_PCS			0x84
-#define  PCH_PCS_PS_D3HOT	3
+#define PCH_DVID			0x0
+#define PCH_MBASE			0x48
+#define PCH_PCS				0x84
+#define  PCH_PCS_PS_D3HOT		3
+#define B_PCH_PMC_BAR0_MASK		0xFFFF0000
+#define PCH_PWRM_PMSYNC_TPR_CONFIG	0xC4
+#define PMSYNC_LOCK			(1 << 31)
+/* SMBUS TCO Config */
+#define PCH_SMBUS_TCOBASE		0x50
+#define PCH_SMBUS_TCOBASE_BAR		0x0000FFE0
+#define PCH_TCO1_CNT			0x08
+#define PCH_TCO_LOCK			0x1000
+#define PCH_TCO1_STS			0x04
+#define PCH_TCO2_STS			0x06
+#define PCH_TCO2_STS_SEC_TO		0x02
+#define PCH_TCO2_STS_BOOT		0x04
 
 u8 pch_revision(void);
 u16 pch_type(void);

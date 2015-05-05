@@ -24,6 +24,10 @@
 #include <soc/iomap.h>
 #include <soc/pm.h>
 
+/* Keep the ordering intact GPP_A ~ G, GPD.
+ * As the gpio/smi functions get_smi_status() and
+ * enable_gpio_groupsmi() depends on this ordering.
+ */
 static const GPIO_GROUP_INFO gpio_group_info[] = {
 	{PID_GPIOCOM0, R_PCH_PCR_GPIO_GPP_A_PADCFG_OFFSET,
 	 V_PCH_GPIO_GPP_A_PAD_MAX, R_PCH_PCR_GPIO_GPP_A_SMI_STS,
@@ -220,16 +224,15 @@ void clear_all_smi(void)
 	}
 }
 
-int get_smi_status(u32 *status)
+void get_smi_status(u32 status[SKL_GPIO_COMMUNITY_MAX])
 {
-	u32 gpiogroupinfolength;
-	u32 gpioindex = 0;
+	u32 num_of_communities;
+	u32 gpioindex;
 	u32 outputvalue = 0;
-	int gpiocnt = 0;
 
-	gpiogroupinfolength = sizeof(gpio_group_info) / sizeof(GPIO_GROUP_INFO);
+	num_of_communities = ARRAY_SIZE(gpio_group_info);
 
-	for (gpioindex = 0; gpioindex < gpiogroupinfolength; gpioindex++) {
+	for (gpioindex = 0; gpioindex < num_of_communities; gpioindex++) {
 		/*Check if group has GPI SMI register */
 		if (gpio_group_info[gpioindex].smistsoffset ==
 		    NO_REGISTER_PROPERTY)
@@ -239,9 +242,7 @@ int get_smi_status(u32 *status)
 			   gpio_group_info[gpioindex].smistsoffset,
 			   &outputvalue);
 		status[gpioindex] = outputvalue;
-		gpiocnt++;
 	}
-	return gpiocnt;
 }
 
 void enable_all_smi(void)

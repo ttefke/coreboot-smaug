@@ -42,14 +42,16 @@
 #include <soc/pch.h>
 #include <soc/pci_devs.h>
 #include <soc/pm.h>
+#include <soc/pmc.h>
 #include <soc/ramstage.h>
-#include <soc/rcba.h>
+#include <soc/pcr.h>
 #include <soc/intel/skylake/chip.h>
+static void pch_power_options(void);
+static void pch_rtc_init(void);
 
 #if IS_ENABLED(CONFIG_CHROMEOS)
 #include <vendorcode/google/chromeos/chromeos.h>
 #endif
-
 static void pch_enable_ioapic(struct device *dev)
 {
 	u32 reg32;
@@ -72,17 +74,118 @@ static void pch_enable_ioapic(struct device *dev)
 	io_apic_write((void *)IO_APIC_ADDR, 0x03, 0x01);
 }
 
-static void pch_power_options(device_t dev)
+/*
+ * PIRQ[n]_ROUT[3:0] - PIRQ Routing Control
+ * 0x00 - 0000 = Reserved
+ * 0x01 - 0001 = Reserved
+ * 0x02 - 0010 = Reserved
+ * 0x03 - 0011 = IRQ3
+ * 0x04 - 0100 = IRQ4
+ * 0x05 - 0101 = IRQ5
+ * 0x06 - 0110 = IRQ6
+ * 0x07 - 0111 = IRQ7
+ * 0x08 - 1000 = Reserved
+ * 0x09 - 1001 = IRQ9
+ * 0x0A - 1010 = IRQ10
+ * 0x0B - 1011 = IRQ11
+ * 0x0C - 1100 = IRQ12
+ * 0x0D - 1101 = Reserved
+ * 0x0E - 1110 = IRQ14
+ * 0x0F - 1111 = IRQ15
+ * PIRQ[n]_ROUT[7] - PIRQ Routing Control
+ * 0x80 - The PIRQ is not routed.
+ */
+
+static void pch_pirq_init(device_t dev)
 {
-	/* Get the chip configuration */
+	device_t irq_dev;
 	config_t *config = dev->chip_info;
 
+	pcr_write8(PID_ITSS, R_PCH_PCR_ITSS_PIRQA_ROUT, config->pirqa_routing);
+	pcr_write8(PID_ITSS, R_PCH_PCR_ITSS_PIRQB_ROUT, config->pirqb_routing);
+	pcr_write8(PID_ITSS, R_PCH_PCR_ITSS_PIRQC_ROUT, config->pirqc_routing);
+	pcr_write8(PID_ITSS, R_PCH_PCR_ITSS_PIRQD_ROUT, config->pirqd_routing);
+	pcr_write8(PID_ITSS, R_PCH_PCR_ITSS_PIRQE_ROUT, config->pirqe_routing);
+	pcr_write8(PID_ITSS, R_PCH_PCR_ITSS_PIRQF_ROUT, config->pirqf_routing);
+	pcr_write8(PID_ITSS, R_PCH_PCR_ITSS_PIRQG_ROUT, config->pirqg_routing);
+	pcr_write8(PID_ITSS, R_PCH_PCR_ITSS_PIRQH_ROUT, config->pirqh_routing);
+
+	for (irq_dev = all_devices; irq_dev; irq_dev = irq_dev->next) {
+		u8 int_pin = 0, int_line = 0;
+
+		if (!irq_dev->enabled || irq_dev->path.type != DEVICE_PATH_PCI)
+			continue;
+
+		int_pin = pci_read_config8(irq_dev, PCI_INTERRUPT_PIN);
+
+		switch (int_pin) {
+		case 1: /* INTA# */
+			int_line = config->pirqa_routing;
+			break;
+		case 2: /* INTB# */
+			int_line = config->pirqb_routing;
+			break;
+		case 3: /* INTC# */
+			int_line = config->pirqc_routing;
+			break;
+		case 4: /* INTD# */
+			int_line = config->pirqd_routing;
+			break;
+		}
+
+		if (!int_line)
+			continue;
+
+		pci_write_config8(irq_dev, PCI_INTERRUPT_LINE, int_line);
+	}
+}
+
+static void pch_power_options()
+{
+	u16 reg16;
+	const char *state;
+	/*PMC Controller Device 0x1F, Func 02*/
+	device_t dev = PCH_DEV_PMC;
+	/* Get the chip configuration */
+	config_t *config = dev->chip_info;
+	int pwr_on = CONFIG_MAINBOARD_POWER_ON_AFTER_POWER_FAIL;
+
+	/*
+	 * Which state do we want to goto after g3 (power restored)?
+	 * 0 == S0 Full On
+	 * 1 == S5 Soft Off
+	 *
+	 * If the option is not existent (Laptops), use Kconfig setting.
+	 */
+	/*TODO: cmos_layout.bin need to verify; cause wrong CMOS setup*/
+	//get_option(&pwr_on, "power_on_after_fail");
+	pwr_on = MAINBOARD_POWER_ON;
+	reg16 = pci_read_config16(dev, GEN_PMCON_B_1);
+	reg16 &= 0xfffe;
+	switch (pwr_on) {
+	case MAINBOARD_POWER_OFF:
+		reg16 |= 1;
+		state = "off";
+		break;
+	case MAINBOARD_POWER_ON:
+		reg16 &= ~1;
+		state = "on";
+		break;
+	case MAINBOARD_POWER_KEEP:
+		reg16 &= ~1;
+		state = "state keep";
+		break;
+	default:
+		state = "undefined";
+	}
+	pci_write_config16(dev, GEN_PMCON_B_1, reg16);
+	printk(BIOS_INFO, "Set power %s after power failure.\n", state);
 	/* GPE setup based on device tree configuration */
 	enable_all_gpe(config->gpe0_en_1, config->gpe0_en_2,
 			config->gpe0_en_3, config->gpe0_en_4);
 
 	/* SMI setup based on device tree configuration */
-	enable_alt_smi(config->alt_gp_smi_en);
+	enable_alt_smi(config->ec_smi_gpio, config->alt_gp_smi_en);
 }
 
 #if IS_ENABLED(CONFIG_CHROMEOS_VBNV_CMOS)
@@ -91,11 +194,40 @@ static void pch_power_options(device_t dev)
  * have been re-initialized already by Vboot firmware init.
  */
 /* TODO  Modify for SPT Taken care of in later patch */
+
+static void pch_cmos_init_preserve(int reset)
+{
+	uint8_t vbnv[CONFIG_VBNV_SIZE];
+	if (reset)
+		read_vbnv(vbnv);
+
+	cmos_init(reset);
+
+	if (reset)
+		save_vbnv(vbnv);
+}
+
 #endif
 
-static void pch_rtc_init(struct device *dev)
+static void pch_rtc_init()
 {
-	/* TODO Modify for SPT Taken care of in later patch */
+	u8 reg8;
+	int rtc_failed;
+	/*PMC Controller Device 0x1F, Func 02*/
+	device_t dev = PCH_DEV_PMC;
+	reg8 = pci_read_config8(dev, GEN_PMCON_B_1);
+	rtc_failed = reg8 & RTC_BATTERY_DEAD;
+	if (rtc_failed) {
+		reg8 &= ~RTC_BATTERY_DEAD;
+		pci_write_config8(dev, GEN_PMCON_B_1, reg8);
+		printk(BIOS_DEBUG, "rtc_failed = 0x%x\n", rtc_failed);
+	}
+
+#if IS_ENABLED(CONFIG_CHROMEOS_VBNV_CMOS)
+	pch_cmos_init_preserve(rtc_failed);
+#else
+	cmos_init(rtc_failed);
+#endif
 }
 
 static const struct reg_script pch_misc_init_script[] = {
@@ -113,60 +245,40 @@ static const struct reg_script pch_misc_init_script[] = {
 	REG_SCRIPT_END
 };
 
-
-static void pch_set_acpi_mode(void)
-{
-#if IS_ENABLED(CONFIG_HAVE_SMI_HANDLER)
-	if (acpi_slp_type != 3) {
-		printk(BIOS_DEBUG, "Disabling ACPI via APMC:\n");
-		outb(APM_CNT_ACPI_DISABLE, APM_CNT);
-		printk(BIOS_DEBUG, "done.\n");
-	}
-#endif /* CONFIG_HAVE_SMI_HANDLER */
-}
-
 static void lpc_init(struct device *dev)
 {
 	/* Legacy initialization */
 	isa_dma_init();
-	pch_rtc_init(dev);
+	pch_rtc_init();
 	reg_script_run_on_dev(dev, pch_misc_init_script);
 
 	/* Interrupt configuration */
 	pch_enable_ioapic(dev);
+	pch_pirq_init(dev);
 	setup_i8259();
 	i8259_configure_irq_trigger(9, 1);
 
 	/* Initialize power management */
-	pch_power_options(dev);
-
-	pch_set_acpi_mode();
+	pch_power_options();
 }
 
 static void pch_lpc_add_mmio_resources(device_t dev)
 {
 	u32 reg;
 	struct resource *res;
-	const u32 default_decode_base = IO_APIC_ADDR;
-
 	/*
-	 * Just report all resources from IO-APIC base to 4GiB. Don't mark
-	 * them reserved as that may upset the OS if this range is marked
-	 * as reserved in the e820.
+	 * As per the BWG, Chapter 5.9.1. "PCH BIOS component will reserve
+	 * certain memory range as reserved range for BIOS usage.
+	 * For Skylake, this range will be from 0FD000000h till FE7FFFFFh"
+	 * Hence, use FD000000h as PCR_BASE
 	 */
-	res = new_resource(dev, OIC);
+	const u32 default_decode_base = PCH_PCR_BASE_ADDRESS;
+
+	res = new_resource(dev, PCI_BASE_ADDRESS_0);
 	res->base = default_decode_base;
 	res->size = 0 - default_decode_base;
-	res->flags = IORESOURCE_MEM | IORESOURCE_ASSIGNED | IORESOURCE_FIXED;
-
-	/* RCBA */
-	if (RCBA_BASE_ADDRESS < default_decode_base) {
-		res = new_resource(dev, RCBA);
-		res->base = RCBA_BASE_ADDRESS;
-		res->size = 16 * 1024;
-		res->flags = IORESOURCE_MEM | IORESOURCE_ASSIGNED |
-			     IORESOURCE_FIXED | IORESOURCE_RESERVE;
-	}
+	res->flags = IORESOURCE_MEM | IORESOURCE_ASSIGNED |
+		     IORESOURCE_FIXED | IORESOURCE_RESERVE;
 
 	/* Check LPC Memory Decode register. */
 	reg = pci_read_config32(dev, LGMR);
@@ -241,13 +353,6 @@ static void pch_lpc_add_io_resources(device_t dev)
 	res->base = LPC_DEFAULT_IO_RANGE_LOWER;
 	res->size = LPC_DEFAULT_IO_RANGE_UPPER - LPC_DEFAULT_IO_RANGE_LOWER;
 	res->flags = IORESOURCE_IO | IORESOURCE_ASSIGNED | IORESOURCE_FIXED;
-
-	/* GPIOBASE */
-	pch_lpc_add_io_resource(dev, GPIO_BASE_ADDRESS,
-				GPIO_BASE_SIZE, GPIO_BASE);
-
-	/* PMBASE */
-	pch_lpc_add_io_resource(dev, ACPI_BASE_ADDRESS, ACPI_BASE_SIZE, PMBASE);
 
 	/* LPC Generic IO Decode range. */
 	pch_lpc_add_gen_io_resources(dev, config->gen1_dec, LPC_GEN1_DEC);
