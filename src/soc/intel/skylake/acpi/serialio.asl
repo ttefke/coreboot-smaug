@@ -17,7 +17,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+#include <soc/irq.h>
 
+// Intel Serial IO Devices in ACPI Mode
 
 /* Serial IO Device BAR0 and BAR1 is 4KB */
 #define SIO_BAR_LEN 0x1000
@@ -93,7 +95,8 @@ Device (I2C0)
 	Name (RBUF, ResourceTemplate ()
 	{
 		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {10}
+		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , )
+			{ LPSS_I2C0_IRQ }
 	})
 
 	/* DMA channels are only used if Serial IO DMA controller is enabled */
@@ -115,8 +118,23 @@ Device (I2C0)
 	}
 	Method (_STA, 0, NotSerialized)
 	{
-		Return (0xF)
+		If (LEqual (\S0EN, 0)) {
+			Return (0x0)
+		} Else {
+			Return (0xF)
+		}
 	}
+
+	Method (_PS0, 0, Serialized)
+	{
+		^^LPD0 (\S0B1, \S0EN)
+	}
+
+	Method (_PS3, 0, Serialized)
+	{
+		^^LPD3 (\S0B1, \S0EN)
+	}
+
 }
 
 Device (I2C1)
@@ -133,7 +151,8 @@ Device (I2C1)
 	Name (RBUF, ResourceTemplate ()
 	{
 		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {11}
+		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , )
+			{ LPSS_I2C1_IRQ }
 	})
 
 	/* DMA channels are only used if
@@ -157,14 +176,28 @@ Device (I2C1)
 	}
 	Method (_STA, 0, NotSerialized)
 	{
-		Return (0xF)
+		If (LEqual (\S1EN, 0)) {
+			Return (0x0)
+		} Else {
+			Return (0xF)
+		}
+	}
+
+	Method (_PS0, 0, Serialized)
+	{
+		^^LPD0 (\S1B1, \S1EN)
+	}
+
+	Method (_PS3, 0, Serialized)
+	{
+		^^LPD3 (\S1B1, \S1EN)
 	}
 }
 
 
 Device (I2C2)
 {
-        /* Serial IO I2C1 Controller */
+	/* Serial IO I2C1 Controller */
 	Name (_HID,"INT3444")
 	Name (_UID, 1)
 	Name (_ADR, 0x00150002)
@@ -175,7 +208,8 @@ Device (I2C2)
 	Name (RBUF, ResourceTemplate ()
 	{
 		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {12}
+		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , )
+			{ LPSS_I2C2_IRQ }
 	})
 
 	/* DMA channels are only used if
@@ -203,7 +237,21 @@ Device (I2C2)
 
 	Method (_STA, 0, NotSerialized)
 	{
-		Return (0xF)
+		If (LEqual (\S2EN, 0)) {
+			Return (0x0)
+		} Else {
+			Return (0xF)
+		}
+	}
+
+	Method (_PS0, 0, Serialized)
+	{
+		^^LPD0 (\S2B1, \S2EN)
+	}
+
+	Method (_PS3, 0, Serialized)
+	{
+		^^LPD3 (\S2B1, \S2EN)
 	}
 }
 
@@ -216,39 +264,56 @@ Device (I2C3)
 	Name (SSCN, Package () { 432, 507, 30 })
 	Name (FMCN, Package () { 72, 160, 30 })
 
-        /* BAR0 is assigned during PCI enumeration and saved into NVS */
-        Name (RBUF, ResourceTemplate ()
-        {
-                Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-                Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {13}
-        })
+	/* BAR0 is assigned during PCI enumeration and saved into NVS */
+	Name (RBUF, ResourceTemplate ()
+	{
+		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
+		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , )
+				{ LPSS_I2C3_IRQ }
+	})
 
-        /* DMA channels are only used if
+	/* DMA channels are only used if
 	 * Serial IO DMA controller is enabled
 	 */
-        Name (DBUF, ResourceTemplate ()
-        {
-                FixedDMA (0x1A, 6, Width32Bit, DMA1)
-                FixedDMA (0x1B, 7, Width32Bit, DMA2)
-        })
+	Name (DBUF, ResourceTemplate ()
+	{
+		FixedDMA (0x1A, 6, Width32Bit, DMA1)
+		FixedDMA (0x1B, 7, Width32Bit, DMA2)
+	})
 
-        Method (_CRS, 0, NotSerialized)
-        {
-                /* Update BAR0 address and length if set in NVS */
-                If (LNotEqual (\S3B0, Zero)) {
-                        CreateDwordField (^RBUF, ^BAR0._BAS, B0AD)
-                        CreateDwordField (^RBUF, ^BAR0._LEN, B0LN)
-                        Store (\S3B0, B0AD)
-                        Store (SIO_BAR_LEN, B0LN)
-                }
+	Method (_CRS, 0, NotSerialized)
+	{
+		/* Update BAR0 address and length if set in NVS */
+		If (LNotEqual (\S3B0, Zero)) {
+			CreateDwordField (^RBUF, ^BAR0._BAS, B0AD)
+			CreateDwordField (^RBUF, ^BAR0._LEN, B0LN)
+			Store (\S3B0, B0AD)
+			Store (SIO_BAR_LEN, B0LN)
+		}
 
-                /* Check if Serial IO DMA Controller is enabled */
-                Return (RBUF)
-        }
-        Method (_STA, 0, NotSerialized)
-        {
-                Return (0xF)
-        }
+	/* Check if Serial IO DMA Controller is enabled */
+		Return (RBUF)
+	}
+
+	Method (_STA, 0, NotSerialized)
+	{
+		If (LEqual (\S3EN, 0)) {
+			Return (0x0)
+		} Else {
+			Return (0xF)
+		}
+	}
+
+	Method (_PS0, 0, Serialized)
+	{
+		^^LPD0 (\S3B1, \S3EN)
+	}
+
+	Method (_PS3, 0, Serialized)
+	{
+		^^LPD3 (\S3B1, \S3EN)
+	}
+
 }
 
 Device (I2C4)
@@ -260,24 +325,26 @@ Device (I2C4)
 	Name (SSCN, Package () { 432, 507, 30 })
 	Name (FMCN, Package () { 72, 160, 30 })
 
-        /* BAR0 is assigned during PCI enumeration and saved into NVS */
-        Name (RBUF, ResourceTemplate ()
-        {
-                Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-                Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {22}
-        })
+	/* BAR0 is assigned during PCI enumeration and saved into NVS */
+	Name (RBUF, ResourceTemplate ()
+	{
+		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
+		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , )
+			{ LPSS_I2C4_IRQ }
+	})
 
-        /* DMA channels are only used if
+	/* DMA channels are only used if
 	 * Serial IO DMA controller is enabled
 	 */
-        Name (DBUF, ResourceTemplate ()
-        {
-                FixedDMA (0x1A, 6, Width32Bit, DMA1)
-                FixedDMA (0x1B, 7, Width32Bit, DMA2)
-        })
-        Method (_CRS, 0, NotSerialized)
-        {
-                /* Update BAR0 address and length if set in NVS*/
+	Name (DBUF, ResourceTemplate ()
+	{
+		FixedDMA (0x1A, 6, Width32Bit, DMA1)
+		FixedDMA (0x1B, 7, Width32Bit, DMA2)
+	})
+
+	Method (_CRS, 0, NotSerialized)
+	{
+		/* Update BAR0 address and length if set in NVS*/
 		 If (LNotEqual (\S4B0, Zero)) {
 			CreateDwordField (^RBUF, ^BAR0._BAS, B0AD)
 			CreateDwordField (^RBUF, ^BAR0._LEN, B0LN)
@@ -285,13 +352,27 @@ Device (I2C4)
 			Store (SIO_BAR_LEN, B0LN)
 		}
 
-                /* Check if Serial IO DMA Controller is enabled */
-                Return (RBUF)
-        }
-        Method (_STA, 0, NotSerialized)
-        {
-                Return (0xF)
-        }
+		/* Check if Serial IO DMA Controller is enabled */
+		Return (RBUF)
+	}
+	Method (_STA, 0, NotSerialized)
+	{
+		If (LEqual (\S4EN, 0)) {
+			Return (0x0)
+		} Else {
+			Return (0xF)
+		}
+	}
+
+	Method (_PS0, 0, Serialized)
+	{
+		^^LPD0 (\S4B1, \S4EN)
+	}
+
+	Method (_PS3, 0, Serialized)
+	{
+		^^LPD3 (\S4B1, \S4EN)
+	}
 }
 
 Device (I2C5)
@@ -307,35 +388,50 @@ Device (I2C5)
 	Name (RBUF, ResourceTemplate ()
 	{
 	Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {21}
+		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , )
+			{ LPSS_I2C5_IRQ }
 	})
 
-        /* DMA channels are only used if
+	/* DMA channels are only used if
 	 * Serial IO DMA controller is enabled
 	 */
-        Name (DBUF, ResourceTemplate ()
-        {
-                FixedDMA (0x1A, 6, Width32Bit, DMA1)
-                FixedDMA (0x1B, 7, Width32Bit, DMA2)
-        })
+	Name (DBUF, ResourceTemplate ()
+	{
+		FixedDMA (0x1A, 6, Width32Bit, DMA1)
+		FixedDMA (0x1B, 7, Width32Bit, DMA2)
+	})
 
-        Method (_CRS, 0, NotSerialized)
-        {
-                /* Update BAR0 address and length if set in NVS */
-                If (LNotEqual (\S5B0, Zero)) {
-                        CreateDwordField (^RBUF, ^BAR0._BAS, B0AD)
-                        CreateDwordField (^RBUF, ^BAR0._LEN, B0LN)
-                        Store (\S5B0, B0AD)
-                        Store (SIO_BAR_LEN, B0LN)
-                }
+	Method (_CRS, 0, NotSerialized)
+	{
+		/* Update BAR0 address and length if set in NVS */
+		CreateDwordField (^RBUF, ^BAR0._BAS, B0AD)
+		CreateDwordField (^RBUF, ^BAR0._LEN, B0LN)
+		Store (0xFE02A000, B0AD)
+		Store (SIO_BAR_LEN, B0LN)
 
-                /* Check if Serial IO DMA Controller is enabled */
-                Return (RBUF)
-        }
-        Method (_STA, 0, NotSerialized)
-        {
-                Return (0xF)
-        }
+
+		/* Check if Serial IO DMA Controller is enabled */
+		Return (RBUF)
+	}
+
+	Method (_STA, 0, NotSerialized)
+	{
+		If (LEqual (\S5EN, 0)) {
+			Return (0x0)
+		} Else {
+			Return (0xF)
+		}
+	}
+
+	Method (_PS0, 0, Serialized)
+	{
+		^^LPD0 (\S5B1, \S5EN)
+	}
+
+	Method (_PS3, 0, Serialized)
+	{
+		^^LPD3 (\S5B1, \S5EN)
+	}
 }
 
 Device (SPI0)
@@ -349,7 +445,8 @@ Device (SPI0)
 	Name (RBUF, ResourceTemplate ()
 	{
 		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {7}
+		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , )
+			{ LPSS_SPI0_IRQ }
 	})
 
 	Method (_CRS, 0, NotSerialized)
@@ -367,7 +464,20 @@ Device (SPI0)
 
 	Method (_STA, 0, NotSerialized)
 	{
-		Return (0xF)
+		If (LEqual (\S6EN, 0)) {
+			Return (0x0)
+		} Else {
+			Return (0xF)
+		}
+	}
+	Method (_PS0, 0, Serialized)
+	{
+		^^LPD0 (\S6B1, \S6EN)
+	}
+
+	Method (_PS3, 0, Serialized)
+	{
+		^^LPD3 (\S6B1, \S6EN)
 	}
 }
 
@@ -382,7 +492,8 @@ Device (SPI1)
 	Name (RBUF, ResourceTemplate ()
 	{
 		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {7}
+		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , )
+			{ LPSS_SPI1_IRQ }
 	})
 
 	/* DMA channels are only used if Serial IO DMA controller is enabled */
@@ -405,7 +516,21 @@ Device (SPI1)
 	}
 	Method (_STA, 0, NotSerialized)
 	{
-		Return (0xF)
+		If (LEqual (\S7EN, 0)) {
+			Return (0x0)
+		} Else {
+			Return (0xF)
+		}
+	}
+
+	Method (_PS0, 0, Serialized)
+	{
+		^^LPD0 (\S7B1, \S7EN)
+	}
+
+	Method (_PS3, 0, Serialized)
+	{
+		^^LPD3 (\S7B1, \S7EN)
 	}
 }
 
@@ -420,16 +545,8 @@ Device (UAR0)
 	Name (RBUF, ResourceTemplate ()
 	{
 		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {13}
-	})
-
-	/* DMA channels are only used if
-	 * Serial IO DMA controller is enabled
-	 */
-	Name (DBUF, ResourceTemplate ()
-	{
-		FixedDMA (0x16, 2, Width32Bit, DMA1) 
-		FixedDMA (0x17, 3, Width32Bit, DMA2) 
+		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , )
+			{ LPSS_UART0_IRQ }
 	})
 
 	Method (_CRS, 0, NotSerialized)
@@ -447,9 +564,22 @@ Device (UAR0)
 
 	Method (_STA, 0, NotSerialized)
 	{
-		Return (0xF)
+		If (LEqual (\S8EN, 0)) {
+			Return (0x0)
+		} Else {
+			Return (0xF)
+		}
 	}
 
+	Method (_PS0, 0, Serialized)
+	{
+		^^LPD0 (\S8B1, \S8EN)
+	}
+
+	Method (_PS3, 0, Serialized)
+	{
+		^^LPD3 (\S8B1, \S8EN)
+	}
 }
 
 Device (UAR1)
@@ -463,7 +593,8 @@ Device (UAR1)
 	Name (RBUF, ResourceTemplate ()
 	{
 		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {13}
+		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , )
+			{ LPSS_UART1_IRQ }
 	})
 
 	Method (_CRS, 0, NotSerialized)
@@ -481,40 +612,70 @@ Device (UAR1)
 
 	Method (_STA, 0, NotSerialized)
 	{
-		Return (0xF)
+		If (LEqual (\S9EN, 0)) {
+			Return (0x0)
+		} Else {
+			Return (0xF)
+		}
 	}
 
+	Method (_PS0, 0, Serialized)
+	{
+		^^LPD0 (\S9B1, \S9EN)
+	}
+
+	Method (_PS3, 0, Serialized)
+	{
+		^^LPD3 (\S9B1, \S9EN)
+	}
 }
 
 Device (UAR2)
 {
-        /* Serial IO UART1 Controller */
-        Name (_HID,"INT344A")
-        Name (_UID, 1)
-        Name (_ADR, 0x00190000)
+	/* Serial IO UART1 Controller */
+	Name (_HID,"INT344A")
+	Name (_UID, 1)
+	Name (_ADR, 0x00190000)
 
- 	/* BAR0 is assigned during PCI enumeration and saved into NVS */
-        Name (RBUF, ResourceTemplate ()
-        {
-                Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
-                Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , ) {13}
-        })
-        Method (_CRS, 0, NotSerialized)
-        {
-                /* Update BAR0 address and length if set in NVS */
-                If (LNotEqual (\SAB0, Zero)) {
-                        CreateDwordField (^RBUF, ^BAR0._BAS, B0AD)
-                        CreateDwordField (^RBUF, ^BAR0._LEN, B0LN)
-                        Store (\SAB0, B0AD)
-                        Store (SIO_BAR_LEN, B0LN)
-                }
+	/* BAR0 is assigned during PCI enumeration and saved into NVS */
+	Name (RBUF, ResourceTemplate ()
+	{
+		Memory32Fixed (ReadWrite, 0x00000000, 0x00000000, BAR0)
+		Interrupt (ResourceConsumer, Level, ActiveLow, Shared, , , )
+			{ LPSS_UART2_IRQ }
+	})
 
-                Return (RBUF)
-        }
-        Method (_STA, 0, NotSerialized)
-        {
-                Return (0xF)
-        }
+	Method (_CRS, 0, NotSerialized)
+	{
+		/* Update BAR0 address and length if set in NVS */
+		If (LNotEqual (\SAB0, Zero)) {
+			CreateDwordField (^RBUF, ^BAR0._BAS, B0AD)
+			CreateDwordField (^RBUF, ^BAR0._LEN, B0LN)
+			Store (\SAB0, B0AD)
+			Store (SIO_BAR_LEN, B0LN)
+		}
+
+		Return (RBUF)
+	}
+
+	Method (_STA, 0, NotSerialized)
+	{
+		If (LEqual (\SAEN, 0)) {
+			Return (0x0)
+		} Else {
+			Return (0xF)
+		}
+	}
+
+	Method (_PS0, 0, Serialized)
+	{
+		^^LPD0 (\SAB1, \SAEN)
+	}
+
+	Method (_PS3, 0, Serialized)
+	{
+		^^LPD3 (\SAB1, \SAEN)
+	}
 }
 
 
