@@ -1,0 +1,105 @@
+chip soc/intel/skylake
+
+	# SerialIO device modes
+	register sio_disable = "0"
+	register sio_pci_mode = "2"
+
+	register "pirqa_routing" = "0x8b"
+	register "pirqb_routing" = "0x8a"
+	register "pirqc_routing" = "0x8b"
+	register "pirqd_routing" = "0x8b"
+	register "pirqe_routing" = "0x80"
+	register "pirqf_routing" = "0x80"
+	register "pirqg_routing" = "0x80"
+	register "pirqh_routing" = "0x80"
+
+	# EC range is 0x800-0x9ff
+	register "gen1_dec" = "0x00fc0801"
+	register "gen2_dec" = "0x00fc0901"
+
+	# EC_SMI
+	register "ec_smi_gpio" = "34"
+	register "alt_gp_smi_en" = "0x0400"
+	register "gpe0_en_1" = "0x00000000"
+	# EC_SCI is GPIO36
+	register "gpe0_en_2" = "0x00000010"
+	register "gpe0_en_3" = "0x00000000"
+	register "gpe0_en_4" = "0x00000000"
+
+	# Memory related
+	register "probeless_trace" = "0"
+	# Lan
+	register "enable_lan" = "0"
+	# SATA related
+	register "enable_sata" = "1"
+	register "sata_salp_support" = "1"
+	register "sata_mode" = "2"
+	register "sata_ports_enable" = "1"
+	register "ssic_port_enable" = "0"
+	# Audio related
+	register "enable_azalia" = "1"
+	register "enable_trace_hub" = "0"
+	register "dsp_enable" = "1"
+	# I/O Buffer Ownership:
+	# 0: HD-A Link
+	# 1 Shared, HD-A Link and I2S Port
+	# 3: I2S Ports
+	register "io_buffer_ownership" = "3"
+	# SMBUS
+	register "smbus_enable" = "1"
+	# Camera
+	register "cio2_enable" = "0"
+	# eMMC
+	register "scs_emmc_enabled" = "1"
+	register "scs_emmchs400_enabled" = "0"
+	register "scs_sdcard_enabled" = "2"
+	# Integrated Sensor
+	register "ish_enable" = "0"
+
+		device cpu_cluster 0 on
+		device lapic 0 on end
+	end
+	device domain 0 on
+					# Refered from SKL EDS Vol 1 : Page No: 31-32
+		device pci 00.0 on  end # Host Bridge
+		device pci 02.0 on  end # Integrated Graphics Device
+		device pci 14.0 on  end # USB 3.0 xHCI Controller
+		device pci 14.1 on  end # USB Device Controller (OTG)
+		device pci 14.2 on  end # Thermal Subsystem
+		device pci 15.0 on  end # I2C Controller #0
+		device pci 15.1 on  end # I2C Controller #1
+		device pci 15.2 on  end # I2C Controller #2
+		device pci 15.3 on  end # I2C Controller #3
+		device pci 16.0 on  end # Management Engine Interface 1
+		device pci 16.1 off end # Management Engine Interface 2
+		device pci 16.2 off end # Management Engine IDE Redirection (IDE-R)
+		device pci 16.3 off end # Management Engine Keyboard and Text (KT) Redirection
+		device pci 16.4 off end # Management Engine Intel MEI #3
+		device pci 17.0 on  end # SATA Controller
+		device pci 19.0 on  end # UART Controller #2
+		device pci 19.1 on  end # I2C Controller #5
+		device pci 19.2 on  end # I2C Controller #4
+		device pci 1c.0 off end # PCI Express Port 1
+		device pci 1c.1 off end # PCI Express Port 2
+		device pci 1c.2 off end # PCI Express Port 3
+		device pci 1c.3 off end # PCI Express Port 4
+		device pci 1c.4 off end # PCI Express Port 5
+		device pci 1c.5 off end # PCI Express Port 6
+		device pci 1c.6 off end # PCI Express Port 7
+		device pci 1c.7 off end # PCI Express Port 8
+		device pci 1d.0 on  end # PCI Express Port 9
+		device pci 1d.1 off end # PCI Express Port 10
+		device pci 1d.2 off end # PCI Express Port 11
+		device pci 1d.3 off end # PCI Express Port 12
+		device pci 1e.0 on  end # UART #0
+		device pci 1e.1 on  end # UART #1
+		device pci 1e.2 on  end # SPI #0
+		device pci 1e.4 on  end # eMMC
+		device pci 1e.6 on  end # SDCard
+		device pci 1f.0 on  end # LPC Interface (eSPI Enable Strap = 0) eSPI Interface (eSPI Enable Strap = 1)
+		device pci 1f.3 on  end # Intel High Definition Audio (Intel HD Audio) (Audio, Voice, Speech)
+		device pci 1f.4 off end # SMBus Controller
+		device pci 1f.5 on  end # SPI
+		device pci 1f.6 off end # GbE Controller
+	end
+end
