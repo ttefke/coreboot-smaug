@@ -58,6 +58,11 @@ void soc_pre_ram_init(struct romstage_params *params)
 	skylake_fill_pei_data(params->pei_data);
 }
 
+void soc_romstage_init(struct romstage_params *params)
+{
+	pch_early_init();
+}
+
 void ramstage_cache_invalid(struct ramstage_cache *cache)
 {
 #if IS_ENABLED(CONFIG_RESET_ON_INVALID_RAMSTAGE_CACHE)
