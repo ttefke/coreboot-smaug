@@ -121,6 +121,15 @@ Scope (\_SB.I2C2)
 		Name (_DDN, AUDIO_CODEC_DDN)
 		Name (_UID, 1)
 
+		/* Add DT style bindings with _DSD */
+		Name (_DSD, Package () {
+			ToUUID ("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
+			Package () {
+				/* set maxim micbias to 2.8v */
+				Package () { "maxim,micbias", 3 },
+			}
+		})
+
 		Method(_CRS, 0x0, NotSerialized)
 		{
 			Name(SBUF,ResourceTemplate ()
@@ -155,6 +164,15 @@ Scope (\_SB.I2C2)
 		Name (_CID, TI_SWITCH_CID)
 		Name (_DDN, TI_SWITCH_DDN)
 		Name (_UID, 1)
+
+		/* Add DT style bindings with _DSD */
+		Name (_DSD, Package () {
+			ToUUID ("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
+			Package () {
+				/* set ti micbias to 2.8v */
+				Package () { "ti,micbias", 7 },
+			}
+		})
 
 		Method(_CRS, 0x0, NotSerialized)
 		{
