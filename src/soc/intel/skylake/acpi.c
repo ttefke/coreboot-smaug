@@ -42,6 +42,112 @@
 #include <soc/pci_devs.h>
 #include <soc/pm.h>
 #include <soc/intel/skylake/chip.h>
+/*
+ * List of suported C-states in this processor.
+ */
+enum {
+	C_STATE_C0,		/* 0 */
+	C_STATE_C1,		/* 1 */
+	C_STATE_C1E,		/* 2 */
+	C_STATE_C3,		/* 3 */
+	C_STATE_C6_SHORT_LAT,	/* 4 */
+	C_STATE_C6_LONG_LAT,	/* 5 */
+	C_STATE_C7_SHORT_LAT,	/* 6 */
+	C_STATE_C7_LONG_LAT,	/* 7 */
+	C_STATE_C7S_SHORT_LAT,	/* 8 */
+	C_STATE_C7S_LONG_LAT,	/* 9 */
+	C_STATE_C8,		/* 10 */
+	C_STATE_C9,		/* 11 */
+	C_STATE_C10,		/* 12 */
+	NUM_C_STATES
+};
+#define MWAIT_RES(state, sub_state)				\
+	{							\
+		.addrl = (((state) << 4) | (sub_state)),	\
+		.space_id = ACPI_ADDRESS_SPACE_FIXED,		\
+		.bit_width = ACPI_FFIXEDHW_VENDOR_INTEL,	\
+		.bit_offset = ACPI_FFIXEDHW_CLASS_MWAIT,	\
+		.access_size = ACPI_FFIXEDHW_FLAG_HW_COORD,	\
+	}
+
+static acpi_cstate_t cstate_map[NUM_C_STATES] = {
+	[C_STATE_C0] = { },
+	[C_STATE_C1] = {
+		.latency = 0,
+		.power = 1000,
+		.resource = MWAIT_RES(0, 0),
+	},
+	[C_STATE_C1E] = {
+		.latency = 0,
+		.power = 1000,
+		.resource = MWAIT_RES(0, 1),
+	},
+	[C_STATE_C3] = {
+		.latency = C_STATE_LATENCY_FROM_LAT_REG(0),
+		.power = 500,
+		.resource = MWAIT_RES(1, 0),
+	},
+	[C_STATE_C6_SHORT_LAT] = {
+		.latency = C_STATE_LATENCY_FROM_LAT_REG(1),
+		.power = 350,
+		.resource = MWAIT_RES(2, 0),
+	},
+	[C_STATE_C6_LONG_LAT] = {
+		.latency = C_STATE_LATENCY_FROM_LAT_REG(2),
+		.power = 350,
+		.resource = MWAIT_RES(2, 1),
+	},
+	[C_STATE_C7_SHORT_LAT] = {
+		.latency = C_STATE_LATENCY_FROM_LAT_REG(1),
+		.power = 200,
+		.resource = MWAIT_RES(3, 0),
+	},
+	[C_STATE_C7_LONG_LAT] = {
+		.latency = C_STATE_LATENCY_FROM_LAT_REG(2),
+		.power = 200,
+		.resource = MWAIT_RES(3, 1),
+	},
+	[C_STATE_C7S_SHORT_LAT] = {
+		.latency = C_STATE_LATENCY_FROM_LAT_REG(1),
+		.power = 200,
+		.resource = MWAIT_RES(3, 2),
+	},
+	[C_STATE_C7S_LONG_LAT] = {
+		.latency = C_STATE_LATENCY_FROM_LAT_REG(2),
+		.power = 200,
+		.resource = MWAIT_RES(3, 3),
+	},
+	[C_STATE_C8] = {
+		.latency = C_STATE_LATENCY_FROM_LAT_REG(3),
+		.power = 200,
+		.resource = MWAIT_RES(4, 0),
+	},
+	[C_STATE_C9] = {
+		.latency = C_STATE_LATENCY_FROM_LAT_REG(4),
+		.power = 200,
+		.resource = MWAIT_RES(5, 0),
+	},
+	[C_STATE_C10] = {
+		.latency = C_STATE_LATENCY_FROM_LAT_REG(5),
+		.power = 200,
+		.resource = MWAIT_RES(6, 0),
+	},
+};
+
+static int cstate_set_s0ix[] = {
+	C_STATE_C1E,
+	C_STATE_C7S_LONG_LAT,
+	C_STATE_C10
+};
+
+static int cstate_set_non_s0ix[] = {
+	C_STATE_C1E,
+	C_STATE_C3,
+	C_STATE_C7S_LONG_LAT,
+	C_STATE_C8,
+	C_STATE_C9,
+	C_STATE_C10
+};
 
 static int get_cores_per_package(void)
 {
@@ -199,6 +305,26 @@ void acpi_fill_in_fadt(acpi_fadt_t *fadt)
 	fadt->x_gpe1_blk.addrh = 0x0;
 }
 
+static int generate_c_state_entries(int s0ix_enable, int max_cstate)
+{
+
+	acpi_cstate_t map[max_cstate];
+	int *set;
+	int i;
+
+	if (s0ix_enable)
+		set = cstate_set_s0ix;
+	else
+		set = cstate_set_non_s0ix;
+
+	for (i = 0; i < max_cstate; i++) {
+		memcpy(&map[i], &cstate_map[set[i]], sizeof(acpi_cstate_t));
+		map[i].ctype = i + 1;
+	}
+
+	/* Generate C-state tables */
+	return acpigen_write_CST_package(map, ARRAY_SIZE(map));
+}
 void generate_cpu_entries(void)
 {
 	int len_pr;
@@ -206,6 +332,15 @@ void generate_cpu_entries(void)
 	int totalcores = dev_count_cpu();
 	int cores_per_package = get_cores_per_package();
 	int numcpus = totalcores/cores_per_package;
+	device_t dev = SA_DEV_ROOT;
+	config_t *config = dev->chip_info;
+	int is_s0ix_enable = config->s0ix_enable;
+	int max_c_state;
+
+	if (is_s0ix_enable)
+		max_c_state = ARRAY_SIZE(cstate_set_s0ix);
+	else
+		max_c_state = ARRAY_SIZE(cstate_set_non_s0ix);
 
 	printk(BIOS_DEBUG, "Found %d CPU(s) with %d core(s) each.\n",
 	       numcpus, cores_per_package);
@@ -221,6 +356,9 @@ void generate_cpu_entries(void)
 			len_pr = acpigen_write_processor(
 				(cpu_id-1)*cores_per_package+core_id-1,
 				pcontrol_blk, plen);
+			/* Generate C-state tables */
+			len_pr += generate_c_state_entries
+					(is_s0ix_enable, max_c_state);
 
 			len_pr--;
 			acpigen_patch_len(len_pr);
