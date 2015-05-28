@@ -41,20 +41,6 @@
 #define ACTIVE_LOW	0
 #define ACTIVE_HIGH	1
 
-static int get_lid_switch(void)
-{
-#if IS_ENABLED(CONFIG_EC_GOOGLE_CHROMEEC)
-	u8 ec_switches;
-
-	mec_io_bytes(0, EC_LPC_ADDR_MEMMAP + EC_MEMMAP_SWITCHES, 1,
-		     &ec_switches, NULL);
-	return !!(ec_switches & EC_SWITCH_LID_OPEN);
-#else
-	/* Default to force open. */
-	return 1;
-#endif
-}
-
 static void fill_lb_gpio(struct lb_gpio *gpio, int port, int polarity,
 			 const char *name, int force)
 {
@@ -85,6 +71,20 @@ void fill_lb_gpios(struct lb_gpios *gpios)
 	fill_lb_gpio(gpio++, -1, ACTIVE_HIGH, "oprom", oprom_is_loaded);
 }
 #endif
+
+int get_lid_switch(void)
+{
+#if IS_ENABLED(CONFIG_EC_GOOGLE_CHROMEEC)
+	u8 ec_switches;
+
+	mec_io_bytes(0, EC_LPC_ADDR_MEMMAP + EC_MEMMAP_SWITCHES, 1,
+		     &ec_switches, NULL);
+	return !!(ec_switches & EC_SWITCH_LID_OPEN);
+#else
+	/* Default to force open. */
+	return 1;
+#endif
+}
 
 int get_developer_mode_switch(void)
 {

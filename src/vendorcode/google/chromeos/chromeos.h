@@ -32,6 +32,7 @@ int get_recovery_mode_switch(void);
 int clear_recovery_mode_switch(void);
 int get_write_protect_state(void);
 int get_wipeout_mode_switch(void);
+int get_lid_switch(void);
 
 #ifdef __ROMSTAGE__
 void __attribute__((weak)) save_chromeos_gpios(void);

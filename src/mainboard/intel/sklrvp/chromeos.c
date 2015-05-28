@@ -31,12 +31,6 @@
 
 #define GPIO_COUNT	6
 
-static int get_lid_switch(void)
-{
-	/* Default to force open */
-	return 1;
-}
-
 static void fill_lb_gpio(struct lb_gpio *gpio, int num,
 			 int polarity, const char *name, int force)
 {
@@ -70,6 +64,12 @@ void fill_lb_gpios(struct lb_gpios *gpios)
 	fill_lb_gpio(gpio++, -1, ACTIVE_HIGH, "oprom", oprom_is_loaded);
 }
 #endif
+
+int get_lid_switch(void)
+{
+	/* Default to force open */
+	return 1;
+}
 
 /* The dev-switch is virtual */
 int get_developer_mode_switch(void)
