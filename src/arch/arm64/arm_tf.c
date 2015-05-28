@@ -18,6 +18,8 @@
  */
 
 #include <arch/cache.h>
+#include <arch/lib_helpers.h>
+#include <arch/transition.h>
 #include <arm_tf.h>
 #include <assert.h>
 #include <cbfs.h>
@@ -32,15 +34,15 @@
 static image_info_t bl31_image_info;
 static image_info_t bl32_image_info;
 static image_info_t bl33_image_info;
+*/
 static entry_point_info_t bl32_ep_info;
- */
 static entry_point_info_t bl33_ep_info;
 static bl31_params_t bl31_params;
 
 /* TODO: Replace with glorious new CBFSv1 solution when it's available. */
-static void *vboot_get_bl31(void)
+static void *vboot_get_bl3x_entry(uint8_t index)
 {
-	void *bl31_entry;
+	void *entry_addr;
 	struct cbfs_media *media;
 	struct firmware_component *component;
 	struct vboot_handoff *handoff = cbmem_find(CBMEM_ID_VBOOT_HANDOFF);
@@ -48,21 +50,21 @@ static void *vboot_get_bl31(void)
 	if (!handoff)
 		return NULL;
 
-	assert(CONFIG_VBOOT_BL31_INDEX < MAX_PARSED_FW_COMPONENTS);
-	component = &handoff->components[CONFIG_VBOOT_BL31_INDEX];
+	assert(index < MAX_PARSED_FW_COMPONENTS);
+	component = &handoff->components[index];
 
 	/* components[] is zeroed out before filling, so size == 0 -> missing */
 	if (!component->size)
 		return NULL;
 
 	init_default_cbfs_media(media);
-	bl31_entry = cbfs_load_stage_by_offset(media, component->address);
-	if (bl31_entry == CBFS_LOAD_ERROR)
+	entry_addr = cbfs_load_stage_by_offset(media, component->address);
+	if (entry_addr == CBFS_LOAD_ERROR)
 		return NULL;
 
-	printk(BIOS_INFO, "Loaded %u bytes verified BL31 from %#.8x to EP %p\n",
-		component->size, component->address, bl31_entry);
-	return bl31_entry;
+	printk(BIOS_INFO, "Loaded %u bytes verified BLx from %#.8x to EP %p\n",
+		component->size, component->address, entry_addr);
+	return entry_addr;
 }
 
 void __attribute__((weak)) *soc_get_bl31_plat_params(bl31_params_t *params)
@@ -71,13 +73,34 @@ void __attribute__((weak)) *soc_get_bl31_plat_params(bl31_params_t *params)
 	return NULL;
 }
 
+static entry_point_info_t *prepare_bl32(void)
+{
+	const char *bl32_filename = CONFIG_CBFS_PREFIX"/secure_os";
+	void *pc;
+
+	if (IS_ENABLED(CONFIG_VBOOT2_VERIFY_FIRMWARE))
+		pc = vboot_get_bl3x_entry(CONFIG_VBOOT_SECURE_OS_INDEX);
+
+	if (!pc) {
+		pc = cbfs_load_stage(CBFS_DEFAULT_MEDIA, bl32_filename);
+		if (pc == CBFS_LOAD_ERROR)
+			die("Secure OS not found in CBFS");
+	}
+
+	SET_PARAM_HEAD(&bl32_ep_info, PARAM_EP, VERSION_1, PARAM_EP_SECURE);
+	bl32_ep_info.pc = (uintptr_t)pc;
+	bl32_ep_info.spsr = SPSR_EXCEPTION_MASK | get_eret_el(EL1, SPSR_USE_L);
+
+	return &bl32_ep_info;
+}
+
 void arm_tf_run_bl31(u64 payload_entry, u64 payload_arg0, u64 payload_spsr)
 {
 	const char *bl31_filename = CONFIG_CBFS_PREFIX"/bl31";
 	void (*bl31_entry)(bl31_params_t *params, void *plat_params) = NULL;
 
 	if (IS_ENABLED(CONFIG_VBOOT2_VERIFY_FIRMWARE))
-		bl31_entry = vboot_get_bl31();
+		bl31_entry = vboot_get_bl3x_entry(CONFIG_VBOOT_BL31_INDEX);
 
 	if (!bl31_entry) {
 		bl31_entry = cbfs_load_stage(CBFS_DEFAULT_MEDIA, bl31_filename);
@@ -86,8 +109,11 @@ void arm_tf_run_bl31(u64 payload_entry, u64 payload_arg0, u64 payload_spsr)
 	}
 
 	SET_PARAM_HEAD(&bl31_params, PARAM_BL31, VERSION_1, 0);
-	bl31_params.bl33_ep_info = &bl33_ep_info;
 
+	if (IS_ENABLED(CONFIG_ARM64_USE_SECURE_OS))
+		bl31_params.bl32_ep_info = prepare_bl32();
+
+	bl31_params.bl33_ep_info = &bl33_ep_info;
 	SET_PARAM_HEAD(&bl33_ep_info, PARAM_EP, VERSION_1, PARAM_EP_NON_SECURE);
 	bl33_ep_info.pc = payload_entry;
 	bl33_ep_info.spsr = payload_spsr;
