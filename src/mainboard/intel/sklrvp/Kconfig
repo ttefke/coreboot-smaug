@@ -15,6 +15,7 @@ config BOARD_SPECIFIC_OPTIONS # dummy
 	select MONOTONIC_TIMER_MSR
 	select SOC_INTEL_SKYLAKE
 	select VIRTUAL_DEV_SWITCH
+	select LID_SWITCH
 
 config IRQ_SLOT_COUNT
 	int
