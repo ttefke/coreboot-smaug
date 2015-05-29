@@ -12,8 +12,6 @@ chip soc/intel/braswell
 	register "PcdIgdDvmt50PreAlloc" = "1"
 	register "PcdApertureSize" = "2"
 	register "PcdGttSize" = "1"
-	register "ISPEnable" = "0"		# Disable IUNIT
-	register "ISPPciDevConfig" = "3"
 
 	############################################################
 	# Set the parameters for SiliconInit
@@ -38,7 +36,6 @@ chip soc/intel/braswell
 	register "PunitPwrConfigDisable" = "0"	# Enable SVID
 	register "ChvSvidConfig" = "SVID_CONFIG3"
 	register "PcdEmmcMode" = "PCH_ACPI_MODE"
-	register "PcdPciClkSsc" = "1"
 	register "PcdUsb3ClkSsc" = "1"
 	register "PcdDispClkSsc" = "1"
 	register "PcdSataClkSsc" = "1"
@@ -70,6 +67,9 @@ chip soc/intel/braswell
 	register "PcdSataInterfaceSpeed" = "3"
 	register "PcdPchSsicEnable" = "1"
 	register "PcdRtcLock" = "0"	# Disable RTC access locking to NVRAM
+	register "PMIC_I2CBus" = "0"
+	register "ISPEnable" = "0"		# Disable IUNIT
+	register "ISPPciDevConfig" = "3"
 
 	# LPE audio codec settings
 	register "lpe_codec_clk_freq" = "25" # 25MHz clock

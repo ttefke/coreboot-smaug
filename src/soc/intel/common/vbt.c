@@ -26,7 +26,7 @@
 #include <string.h>
 
 /* Locate VBT and pass it to FSP GOP */
-void load_vbt(uint8_t s3_resume, UPD_DATA_REGION *upd_ptr)
+void load_vbt(uint8_t s3_resume, SILICON_INIT_UPD *params)
 {
 	const optionrom_vbt_t *vbt_data;
 	uint32_t vbt_len;
@@ -43,5 +43,5 @@ void load_vbt(uint8_t s3_resume, UPD_DATA_REGION *upd_ptr)
 		else
 			printk(BIOS_DEBUG, "VBT not found!\n");
 	}
-	upd_ptr->PcdGraphicsConfigPtr = (u32)vbt_data;
+	params->PcdGraphicsConfigPtr = (u32)vbt_data;
 }

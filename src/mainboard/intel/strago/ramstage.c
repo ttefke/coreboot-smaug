@@ -19,8 +19,8 @@
 
 #include <soc/ramstage.h>
 
-void mainboard_silicon_init_params(UPD_DATA_REGION *upd_ptr)
+void mainboard_silicon_init_params(SILICON_INIT_UPD *params)
 {
 	if (IS_ENABLED(CONFIG_DYNAMIC_VNN_SUPPORT))
-		upd_ptr->ChvSvidConfig = SVID_CONFIG1;
+		params->ChvSvidConfig = SVID_CONFIG1;
 }

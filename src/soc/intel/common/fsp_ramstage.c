@@ -169,8 +169,9 @@ static void fsp_run_silicon_init(struct romstage_handoff *handoff)
 {
 	FSP_INFO_HEADER *fsp_info_header;
 	FSP_SILICON_INIT fsp_silicon_init;
+	SILICON_INIT_UPD *original_params;
+	SILICON_INIT_UPD silicon_init_params;
 	EFI_STATUS status;
-	UPD_DATA_REGION upd_data;
 	UPD_DATA_REGION *upd_ptr;
 	VPD_DATA_REGION *vpd_ptr;
 
@@ -192,24 +193,29 @@ static void fsp_run_silicon_init(struct romstage_handoff *handoff)
 	upd_ptr = (UPD_DATA_REGION *)(vpd_ptr->PcdUpdRegionOffset +
 					fsp_info_header->ImageBase);
 	printk(BIOS_DEBUG, "0x%p: UPD Data\n", upd_ptr);
-	memcpy(&upd_data, upd_ptr, sizeof(upd_data));
-	soc_silicon_init_params(&upd_data);
+	original_params = (void *)((u8 *)upd_ptr +
+		upd_ptr->SiliconInitUpdOffset);
+	memcpy(&silicon_init_params, original_params,
+		sizeof(silicon_init_params));
+	soc_silicon_init_params(&silicon_init_params);
+
 	/* Locate VBT and pass to FSP GOP */
 	if (IS_ENABLED(CONFIG_GOP_SUPPORT))
-		load_vbt(handoff->s3_resume, &upd_data);
-	mainboard_silicon_init_params(&upd_data);
+		load_vbt(handoff->s3_resume, &silicon_init_params);
+	mainboard_silicon_init_params(&silicon_init_params);
 
 	/* Display the UPD data */
 	if (IS_ENABLED(CONFIG_DISPLAY_UPD_DATA))
-		soc_display_silicon_init_params(upd_ptr, &upd_data);
+		soc_display_silicon_init_params(original_params,
+			&silicon_init_params);
 
 	/* Perform silicon initialization after RAM is configured */
 	fsp_silicon_init = (FSP_SILICON_INIT)(fsp_info_header->ImageBase
 		+ fsp_info_header->FspSiliconInitEntryOffset);
 	timestamp_add_now(TS_FSP_SILICON_INIT_START);
-	printk(BIOS_DEBUG, "Calling FspSiliconInit(0x%p) at 0x%p\n", &upd_data,
-		 fsp_silicon_init);
-	status = fsp_silicon_init(&upd_data);
+	printk(BIOS_DEBUG, "Calling FspSiliconInit(0x%p) at 0x%p\n",
+		&silicon_init_params, fsp_silicon_init);
+	status = fsp_silicon_init(&silicon_init_params);
 	timestamp_add_now(TS_FSP_SILICON_INIT_END);
 	printk(BIOS_DEBUG, "FspSiliconInit returned 0x%08x\n", status);
 
@@ -307,21 +313,21 @@ void intel_silicon_init(void)
 
 /* Initialize the UPD parameters for SiliconInit */
 __attribute__((weak)) void mainboard_silicon_init_params(
-	UPD_DATA_REGION *upd_ptr)
+	SILICON_INIT_UPD *params)
 {
 	printk(BIOS_DEBUG, "WEAK: %s/%s called\n", __FILE__, __func__);
 };
 
 /* Display the UPD parameters for SiliconInit */
 __attribute__((weak)) void soc_display_silicon_init_params(
-	const UPD_DATA_REGION *original, UPD_DATA_REGION *upd_ptr)
+	const SILICON_INIT_UPD *old, SILICON_INIT_UPD *new)
 {
 	printk(BIOS_SPEW, "UPD values for SiliconInit:\n");
-	hexdump32(BIOS_SPEW, upd_ptr, sizeof(*upd_ptr));
+	hexdump32(BIOS_SPEW, new, sizeof(*new));
 }
 
 /* Initialize the UPD parameters for SiliconInit */
-__attribute__((weak)) void soc_silicon_init_params(UPD_DATA_REGION *upd_ptr)
+__attribute__((weak)) void soc_silicon_init_params(SILICON_INIT_UPD *params)
 {
 	printk(BIOS_DEBUG, "WEAK: %s/%s called\n", __FILE__, __func__);
 }

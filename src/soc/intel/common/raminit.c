@@ -41,14 +41,15 @@ void raminit(struct romstage_params *params)
 	void *fsp_reserved_memory_area;
 	FSP_INIT_RT_COMMON_BUFFER fsp_rt_common_buffer;
 	void *hob_list_ptr;
+	MEMORY_INIT_UPD memory_init_params;
 	const EFI_GUID mrc_guid = FSP_NON_VOLATILE_STORAGE_HOB_GUID;
 	u32 *mrc_hob;
 	u32 fsp_reserved_bytes;
-	EFI_STATUS status;
+	MEMORY_INIT_UPD *original_params;
 	struct pei_data *pei_ptr;
+	EFI_STATUS status;
 	VPD_DATA_REGION *vpd_ptr;
 	UPD_DATA_REGION *upd_ptr;
-	UPD_DATA_REGION upd_data_buffer;
 	int fsp_verification_failure = 0;
 #if IS_ENABLED(CONFIG_DISPLAY_HOBS)
 	unsigned long int data;
@@ -72,7 +73,10 @@ void raminit(struct romstage_params *params)
 	upd_ptr = (UPD_DATA_REGION *)(vpd_ptr->PcdUpdRegionOffset +
 					fsp_header->ImageBase);
 	printk(BIOS_DEBUG, "UPD Data: 0x%p\n", upd_ptr);
-	memcpy(&upd_data_buffer, upd_ptr, sizeof(upd_data_buffer));
+	original_params = (void *)((u8 *)upd_ptr +
+		upd_ptr->MemoryInitUpdOffset);
+	memcpy(&memory_init_params, original_params,
+		sizeof(memory_init_params));
 
 	/* Zero fill RT Buffer data and start populating fields. */
 	memset(&fsp_rt_common_buffer, 0, sizeof(fsp_rt_common_buffer));
@@ -85,7 +89,7 @@ void raminit(struct romstage_params *params)
 	} else {
 		fsp_rt_common_buffer.BootMode = BOOT_WITH_FULL_CONFIGURATION;
 	}
-	fsp_rt_common_buffer.UpdDataRgnPtr = &upd_data_buffer;
+	fsp_rt_common_buffer.UpdDataRgnPtr = &memory_init_params;
 	fsp_rt_common_buffer.BootLoaderTolumSize = CBMEM_ROOT_SIZE;
 
 	/* Get any board specific changes */
@@ -94,13 +98,14 @@ void raminit(struct romstage_params *params)
 	fsp_memory_init_params.HobListPtr = &hob_list_ptr;
 
 	/* Update the UPD data */
-	soc_memory_init_params(&upd_data_buffer);
-	mainboard_memory_init_params(params, &upd_data_buffer);
+	soc_memory_init_params(&memory_init_params);
+	mainboard_memory_init_params(params, &memory_init_params);
 	post_code(0x36);
 
 	/* Display the UPD data */
 	if (IS_ENABLED(CONFIG_DISPLAY_UPD_DATA))
-		soc_display_memory_init_params(upd_ptr, &upd_data_buffer);
+		soc_display_memory_init_params(original_params,
+			&memory_init_params);
 
 	/* Call FspMemoryInit to initialize RAM */
 	fsp_memory_init = (FSP_MEMORY_INIT)(fsp_header->ImageBase
@@ -280,21 +285,21 @@ void raminit(struct romstage_params *params)
 /* Initialize the UPD parameters for MemoryInit */
 __attribute__((weak)) void mainboard_memory_init_params(
 	struct romstage_params *params,
-	UPD_DATA_REGION *upd_ptr)
+	MEMORY_INIT_UPD *upd_ptr)
 {
 	printk(BIOS_DEBUG, "WEAK: %s/%s called\n", __FILE__, __func__);
 }
 
 /* Display the UPD parameters for MemoryInit */
 __attribute__((weak)) void soc_display_memory_init_params(
-	const UPD_DATA_REGION *original, UPD_DATA_REGION *upd_ptr)
+	const MEMORY_INIT_UPD *old, MEMORY_INIT_UPD *new)
 {
 	printk(BIOS_SPEW, "UPD values for MemoryInit:\n");
-	hexdump32(BIOS_SPEW, upd_ptr, sizeof(*upd_ptr));
+	hexdump32(BIOS_SPEW, new, sizeof(*new));
 }
 
 /* Initialize the UPD parameters for MemoryInit */
-__attribute__((weak)) void soc_memory_init_params(UPD_DATA_REGION *upd_ptr)
+__attribute__((weak)) void soc_memory_init_params(MEMORY_INIT_UPD *params)
 {
 	printk(BIOS_DEBUG, "WEAK: %s/%s called\n", __FILE__, __func__);
 }

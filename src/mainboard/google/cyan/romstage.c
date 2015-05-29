@@ -37,12 +37,11 @@ void mainboard_romstage_entry(struct romstage_params *rp)
 	romstage_common(rp);
 }
 
-void mainboard_memory_init_params(
-	struct romstage_params *params,
-	UPD_DATA_REGION *upd_ptr)
+void mainboard_memory_init_params(struct romstage_params *params,
+	MEMORY_INIT_UPD *memory_params)
 {
 	/* Update SPD data */
-	upd_ptr->PcdMemorySpdPtr = (u32)params->pei_data->spd_data_ch0;
-	upd_ptr->PcdMemChannel0Config = params->pei_data->spd_ch0_config;
-	upd_ptr->PcdMemChannel1Config = params->pei_data->spd_ch1_config;
+	memory_params->PcdMemorySpdPtr = (u32)params->pei_data->spd_data_ch0;
+	memory_params->PcdMemChannel0Config = params->pei_data->spd_ch0_config;
+	memory_params->PcdMemChannel1Config = params->pei_data->spd_ch1_config;
 }

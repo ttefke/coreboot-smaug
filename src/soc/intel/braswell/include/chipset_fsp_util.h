@@ -37,6 +37,6 @@
 #include <MdePkg/Include/Uefi/UefiMultiPhase.h>	/* UEFI memory types */
 #include <MdePkg/Include/Pi/PiHob.h>		/* Hand off block definitions */
 #include <MdePkg/Include/Library/HobLib.h>	/* HOB routine declarations */
-#include <VpdHeader.h>		/* Vital/updatable product data definitions */
+#include <FspUpdVpd.h>		/* Vital/updatable product data definitions */
 
 #endif	/* CHIPSET_FSP_UTIL_H */

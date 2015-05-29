@@ -69,8 +69,6 @@ struct soc_intel_braswell_config {
 	UINT8  PcdIgdDvmt50PreAlloc;
 	UINT8  PcdApertureSize;
 	UINT8  PcdGttSize;
-	UINT8  ISPEnable;
-	UINT8  ISPPciDevConfig;
 	UINT8  PcdLegacySegDecode;
 
 	/*
@@ -100,7 +98,6 @@ struct soc_intel_braswell_config {
 	UINT8  ChvSvidConfig;
 	UINT8  DptfDisable;
 	UINT8  PcdEmmcMode;
-	UINT8  PcdPciClkSsc;
 	UINT8  PcdUsb3ClkSsc;
 	UINT8  PcdDispClkSsc;
 	UINT8  PcdSataClkSsc;
@@ -136,6 +133,9 @@ struct soc_intel_braswell_config {
 	UINT32 PcdLogoPtr;
 	UINT32 PcdLogoSize;
 	UINT8  PcdRtcLock;
+	UINT8  PMIC_I2CBus;
+	UINT8  ISPEnable;
+	UINT8  ISPPciDevConfig;
 };
 
 extern struct chip_operations soc_intel_braswell_ops;

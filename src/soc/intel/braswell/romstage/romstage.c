@@ -209,7 +209,7 @@ void soc_after_ram_init(struct romstage_params *params)
 }
 
 /* Initialize the UPD parameters for MemoryInit */
-void soc_memory_init_params(UPD_DATA_REGION *upd_ptr)
+void soc_memory_init_params(MEMORY_INIT_UPD *params)
 {
 	const struct device *dev;
 	const struct soc_intel_braswell_config *config;
@@ -218,48 +218,42 @@ void soc_memory_init_params(UPD_DATA_REGION *upd_ptr)
 	dev = dev_find_slot(0, PCI_DEVFN(LPC_DEV, LPC_FUNC));
 	config = dev->chip_info;
 	printk(BIOS_DEBUG, "Updating UPD values for MemoryInit\n");
-	upd_ptr->PcdMrcInitTsegSize = IS_ENABLED(CONFIG_HAVE_SMI_HANDLER) ?
+	params->PcdMrcInitTsegSize = IS_ENABLED(CONFIG_HAVE_SMI_HANDLER) ?
 		config->PcdMrcInitTsegSize : 0;
-	upd_ptr->PcdMrcInitMmioSize = config->PcdMrcInitMmioSize;
-	upd_ptr->PcdMrcInitSpdAddr1 = config->PcdMrcInitSpdAddr1;
-	upd_ptr->PcdMrcInitSpdAddr2 = config->PcdMrcInitSpdAddr2;
-	upd_ptr->PcdIgdDvmt50PreAlloc = config->PcdIgdDvmt50PreAlloc;
-	upd_ptr->PcdApertureSize = config->PcdApertureSize;
-	upd_ptr->PcdGttSize = config->PcdGttSize;
-	upd_ptr->ISPEnable = config->ISPEnable;
-	upd_ptr->ISPPciDevConfig = config->ISPPciDevConfig;
-	upd_ptr->PcdLegacySegDecode = config->PcdLegacySegDecode;
+	params->PcdMrcInitMmioSize = config->PcdMrcInitMmioSize;
+	params->PcdMrcInitSpdAddr1 = config->PcdMrcInitSpdAddr1;
+	params->PcdMrcInitSpdAddr2 = config->PcdMrcInitSpdAddr2;
+	params->PcdIgdDvmt50PreAlloc = config->PcdIgdDvmt50PreAlloc;
+	params->PcdApertureSize = config->PcdApertureSize;
+	params->PcdGttSize = config->PcdGttSize;
+	params->PcdLegacySegDecode = config->PcdLegacySegDecode;
 }
 
-void soc_display_memory_init_params(const UPD_DATA_REGION *original,
-	UPD_DATA_REGION *upd_ptr)
+void soc_display_memory_init_params(const MEMORY_INIT_UPD *old,
+	MEMORY_INIT_UPD *new)
 {
 	/* Display the parameters for MemoryInit */
 	printk(BIOS_SPEW, "UPD values for MemoryInit:\n");
 	soc_display_upd_value("PcdMrcInitTsegSize", 2,
-		original->PcdMrcInitTsegSize, upd_ptr->PcdMrcInitTsegSize);
+		old->PcdMrcInitTsegSize, new->PcdMrcInitTsegSize);
 	soc_display_upd_value("PcdMrcInitMmioSize", 2,
-		original->PcdMrcInitMmioSize, upd_ptr->PcdMrcInitMmioSize);
+		old->PcdMrcInitMmioSize, new->PcdMrcInitMmioSize);
 	soc_display_upd_value("PcdMrcInitSpdAddr1", 1,
-		original->PcdMrcInitSpdAddr1, upd_ptr->PcdMrcInitSpdAddr1);
+		old->PcdMrcInitSpdAddr1, new->PcdMrcInitSpdAddr1);
 	soc_display_upd_value("PcdMrcInitSpdAddr2", 1,
-		original->PcdMrcInitSpdAddr2, upd_ptr->PcdMrcInitSpdAddr2);
+		old->PcdMrcInitSpdAddr2, new->PcdMrcInitSpdAddr2);
 	soc_display_upd_value("PcdMemChannel0Config", 1,
-		original->PcdMemChannel0Config, upd_ptr->PcdMemChannel0Config);
+		old->PcdMemChannel0Config, new->PcdMemChannel0Config);
 	soc_display_upd_value("PcdMemChannel1Config", 1,
-		original->PcdMemChannel1Config, upd_ptr->PcdMemChannel1Config);
+		old->PcdMemChannel1Config, new->PcdMemChannel1Config);
 	soc_display_upd_value("PcdMemorySpdPtr", 4,
-		original->PcdMemorySpdPtr, upd_ptr->PcdMemorySpdPtr);
+		old->PcdMemorySpdPtr, new->PcdMemorySpdPtr);
 	soc_display_upd_value("PcdIgdDvmt50PreAlloc", 1,
-		original->PcdIgdDvmt50PreAlloc, upd_ptr->PcdIgdDvmt50PreAlloc);
+		old->PcdIgdDvmt50PreAlloc, new->PcdIgdDvmt50PreAlloc);
 	soc_display_upd_value("PcdApertureSize", 1,
-		original->PcdApertureSize, upd_ptr->PcdApertureSize);
+		old->PcdApertureSize, new->PcdApertureSize);
 	soc_display_upd_value("PcdGttSize", 1,
-		original->PcdGttSize, upd_ptr->PcdGttSize);
-	soc_display_upd_value("ISPEnable", 1,
-		original->ISPEnable, upd_ptr->ISPEnable);
-	soc_display_upd_value("ISPPciDevConfig", 1,
-		original->ISPPciDevConfig, upd_ptr->ISPPciDevConfig);
+		old->PcdGttSize, new->PcdGttSize);
 	soc_display_upd_value("PcdLegacySegDecode", 1,
-		original->PcdLegacySegDecode, upd_ptr->PcdLegacySegDecode);
+		old->PcdLegacySegDecode, new->PcdLegacySegDecode);
 }
