@@ -85,7 +85,15 @@ static void lock_down_vpr(void)
 
 	write32(&regs->video_protect_bom, 0);
 	write32(&regs->video_protect_size_mb, 0);
-	write32(&regs->video_protect_reg_ctrl, 1);
+
+	write32(&regs->video_protect_gpu_override_0, 1);
+	/*
+	 * Set both _ACCESS bits so that kernel/secure code
+	 * can reconfig VPR careveout as needed from the TrustZone.
+	 */
+
+	write32(&regs->video_protect_reg_ctrl,
+		(MC_VPR_WR_ACCESS_DISABLE | MC_VPR_ALLOW_TZ_WR_ACCESS_ENABLE));
 }
 
 static void soc_init(device_t dev)

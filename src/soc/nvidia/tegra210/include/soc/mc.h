@@ -223,6 +223,8 @@ enum {
 };
 
 #define MC_SECURITY_CARVEOUT_LOCKED		(1 << 1)
+#define MC_VPR_WR_ACCESS_DISABLE		(1 << 0)
+#define MC_VPR_ALLOW_TZ_WR_ACCESS_ENABLE	(1 << 1)
 
 check_member(tegra_mc_regs, security_carveout5_cfia4, 0xd7c);
 
