@@ -41,6 +41,8 @@ void raminit(struct romstage_params *params)
 	void *fsp_reserved_memory_area;
 	FSP_INIT_RT_COMMON_BUFFER fsp_rt_common_buffer;
 	void *hob_list_ptr;
+	FSP_SMBIOS_MEMORY_INFO *memory_info_hob;
+	const EFI_GUID memory_info_hob_guid = FSP_SMBIOS_MEMORY_INFO_GUID;
 	MEMORY_INIT_UPD memory_init_params;
 	const EFI_GUID mrc_guid = FSP_NON_VOLATILE_STORAGE_HOB_GUID;
 	u32 *mrc_hob;
@@ -178,6 +180,18 @@ void raminit(struct romstage_params *params)
 			fsp_rt_common_buffer.BootLoaderTolumSize);
 	}
 
+	/* Locate the FSP_SMBIOS_MEMORY_INFO HOB */
+	memory_info_hob = get_next_guid_hob(&memory_info_hob_guid,
+		hob_list_ptr);
+	if (NULL == memory_info_hob) {
+		printk(BIOS_ERR, "FSP_SMBIOS_MEMORY_INFO HOB missing!\n");
+		fsp_verification_failure = 1;
+	} else {
+		printk(BIOS_DEBUG,
+			"FSP_SMBIOS_MEMORY_INFO HOB: 0x%p\n",
+			memory_info_hob);
+	}
+
 #if IS_ENABLED(CONFIG_DISPLAY_HOBS)
 	if (hob_list_ptr == NULL)
 		die("ERROR - HOB pointer is NULL!\n");
@@ -189,6 +203,7 @@ void raminit(struct romstage_params *params)
 	 *	7.3: FSP_NON_VOLATILE_STORAGE_HOB verified below
 	 *	7.4: FSP_BOOTLOADER_TOLUM_HOB verified above
 	 *	7.5: EFI_PEI_GRAPHICS_INFO_HOB produced by SiliconInit
+	 *	FSP_SMBIOS_MEMORY_INFO HOB verified above
 	 */
 	if (NULL != cbmem_root) {
 		printk(BIOS_DEBUG,

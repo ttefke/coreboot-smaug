@@ -19,8 +19,12 @@
  */
 
 #include <cbfs.h>
+#include <cbmem.h>
 #include <console/console.h>
 #include <lib.h>
+#include <memory_info.h>
+#include <smbios.h>
+#include <spd.h>
 #include <soc/gpio.h>
 #include <soc/romstage.h>
 #include <string.h>
@@ -47,16 +51,27 @@ static void *get_spd_pointer(char *spd_file_content, int total_spds, int *dual)
 	ram_id |= get_gpio(COMMUNITY_GPSOUTHEAST_BASE, MF_PLT_CLK1_PAD_CFG0)
 		<< 2;
 	ram_id |= get_gpio(COMMUNITY_GPSOUTHWEST_BASE, I2C3_SDA_PAD_CFG0) << 3;
-
 	printk(BIOS_DEBUG, "ram_id=%d, total_spds: %d\n", ram_id, total_spds);
-
 	if (ram_id >= total_spds)
 		return NULL;
 
-	/* Single channel configs */
+	/* Determine if this is a single or dual channel memory system */
 	if (dual_channel_config & (1 << ram_id))
 		*dual = 1;
 
+	/* Display the RAM type */
+	switch (ram_id) {
+	case 0:
+	case 2:
+		printk(BIOS_DEBUG, "2GiB Samsung K4B4G1646Q-HYK0 1600MHz\n");
+		break;
+	case 1:
+	case 3:
+		printk(BIOS_DEBUG, "2GiB Hynix  H5TC4G63CFR-PBA 1600MHz\n");
+		break;
+	}
+
+	/* Return the serial product data for the RAM */
 	return &spd_file_content[SPD_SIZE * ram_id];
 }
 
@@ -94,11 +109,79 @@ void mainboard_fill_spd_data(struct pei_data *ps)
 	if (spd_content != NULL) {
 		ps->spd_data_ch0 = spd_content;
 		ps->spd_ch0_config = 1;
+		printk(BIOS_DEBUG, "Channel 0 DIMM soldered down\n");
 		if (dual_channel) {
+			printk(BIOS_DEBUG, "Channel 1 DIMM soldered down\n");
 			ps->spd_data_ch1 = spd_content;
 			ps->spd_ch1_config = 1;
 		} else {
+			printk(BIOS_DEBUG, "Channel 1 DIMM not installed\n");
 			ps->spd_ch1_config = 2;
 		}
+	}
+}
+
+static void set_dimm_info(uint32_t chips, uint8_t *spd, struct dimm_info *dimm)
+{
+	uint16_t clock_frequency;
+	uint32_t log2_chips;
+
+	/* Parse the SPD data to determine the DIMM information */
+	dimm->ddr_type = MEMORY_DEVICE_DDR3;
+	dimm->dimm_size = (chips << (spd[4] & 0xf)) << (28 - 3 - 20);  /* MiB */
+	clock_frequency = 1000 * spd[11] / (spd[10] * spd[12]);	/* MHz */
+	dimm->ddr_frequency = 2 * clock_frequency;	/* Double Data Rate */
+	dimm->mod_type = spd[3] & 0xf;
+	memcpy((char *)&dimm->module_part_number[0], &spd[0x80],
+		sizeof(dimm->module_part_number) - 1);
+	dimm->mod_id = *(uint16_t *)&spd[0x94];
+	switch (chips) {
+	case 1:
+		log2_chips = 0;
+		break;
+
+	case 2:
+		log2_chips = 1;
+		break;
+
+	case 4:
+		log2_chips = 2;
+		break;
+
+	case 8:
+		log2_chips = 3;
+		break;
+	}
+	dimm->bus_width = (uint8_t)(log2_chips + (spd[7] & 7) + 2 - 3);
+}
+
+void mainboard_save_dimm_info(struct romstage_params *params)
+{
+	struct dimm_info *dimm;
+	struct memory_info *mem_info;
+	uint32_t chips;
+
+	/*
+	 * Allocate CBMEM area for DIMM information used to populate SMBIOS
+	 * table 17
+	 */
+	mem_info = cbmem_add(CBMEM_ID_MEMINFO, sizeof(*mem_info));
+	printk(BIOS_DEBUG, "CBMEM entry for DIMM info: 0x%p\n", mem_info);
+	if (mem_info == NULL)
+		return;
+	memset(mem_info, 0, sizeof(*mem_info));
+
+	/* Describe the first channel memory */
+	chips = 4;
+	dimm = &mem_info->dimm[0];
+	set_dimm_info(chips, params->pei_data->spd_data_ch0, dimm);
+	mem_info->dimm_cnt = 1;
+
+	/* Describe the second channel memory */
+	if (params->pei_data->spd_ch1_config == 1) {
+		dimm = &mem_info->dimm[1];
+		set_dimm_info(chips, params->pei_data->spd_data_ch1, dimm);
+		dimm->channel_num = 1;
+		mem_info->dimm_cnt = 2;
 	}
 }

@@ -31,6 +31,7 @@
 #include <ec/google/chromeec/ec.h>
 #include <ec/google/chromeec/ec_commands.h>
 #include <elog.h>
+#include <memory_info.h>
 #include <ramstage_cache.h>
 #include <reset.h>
 #include <romstage_handoff.h>
@@ -255,12 +256,109 @@ __attribute__((weak)) void mainboard_romstage_entry(
 	romstage_common(params);
 }
 
-/* Used by MRC images to save DIMM information */
+/* Save the DIMM information for SMBIOS table 17 */
+#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP)
+__attribute__((weak)) void mainboard_save_dimm_info(
+	struct romstage_params *params)
+{
+	int channel;
+	CHANNEL_INFO *channel_info;
+	int dimm;
+	DIMM_INFO *dimm_info;
+	int dimm_max;
+	void *hob_list_ptr;
+	EFI_HOB_GUID_TYPE *hob_ptr;
+	int index;
+	struct memory_info *mem_info;
+	FSP_SMBIOS_MEMORY_INFO *memory_info_hob;
+	const EFI_GUID memory_info_hob_guid = FSP_SMBIOS_MEMORY_INFO_GUID;
+
+	/* Locate the memory info HOB, presence validated by raminit */
+	hob_list_ptr = fsp_get_hob_list();
+	hob_ptr = get_next_guid_hob(&memory_info_hob_guid, hob_list_ptr);
+	memory_info_hob = (FSP_SMBIOS_MEMORY_INFO *)(hob_ptr + 1);
+
+	/* Display the data in the FSP_SMBIOS_MEMORY_INFO HOB */
+	if (IS_ENABLED(CONFIG_DISPLAY_HOBS)) {
+		printk(BIOS_DEBUG, "FSP_SMBIOS_MEMORY_INFO HOB\n");
+		printk(BIOS_DEBUG, "    0x%02x: Revision\n",
+			memory_info_hob->Revision);
+		printk(BIOS_DEBUG, "    0x%02x: MemoryType\n",
+			memory_info_hob->MemoryType);
+		printk(BIOS_DEBUG, "  0x%04x: MemoryFrequencyInMHz\n",
+			memory_info_hob->MemoryFrequencyInMHz);
+		printk(BIOS_DEBUG, "    0x%02x: ErrorCorrectionType\n",
+			memory_info_hob->ErrorCorrectionType);
+		printk(BIOS_DEBUG, "    0x%02x: ChannelCount\n",
+			memory_info_hob->ChannelCount);
+		for (channel = 0; channel < memory_info_hob->ChannelCount;
+			channel++) {
+			channel_info = &memory_info_hob->ChannelInfo[channel];
+			printk(BIOS_DEBUG, "  Channel %d\n", channel);
+			printk(BIOS_DEBUG, "      0x%02x: ChannelId\n",
+				channel_info->ChannelId);
+			printk(BIOS_DEBUG, "      0x%02x: DimmCount\n",
+				channel_info->DimmCount);
+			for (dimm = 0; dimm < channel_info->DimmCount;
+				dimm++) {
+				dimm_info = &channel_info->DimmInfo[dimm];
+				printk(BIOS_DEBUG, "   DIMM %d\n", dimm);
+				printk(BIOS_DEBUG, "      0x%02x: DimmId\n",
+					dimm_info->DimmId);
+				printk(BIOS_DEBUG, "      0x%02x: SizeInMb\n",
+					dimm_info->SizeInMb);
+			}
+		}
+	}
+
+	/*
+	 * Allocate CBMEM area for DIMM information used to populate SMBIOS
+	 * table 17
+	 */
+	mem_info = cbmem_add(CBMEM_ID_MEMINFO, sizeof(*mem_info));
+	printk(BIOS_DEBUG, "CBMEM entry for DIMM info: 0x%p\n", mem_info);
+	if (mem_info == NULL)
+		return;
+	memset(mem_info, 0, sizeof(*mem_info));
+
+	/* Describe the first N DIMMs in the system */
+	index = 0;
+	dimm_max = ARRAY_SIZE(mem_info->dimm);
+	for (channel = 0; channel < memory_info_hob->ChannelCount; channel++) {
+		if (index >= dimm_max)
+			break;
+		channel_info = &memory_info_hob->ChannelInfo[channel];
+		for (dimm = 0; dimm < channel_info->DimmCount; dimm++) {
+			if (index >= dimm_max)
+				break;
+			dimm_info = &channel_info->DimmInfo[dimm];
+
+			/* Populate the DIMM information */
+			if (dimm_info->SizeInMb) {
+				mem_info->dimm[index].dimm_size =
+					dimm_info->SizeInMb;
+				mem_info->dimm[index].ddr_type =
+					memory_info_hob->MemoryType;
+				mem_info->dimm[index].ddr_frequency =
+					memory_info_hob->MemoryFrequencyInMHz;
+				mem_info->dimm[index].channel_num =
+					channel_info->ChannelId;
+				mem_info->dimm[index].dimm_num =
+					dimm_info->DimmId;
+				index++;
+			}
+		}
+	}
+	mem_info->dimm_cnt = index;
+	printk(BIOS_DEBUG, "%d DIMMs found\n", mem_info->dimm_cnt);
+}
+#else
 __attribute__((weak)) void mainboard_save_dimm_info(
 	struct romstage_params *params)
 {
 	printk(BIOS_DEBUG, "WEAK: %s/%s called\n", __FILE__, __func__);
 }
+#endif
 
 /* Get the memory configuration data */
 __attribute__((weak)) int mrc_cache_get_current(
