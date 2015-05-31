@@ -174,10 +174,6 @@ static void setup_gpio_route(const struct soc_gpio_map *sw_gpios,
 	/* enable gpe bits in GPE0A_EN_REG */
 	outl(gpe0a_en, ACPI_BASE_ADDRESS + GPE0A_EN_REG);
 
-	/* enable sci bit (bit 0) in PM1_CNT */
-	outl(inl(ACPI_BASE_ADDRESS + PM1_CNT) | 0x1,
-	ACPI_BASE_ADDRESS + PM1_CNT);
-
 #ifdef GPIO_DEBUG
 	printk(BIOS_DEBUG, "gpio_rout = %x alt_gpio_smi = %x  gpe0a_en = %x\n",
 	route_reg, alt_gpio_smi, gpe0a_en);

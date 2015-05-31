@@ -42,14 +42,18 @@ void mainboard_ec_init(void)
 		/* Clear pending events */
 		while (google_chromeec_get_event() != 0)
 			;
-		/* Clear wake events, these are enabled on entry to sleep */
+		/*
+		 * Set SCI mask.OS may not generate SMI event to set
+		 * this on S3 resume.
+		 */
 		google_chromeec_set_sci_mask(MAINBOARD_EC_SCI_EVENTS);
 	} else {
 		google_chromeec_log_events(MAINBOARD_EC_LOG_EVENTS |
 					   MAINBOARD_EC_S5_WAKE_EVENTS);
 	}
+
+	/* Clear wake event mask */
 	google_chromeec_set_wake_mask(0);
 #endif
-
 	post_code(0xf1);
 }
