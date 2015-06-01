@@ -71,6 +71,7 @@ static void bootblock_mdelay(int ms)
 
 static void set_flex_ratio_to_tdp_nominal(void)
 {
+#if 0 /* Disabled until http://crosbug.com/p/41039 is resolved */
 	msr_t flex_ratio, msr;
 	u32 soft_reset_data;
 	u8 nominal_ratio;
@@ -104,6 +105,7 @@ static void set_flex_ratio_to_tdp_nominal(void)
 
 	/* Issue soft reset, will be "CPU only" due to soft reset data */
 	soft_reset();
+#endif
 }
 
 static void check_for_clean_reset(void)
