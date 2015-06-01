@@ -40,6 +40,7 @@
 #include <soc/pm.h>
 #include <soc/ramstage.h>
 #include <soc/intel/common/ramstage.h>
+#include <boardid.h>
 #include <stdlib.h>
 
 #define SHOW_PATTRS 1
@@ -187,6 +188,18 @@ static void s3_resume_prepare(void)
 	s3_save_acpi_wake_source(gnvs);
 }
 
+static void set_board_id(void)
+{
+	global_nvs_t *gnvs;
+
+	gnvs = cbmem_find(CBMEM_ID_ACPI_GNVS);
+	if (!gnvs) {
+		printk(BIOS_ERR, "Unable to locate Global NVS\n");
+		return;
+	}
+	gnvs->bdid = board_id();
+}
+
 void braswell_init_pre_device(struct soc_intel_braswell_config *config)
 {
 	struct soc_gpio_config *gpio_config;
@@ -202,6 +215,7 @@ void braswell_init_pre_device(struct soc_intel_braswell_config *config)
 	/* Perform silicon specific init. */
 	intel_silicon_init();
 
+	set_board_id();
 	/* Get GPIO initial states from mainboard */
 	gpio_config = mainboard_get_gpios();
 	setup_soc_gpios(gpio_config, config->enable_xdp_tap);
