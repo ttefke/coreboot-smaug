@@ -85,6 +85,10 @@ config BOOT_MEDIA_SPI_CHIP_SELECT
 # For smaug, we are using vboot2. Thus, index for stages:
 # VBOOT_ROMSTAGE_INDEX -> Use default value of 0x2
 # VBOOT_RAMSTAGE_INDEX -> Use 0x3
+config VBOOT_SECURE_OS_INDEX
+	hex
+	default 0x5
+
 config VBOOT_BL31_INDEX
 	hex
 	default 0x4
