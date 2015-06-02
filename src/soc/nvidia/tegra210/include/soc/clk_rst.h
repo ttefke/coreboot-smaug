@@ -337,6 +337,9 @@ check_member(clk_rst_ctlr, clk_src_qspi, 0x6C4);
 
 /* _CCLK_BURST_POLICY 0x20 */
 #define CCLK_BURST_POLICY_VAL		0x20008888
+/* CLK_M divisor */
+#define CLK_M_DIVISOR_MASK		(0x3 << 2)
+#define CLK_M_DIVISOR_BY_2		(1 << 2)
 
 /* CRC_SUPER_CCLK_DIVIDER_0 0x24 */
 #define SUPER_CDIV_ENB_ENABLE		(1 << 31)
@@ -595,5 +598,9 @@ enum {
 	CRC_RST_CPULP_CLR_NONCPU = 0x1 << 29,
 	CRC_RST_CPULP_CLR_PDBG = 0x1 << 30,
 };
+
+#define TIMERUS_CNTR_1US		0x0
+#define TIMERUS_USEC_CFG		0x4
+#define TIMERUS_USEC_CFG_19P2_CLK_M	0x045F
 
 #endif	/* _TEGRA210_CLK_RST_H_ */

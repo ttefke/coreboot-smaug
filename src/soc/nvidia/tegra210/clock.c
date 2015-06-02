@@ -235,7 +235,7 @@ int clock_get_pll_input_khz(void)
 
 void clock_init_arm_generic_timer(void)
 {
-	uint32_t freq = clock_get_osc_khz() * 1000;
+	uint32_t freq = TEGRA_CLK_M_KHZ * 1000;
 
 	// Record the system timer frequency.
 	write32(&sysctr->cntfid0, freq);
@@ -580,6 +580,13 @@ void clock_halt_avp(void)
 void clock_init(void)
 {
 	u32 osc = clock_get_osc_bits();
+	/* clk_m = osc/2 */
+	clrsetbits_le32(CLK_RST_REG(spare_reg0), CLK_M_DIVISOR_MASK,
+			CLK_M_DIVISOR_BY_2);
+
+	/* TIMERUS needs to be adjusted for new 19.2MHz CLK_M rate */
+	write32((void *)TEGRA_TMRUS_BASE + TIMERUS_USEC_CFG,
+		TIMERUS_USEC_CFG_19P2_CLK_M);
 
 	init_pllc(osc);
 
