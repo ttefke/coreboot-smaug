@@ -21,7 +21,10 @@
 #include "irqroute.h"
 #include <soc/gpio.h>
 #include <stdlib.h>
+#include <boardid.h>
+#include "onboard.h"
 #include "gpio.h"
+
 
 /* South East Community */
 static const struct soc_gpio_map gpse_gpio_map[] = {
@@ -84,7 +87,6 @@ static const struct soc_gpio_map gpse_gpio_map[] = {
 	GPIO_END
 };
 
-
 /* South West Community */
 static const struct soc_gpio_map  gpsw_gpio_map[] = {
 	GPIO_NC, /* 00 FST_SPI_D2 */
@@ -115,7 +117,7 @@ static const struct soc_gpio_map  gpsw_gpio_map[] = {
 		/* 37 MF_HDA_DOCKENB */
 	NATIVE_PU1K_CSEN_INVTX(1), /* 45 I2C5_SDA */
 	GPIO_NC, /* 46 I2C4_SDA */
-	NATIVE_PU20K(2), /* 47 I2C6_SDA */
+	NATIVE_PU1K_CSEN_INVTX(1), /* 47 I2C6_SDA */
 	NATIVE_PU1K_CSEN_INVTX(1), /* 48 I2C5_SCL */
 	GPIO_NC, /* 49 I2C_NFC_SDA */
 	GPIO_NC, /* 50 I2C4_SCL */
@@ -130,7 +132,8 @@ static const struct soc_gpio_map  gpsw_gpio_map[] = {
 	NATIVE_PU1K_CSEN_INVTX(1), /* 66  I2C2_SCL */
 	GPIO_INPUT_NO_PULL,/* 67  I2C3_SCL,RAMID1 */
 	GPIO_OUT_HIGH, /* 75 SATA_GP0 */
-	GPIO_NC, /* 76 GPI SATA_GP1 */
+	GPI(trig_edge_low, L0, P_1K_H, non_maskable, NA, NA, NA),
+	/* 76 GPI SATA_GP1 */
 	Native_M1, /* 77 SATA_LEDN */
 	GPIO_NC, /* 78 HSIC AUX1 / SV Mode/ SATA_GP2 */
 	Native_M1, /* 79 MF_SMB_ALERTB */
@@ -170,8 +173,7 @@ static const struct soc_gpio_map  gpn_gpio_map[] = {
 	/* 17 GPIO_SUS3 */
 	GPI(trig_edge_low, L1, P_1K_H, non_maskable, NA, UNMASK_WAKE, NA),
 	/* 18 GPIO_SUS7 */
-	GPI(trig_edge_low, L3, P_1K_H, non_maskable, NA, UNMASK_WAKE, NA),
-	/* 19 GPIO_SUS1 */
+	GPO_FUNC(0, 0), /* 19 GPIO_SUS1 */
 	GPIO_NC, /* 20 GPIO_SUS5 */
 	GPI(trig_edge_high, L2, NA, non_maskable, en_edge_rx_data, NA , NA),
 	/* 21 SEC_GPIO_SUS11 */
@@ -222,7 +224,6 @@ static const struct soc_gpio_map  gpn_gpio_map[] = {
 	GPIO_END
 };
 
-
 /* East Community */
 static const struct soc_gpio_map  gpe_gpio_map[] = {
 	Native_M1, /* 00 PMU_SLP_S3_B */
@@ -252,25 +253,19 @@ static const struct soc_gpio_map  gpe_gpio_map[] = {
 	GPIO_END
 };
 
-
 static struct soc_gpio_config gpio_config = {
 	/* BSW */
-	/* gpio configuration for EVT board which
-	 * is the default configuration for Cyan.
-	 */
+	/* gpio configuration for pre-evt board */
 	.north = gpn_gpio_map,
 	.southeast = gpse_gpio_map,
 	.southwest  = gpsw_gpio_map,
 	.east = gpe_gpio_map
 };
 
-struct soc_gpio_config *mainboard_get_gpios(void)
+struct soc_gpio_config *get_override_gpios(struct soc_gpio_config *config)
 {
-	return get_override_gpios(&gpio_config);
-}
+	if (board_id() == BOARD_PRE_EVT)
+		return &gpio_config;
 
-__attribute__((weak)) struct soc_gpio_config *get_override_gpios(
-		struct soc_gpio_config *config)
-{
 	return config;
 }
