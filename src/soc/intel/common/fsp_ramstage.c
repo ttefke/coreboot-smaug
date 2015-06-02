@@ -229,11 +229,14 @@ static void fsp_run_silicon_init(struct romstage_handoff *handoff)
 	 *	7.2: FSP_RESERVED_MEMORY_RESOURCE_HOB verified by raminit
 	 *	7.3: FSP_NON_VOLATILE_STORAGE_HOB verified by raminit
 	 *	7.4: FSP_BOOTLOADER_TOLUM_HOB verified by raminit
-	 *	7.5: EFI_PEI_GRAPHICS_INFO_HOB verified below
+	 *	7.5: EFI_PEI_GRAPHICS_INFO_HOB verified below,
+	 *	     if the ImageAttribute bit is set
 	 */
-	if (NULL == get_next_guid_hob(&graphics_info_guid, hob_list_ptr)) {
+	if ((fsp_info_header->ImageAttribute & GRAPHICS_SUPPORT_BIT) &
+		!get_next_guid_hob(&graphics_info_guid, hob_list_ptr)) {
 		printk(BIOS_ERR, "7.5: EFI_PEI_GRAPHICS_INFO_HOB missing!\n");
 		missing_hob = 1;
+		}
 	}
 	if (missing_hob)
 		die("ERROR - Missing one or more required FSP HOBs!\n");

@@ -119,6 +119,8 @@ void update_mrc_cache(void *unused);
 #define FSP_IMAGE_SIG_LOC			0
 #define FSP_IMAGE_ID_LOC			16
 #define FSP_IMAGE_BASE_LOC			28
+#define FSP_IMAGE_ATTRIBUTE_LOC			32
+#define  GRAPHICS_SUPPORT_BIT			(1 << 0)
 
 #define FSP_SIG					0x48505346	/* 'FSPH' */
 
