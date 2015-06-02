@@ -39,7 +39,6 @@
 #include <soc/pm.h>
 #include <soc/pmc.h>
 #include <soc/smm.h>
-#include <soc/xhci.h>
 
 static u8 smm_initialized = 0;
 
@@ -139,9 +138,6 @@ static void southbridge_smi_sleep(void)
 	/* Do any mainboard sleep handling */
 	mainboard_smi_sleep(slp_typ-2);
 
-	/* USB sleep preparations */
-	usb_xhci_sleep_prepare(PCH_DEV_XHCI, slp_typ);
-
 #if IS_ENABLED(CONFIG_ELOG_GSMI)
 	/* Log S3, S4, and S5 entry */
 	if (slp_typ >= 5)
@@ -158,6 +154,12 @@ static void southbridge_smi_sleep(void)
 		break;
 	case SLP_TYP_S1:
 		printk(BIOS_DEBUG, "SMI#: Entering S1 (Assert STPCLK#)\n");
+		break;
+	case SLP_TYP_S3:
+		printk(BIOS_DEBUG, "SMI#: Entering S3 (Suspend-To-RAM)\n");
+
+		/* Invalidate the cache before going to S3 */
+		wbinvd();
 		break;
 	case SLP_TYP_S5:
 		printk(BIOS_DEBUG, "SMI#: Entering S5 (Soft Power off)\n");
