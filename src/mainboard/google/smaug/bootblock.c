@@ -27,6 +27,8 @@
 #include <soc/funitcfg.h>
 #include <soc/nvidia/tegra/i2c.h>
 #include <soc/padconfig.h>
+#include <soc/pmc.h>
+#include <soc/power.h>
 #include <soc/spi.h>
 
 #include "pmic.h"
@@ -116,4 +118,13 @@ void bootblock_mainboard_init(void)
 
 	/* EC */
 	i2c_init(I2C2_BUS);
+
+	/*
+	 * Set power detect override for GPIO, audio & sdmmc3 rails.
+	 * GPIO rail override is required to put it into 1.8V mode.
+	 */
+	pmc_override_pwr_det(PMC_GPIO_RAIL_AO_MASK | PMC_AUDIO_RAIL_AO_MASK |
+			     PMC_SDMMC3_RAIL_AO_MASK, PMC_GPIO_RAIL_AO_DISABLE |
+			     PMC_AUDIO_RAIL_AO_DISABLE |
+			     PMC_SDMMC3_RAIL_AO_DISABLE);
 }
