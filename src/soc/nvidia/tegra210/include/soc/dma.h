@@ -71,6 +71,9 @@ struct apb_dma {
 } __attribute__((packed));
 check_member(apb_dma, channel_swid1, 0x54);
 
+/* Security enable for DMA channel */
+#define SECURITY_EN_BIT(ch)	(1 << ch)
+
 /*
  * Naming in the doc included a superfluous _CHANNEL_n_ for
  * each entry and was left out for the sake of conciseness.

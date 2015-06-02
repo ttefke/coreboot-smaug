@@ -552,6 +552,8 @@ static void tegra_spi_dma_start(struct tegra_spi_channel *spi)
 	 */
 	setbits_le32(&spi->regs->trans_status, SPI_STATUS_RDY);
 
+	struct apb_dma * const apb_dma = (struct apb_dma *)TEGRA_APB_DMA_BASE;
+
 	/*
 	 * The DMA triggers have units of packets. As each packet is currently
 	 * 1 byte the triggers need to be set to 4 packets (0b01) to match
@@ -559,12 +561,18 @@ static void tegra_spi_dma_start(struct tegra_spi_channel *spi)
 	 * occur.
 	 */
 	if (spi->dma_out) {
+		/* Enable secure access for the channel. */
+		setbits_le32(&apb_dma->security_reg,
+			     SECURITY_EN_BIT(spi->dma_out->num));
 		clrsetbits_le32(&spi->regs->dma_ctl,
 			SPI_DMA_CTL_TX_TRIG_MASK << SPI_DMA_CTL_TX_TRIG_SHIFT,
 			1 << SPI_DMA_CTL_TX_TRIG_SHIFT);
 		setbits_le32(&spi->regs->command1, SPI_CMD1_TX_EN);
 	}
 	if (spi->dma_in) {
+		/* Enable secure access for the channel. */
+		setbits_le32(&apb_dma->security_reg,
+			     SECURITY_EN_BIT(spi->dma_in->num));
 		clrsetbits_le32(&spi->regs->dma_ctl,
 			SPI_DMA_CTL_RX_TRIG_MASK << SPI_DMA_CTL_RX_TRIG_SHIFT,
 			1 << SPI_DMA_CTL_RX_TRIG_SHIFT);
@@ -589,6 +597,8 @@ static int tegra_spi_dma_finish(struct tegra_spi_channel *spi)
 	int ret;
 	unsigned int todo;
 
+	struct apb_dma * const apb_dma = (struct apb_dma *)TEGRA_APB_DMA_BASE;
+
 	todo = read32(&spi->dma_in->regs->wcount);
 
 	if (spi->dma_in) {
@@ -597,6 +607,9 @@ static int tegra_spi_dma_finish(struct tegra_spi_channel *spi)
 			;	/* this shouldn't take long, no udelay */
 		dma_stop(spi->dma_in);
 		clrbits_le32(&spi->regs->command1, SPI_CMD1_RX_EN);
+		/* Disable secure access for the channel. */
+		clrbits_le32(&apb_dma->security_reg,
+			     SECURITY_EN_BIT(spi->dma_in->num));
 		dma_release(spi->dma_in);
 	}
 
@@ -606,6 +619,9 @@ static int tegra_spi_dma_finish(struct tegra_spi_channel *spi)
 			spi_delay(spi, todo - spi_byte_count(spi));
 		clrbits_le32(&spi->regs->command1, SPI_CMD1_TX_EN);
 		dma_stop(spi->dma_out);
+		/* Disable secure access for the channel. */
+		clrbits_le32(&apb_dma->security_reg,
+			     SECURITY_EN_BIT(spi->dma_out->num));
 		dma_release(spi->dma_out);
 	}
 
