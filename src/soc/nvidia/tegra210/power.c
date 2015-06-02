@@ -94,3 +94,11 @@ void remove_clamps(int id)
 	while (partition_clamp_on(id))
 		;
 }
+
+void pmc_override_pwr_det(uint32_t bits, uint32_t override)
+{
+	uint32_t val = read32(&pmc->pwr_det_val);
+	val &= ~bits;
+	val |= (override & bits);
+	write32(&pmc->pwr_det_val, val);
+}
