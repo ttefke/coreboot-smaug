@@ -110,39 +110,6 @@ struct soc_intel_skylake_config {
 	u8 gpu_dp_c_hotplug;
 	u8 gpu_dp_d_hotplug;
 
-	/* Memory related */
-	u8 probeless_trace;
-
-	/* Lan */
-	u8 enable_lan;
-
-	/* SATA related */
-	u8 enable_sata;
-	u8 sata_salp_support;
-	u8 sata_mode;
-	u8 sata_ports_enable;
-	u8 ssic_port_enable;
-
-	/* Audio related */
-	u8 enable_azalia;
-	u8 enable_trace_hub;
-	u8 dsp_enable;
-	u8 io_buffer_ownership;
-
-	/* SMBUS */
-	u8 smbus_enable;
-
-	/* Camera */
-	u8 cio2_enable;
-
-	/* eMMC */
-	u8 scs_emmc_enabled;
-	u8 scs_emmchs400_enabled;
-	u8 scs_sdcard_enabled;
-
-	/* Integrated Sensor */
-	u8 ish_enable;
-
 	/* Panel power sequence timings */
 	u8 gpu_panel_port_select;
 	u8 gpu_panel_power_cycle_delay;
@@ -173,6 +140,93 @@ struct soc_intel_skylake_config {
 
 	/* TCC activation offset */
 	int tcc_offset;
+
+	/*
+	 * The following fields come from fsp_vpd.h.
+	 * These are configuration values that are passed to FSP during
+	 * MemoryInit.
+	 */
+	u64 PlatformMemorySize;
+	u8 SmramMask;
+	u8 MrcFastBoot;
+	u32 IedSize;
+	u32 TsegSize;
+	u16 MmioSize;
+
+	/* Probeless Trace function */
+	u8 ProbelessTrace;
+
+	/* Lan */
+	u8 EnableLan;
+
+	/* SATA related */
+	u8 EnableSata;
+	u8 SataMode;
+	u8 SataSalpSupport;
+	u8 SataPortsEnable[8];
+	u8 SataPortsDevSlp[8];
+
+	/* Audio related */
+	u8 EnableAzalia;
+	u8 DspEnable;
+	u8 IoBufferOwnership;
+
+	/* Trace Hub function */
+	u8 EnableTraceHub;
+
+	/* Pcie Root Ports */
+	u8 PcieRpEnable[20];
+	u8 PcieRpClkReqSupport[20];
+	u8 PcieRpClkReqNumber[20];
+
+	/* USB related */
+	u8 PortUsb20Enable[16];
+	u8 PortUsb30Enable[10];
+	u8 XdciEnable;
+	u8 SsicPortEnable;
+
+	/* SMBus */
+	u8 SmbusEnable;
+
+	/* Serial IO */
+	u8 SerialIoDevMode[11];
+
+	/* Camera */
+	u8 Cio2Enable;
+
+	/* eMMC and SD */
+	u8 ScsEmmcEnabled;
+	u8 ScsEmmcHs400Enabled;
+	u8 ScsSdCardEnabled;
+
+	/* Integrated Sensor */
+	u8 IshEnable;
+
+	/* SPI related */
+	u8 ShowSpiController;
+
+	u8 PttSwitch;
+	u8 HeciTimeouts;
+	u8 HsioMessaging;
+	u8 Heci3Enabled;
+
+	/* Gfx related */
+	u8 IgdDvmt50PreAlloc;
+	u8 PrimaryDisplay;
+	u8 InternalGfx;
+	u8 ApertureSize;
+	u8 SkipExtGfxScan;
+	u8 ScanExtGfxForLegacyOpRom;
+
+	/*
+	 * The following fields come from fsp_vpd.h
+	 * These are configuration values that are passed to FSP during
+	 * SiliconInit.
+	 */
+	u32 LogoPtr;
+	u32 LogoSize;
+	u32 GraphicsConfigPtr;
+	u8 Device4Enable;
 };
 
 typedef struct soc_intel_skylake_config config_t;

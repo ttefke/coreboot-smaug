@@ -16,8 +16,8 @@
 #include "gpio_rvp3.h"
 #include <soc/ramstage.h>
 
-void mainboard_silicon_init_params(UPD_DATA_REGION *upd_ptr)
+void mainboard_silicon_init_params(SILICON_INIT_UPD *params)
 {
 	/*update gpio table*/
-	upd_ptr->GpioTablePtr = (UINT32 *)GpioTableRvp3;
+	params->GpioTablePtr = (UINT32 *)GpioTableRvp3;
 }
