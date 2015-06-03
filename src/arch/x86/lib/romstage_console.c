@@ -35,10 +35,14 @@ void console_tx_byte(unsigned char byte)
 		console_tx_byte('\r');
 
 #if CONFIG_CONSOLE_SERIAL8250MEM
+#if CONFIG_DRIVERS_OXFORD_OXPCIE
 	if (oxford_oxpcie_present) {
 		uart8250_mem_tx_byte(
 			CONFIG_OXFORD_OXPCIE_BASE_ADDRESS + 0x1000, byte);
 	}
+#else
+	uart8250_mem_tx_byte(CONFIG_TTYS0_BASE, byte);
+#endif
 #endif
 #if CONFIG_CONSOLE_SERIAL8250
 	uart8250_tx_byte(CONFIG_TTYS0_BASE, byte);
@@ -57,7 +61,11 @@ void console_tx_byte(unsigned char byte)
 void console_tx_flush(void)
 {
 #if CONFIG_CONSOLE_SERIAL8250MEM
+#if CONFIG_DRIVERS_OXFORD_OXPCIE
 	uart8250_mem_tx_flush(CONFIG_OXFORD_OXPCIE_BASE_ADDRESS + 0x1000);
+#else
+	uart8250_mem_tx_flush(CONFIG_TTYS0_BASE);
+#endif
 #endif
 #if CONFIG_CONSOLE_SERIAL8250
 	uart8250_tx_flush(CONFIG_TTYS0_BASE);

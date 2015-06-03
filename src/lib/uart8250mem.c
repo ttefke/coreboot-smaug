@@ -111,9 +111,13 @@ void uart8250_mem_init(unsigned base_port, unsigned divisor)
 
 u32 uart_mem_init(void)
 {
-	unsigned uart_baud = CONFIG_TTYS0_BAUD;
-	u32 uart_bar = 0;
+	unsigned uart_baud;
+	u32 uart_bar;
 	unsigned div;
+
+	uart_bar = CONFIG_TTYS0_BASE;
+	uart_baud = CONFIG_TTYS0_BAUD;
+	div = 1; // Default to 115200
 
 	/* find out the correct baud rate */
 #if !defined(__SMM__) && CONFIG_USE_OPTION_TABLE
