@@ -138,7 +138,7 @@ romstage-$(CONFIG_REG_SCRIPT) += reg_script.c
 
 ramstage-$(CONFIG_CONSOLE_NE2K) += ne2k.c
 
-romstage-$(CONFIG_CACHE_RELOCATED_RAMSTAGE_OUTSIDE_CBMEM) += ramstage_cache.c
+romstage-$(CONFIG_RELOCATABLE_RAMSTAGE) += ramstage_cache.c
 
 ifneq ($(CONFIG_ARCH_X86),y)
 # X86 bootblock and romstage use custom ldscripts that are all glued together,
