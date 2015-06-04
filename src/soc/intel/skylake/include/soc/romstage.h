@@ -27,6 +27,7 @@ struct chipset_power_state;
 struct chipset_power_state *fill_power_state(void);
 void systemagent_early_init(void);
 void pch_early_init(void);
+void pch_uart_init(void);
 void intel_early_me_status(void);
 
 void enable_smbus(void);

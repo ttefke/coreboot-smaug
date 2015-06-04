@@ -204,7 +204,7 @@ config SMM_TSEG_SIZE
 
 config TTYS0_BASE
 	hex
-	default 0xd6000000
+	default 0xfe034000
 	depends on INTEL_PCH_UART_CONSOLE
 
 config VGA_BIOS_ID

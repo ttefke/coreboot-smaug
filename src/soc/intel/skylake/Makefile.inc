@@ -44,6 +44,7 @@ ramstage-y += smmrelocate.c
 ramstage-y += stage_cache.c
 ramstage-y += systemagent.c
 ramstage-y += tsc_freq.c
+ramstage-y += uart.c
 ramstage-y += xhci.c
 
 smm-y += cpu_info.c

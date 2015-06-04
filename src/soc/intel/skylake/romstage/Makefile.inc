@@ -8,3 +8,4 @@ romstage-y += romstage.c
 romstage-y += smbus.c
 romstage-y += spi.c
 romstage-y += systemagent.c
+romstage-$(CONFIG_INTEL_PCH_UART_CONSOLE) += uart.c

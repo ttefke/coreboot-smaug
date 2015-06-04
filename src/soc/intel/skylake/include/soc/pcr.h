@@ -54,6 +54,12 @@
 /* Trapped write data */
 #define R_PCH_PCR_PSTH_TRPD		0x1E18
 
+/* Serial IO UART controller legacy mode */
+#define R_PCH_PCR_SERIAL_IO_GPPRVRW7	0x618
+#define SIO_PCH_LEGACY_UART0		(1 << 0)
+#define SIO_PCH_LEGACY_UART1		(1 << 1)
+#define SIO_PCH_LEGACY_UART2		(1 << 2)
+
 /*
  * Definition for PCR address
  * The PCR address is used to the PCR MMIO programming
@@ -67,15 +73,16 @@
  * PCH SBI programming as well.
  */
 typedef enum {
-	PID_DMI = 0xEF,
+	PID_PSTH = 0x89,
+	PID_GPIOCOM3 = 0xAC,
+	PID_GPIOCOM2 = 0xAD,
+	PID_GPIOCOM1 = 0xAE,
+	PID_GPIOCOM0 = 0xAF,
 	PID_LPC = 0xC7,
 	PID_ITSS = 0xC4,
 	PID_RTC = 0xC3,
-	PID_GPIOCOM0 = 0xAF,
-	PID_GPIOCOM1 = 0xAE,
-	PID_GPIOCOM2 = 0xAD,
-	PID_GPIOCOM3 = 0xAC,
-	PID_PSTH = 0x89
+	PID_SERIALIO = 0xCB,
+	PID_DMI = 0xEF,
 } PCH_SBI_PID;
 
 u8 pcr_read32(PCH_SBI_PID pid, u16 offset, u32 *outdata);
