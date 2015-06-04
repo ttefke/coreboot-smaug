@@ -113,3 +113,32 @@ config PLLX_KHZ
         default 700000
 endif
 
+config HAVE_MTC
+	bool "Add external Memory controller Training Code binary"
+	default y
+	help
+	  Select this option to add emc training firmware
+
+if HAVE_MTC
+
+config MTC_FILE
+	string "tegra mtc firmware filename"
+	default "tegra_mtc.bin"
+	help
+	  The filename of the mtc firmware
+
+config MTC_DIRECTORY
+	string "Directory where MTC firmware file is located"
+	default "."
+	help
+	  Path to directory where MTC firmware file is located.
+
+config MTC_ADDRESS
+	hex
+	default 0x81000000
+	help
+	  The DRAM location where MTC firmware to be loaded in. This location
+	  needs to be consistent with the location defined in tegra_mtc.ld
+
+endif # HAVE_MTC
+

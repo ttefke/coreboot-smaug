@@ -149,3 +149,11 @@ $(objcbfs)/bootblock.bin: $(objcbfs)/bootblock.raw.bin $(BCT_BIN)
 	$(CBOOTIMAGE) $(CBOOTIMAGE_OPTS) $(BCT_WRAPPER) $@
 
 BL31_MAKEARGS += PLAT=tegra TARGET_SOC=t210
+
+# MTC fw
+MTC_DIR = $(CONFIG_MTC_DIRECTORY)
+MTC_FILE = $(MTC_DIR)/$(CONFIG_MTC_FILE)
+MTC_FILE_CBFS = $(CONFIG_MTC_FILE)
+cbfs-files-$(CONFIG_HAVE_MTC) += $(MTC_FILE_CBFS)
+$(MTC_FILE_CBFS)-file := $(MTC_FILE)
+$(MTC_FILE_CBFS)-type := 0x50
