@@ -69,6 +69,7 @@ void acpi_init_gnvs(global_nvs_t *gnvs)
 
 #if IS_ENABLED(CONFIG_CONSOLE_CBMEM)
 	/* Update the mem console pointer. */
+	gnvs->cbmc = (u32)cbmem_find(CBMEM_ID_CONSOLE);
 #endif
 
 #if IS_ENABLED(CONFIG_CHROMEOS)
