@@ -488,6 +488,11 @@ void main(void)
 	timestamp_add_now(TS_START_RAMSTAGE);
 	post_code(POST_ENTRY_RAMSTAGE);
 
+	/* TODO: Understand why this is here and move to arch/platform code. */
+	/* For MMIO UART this needs to be called before any other printk. */
+	if (IS_ENABLED(CONFIG_ARCH_X86))
+		init_timer();
+
 	/* console_init() MUST PRECEDE ALL printk()! */
 	console_init();
 
@@ -503,10 +508,6 @@ void main(void)
 
 	/* Schedule the static boot state entries. */
 	boot_state_schedule_static_entries();
-
-	/* TODO: Understand why this is here and move to arch/platform code. */
-	if (IS_ENABLED(CONFIG_ARCH_X86))
-		init_timer();
 
 	bs_walk_state_machine();
 
