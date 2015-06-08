@@ -98,6 +98,14 @@ config BOARD_GOOGLE_FOSTER
 	  Foster is a Chrome OS mainboard.
 	  Foster is based on the Nvidia Tegra210 platform.
 
+config BOARD_GOOGLE_GLADOS
+	bool "Glados"
+	help
+	  Google Glados mainboard.
+	  Enable this config to select the Google Glados mainboard.
+	  Glados is a Chrome OS reference board.
+	  Glados is based on the Intel Skylake platform.
+
 config BOARD_GOOGLE_JECHT
         bool "Jecht"
         help
@@ -331,6 +339,7 @@ source "src/mainboard/google/cyan/Kconfig"
 source "src/mainboard/google/daisy/Kconfig"
 source "src/mainboard/google/falco/Kconfig"
 source "src/mainboard/google/foster/Kconfig"
+source "src/mainboard/google/glados/Kconfig"
 source "src/mainboard/google/jecht/Kconfig"
 source "src/mainboard/google/link/Kconfig"
 source "src/mainboard/google/nyan/Kconfig"
