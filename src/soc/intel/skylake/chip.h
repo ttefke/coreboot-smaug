@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 #include <soc/pci_devs.h>
+#include <soc/serialio.h>
 
 #ifndef _SOC_INTEL_SKYLAKE_CHIP_H_
 #define _SOC_INTEL_SKYLAKE_CHIP_H_
@@ -55,16 +56,37 @@ struct soc_intel_skylake_config {
 	uint32_t gen3_dec;
 	uint32_t gen4_dec;
 
+	/*
+	 * SerialIO device mode selection:
+	 *
+	 * Device index:
+	 * PchSerialIoIndexI2C0
+	 * PchSerialIoIndexI2C1
+	 * PchSerialIoIndexI2C2
+	 * PchSerialIoIndexI2C3
+	 * PchSerialIoIndexI2C4
+	 * PchSerialIoIndexI2C5
+	 * PchSerialIoIndexI2C6
+	 * PchSerialIoIndexSpi0
+	 * PchSerialIoIndexSpi1
+	 * PchSerialIoIndexUart0
+	 * PchSerialIoIndexUart1
+	 * PchSerialIoIndexUart2
+	 *
+	 * Mode select:
+	 * PchSerialIoDisabled
+	 * PchSerialIoAcpi
+	 * PchSerialIoPci
+	 * PchSerialIoAcpiHidden
+	 * PchSerialIoLegacyUart
+	 */
+	u8 sio_device_mode[PchSerialIoIndexMax];
+
 	/* Enable linear PCIe Root Port function numbers starting at zero */
 	uint8_t pcie_port_coalesce;
 
 	/* Force root port ASPM configuration with port bitmap */
 	uint8_t pcie_port_force_aspm;
-
-	/* Put SerialIO devices into ACPI mode instead of a PCI device */
-	uint8_t sio_disable;
-	uint8_t sio_acpi_mode;
-	uint8_t sio_pci_mode;
 
 	/* Enable ADSP power gating features */
 	uint8_t adsp_d3_pg_enable;

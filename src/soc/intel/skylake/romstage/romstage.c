@@ -105,23 +105,7 @@ void soc_memory_init_params(UPD_DATA_REGION *upd_ptr)
 	upd_ptr->EnableTraceHub = config->enable_trace_hub;
 
 	for (i = 0; i < PchSerialIoIndexMax; i++) {
-		switch (i) {
-		case	PchSerialIoIndexSpi0:
-		case	PchSerialIoIndexSpi1:
-		case	PchSerialIoIndexUart1:
-		case	PchSerialIoIndexI2C2:
-		case	PchSerialIoIndexI2C3:
-			upd_ptr->SerialIoDevMode[i] = config->sio_disable;
-			break;
-		case	PchSerialIoIndexI2C0:
-		case	PchSerialIoIndexI2C1:
-		case	PchSerialIoIndexI2C4:
-		case	PchSerialIoIndexI2C5:
-		case	PchSerialIoIndexUart0:
-		case	PchSerialIoIndexUart2:
-			upd_ptr->SerialIoDevMode[i] = config->sio_pci_mode;
-			break;
-		}
+		upd_ptr->SerialIoDevMode[i] = config->sio_device_mode[i];
 	}
 }
 
