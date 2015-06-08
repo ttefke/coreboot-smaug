@@ -17,6 +17,41 @@
  * Foundation, Inc.
  */
 
+Scope (\_SB)
+{
+	Device (LID0)
+	{
+		Name (_HID, EisaId("PNP0C0D"))
+		Method (_LID, 0)
+		{
+			Return (\_SB.PCI0.LPCB.EC0.LIDS)
+		}
+	}
+
+	Device (PWRB)
+	{
+		Name(_HID, EisaId("PNP0C0C"))
+	}
+
+	/* Keyboard Backlight interface via EC */
+	Device (KBLT) {
+		Name (_HID, "GOOG0002")
+		Name (_UID, 1)
+
+		/* Read current backlight value */
+		Method (KBQC, 0)
+		{
+			Return (\_SB.PCI0.LPCB.EC0.KBLV)
+		}
+
+		/* Write new backlight value */
+		Method (KBCM, 1)
+		{
+			Store (Arg0, \_SB.PCI0.LPCB.EC0.KBLV)
+		}
+	}
+}
+
 /*
  * LPC Trusted Platform Module
  */
