@@ -23,6 +23,12 @@
 /* DMI Control Register */
 #define R_PCH_PCR_DMI_DMIC	0x2234
 #define B_PCH_PCR_DMI_DMIC_SRL	(1 << 31)
+#define R_PCH_PCR_DMI_LPCLGIR1	0x2730
+#define R_PCH_PCR_DMI_LPCLGIR2	0x2734
+#define R_PCH_PCR_DMI_LPCLGIR3	0x2738
+#define R_PCH_PCR_DMI_LPCLGIR4	0x273c
+#define R_PCH_PCR_DMI_LPCIOD	0x2770
+#define R_PCH_PCR_DMI_LPCIOE	0x2774
 
 /* RTC configuration */
 #define R_PCH_PCR_RTC_CONF	0x3400

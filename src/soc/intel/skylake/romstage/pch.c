@@ -52,16 +52,35 @@ static void pch_enable_lpc(void)
 	/* Lookup device tree in romstage */
 	const struct device *dev;
 	const config_t *config;
+	u16 lpc_en;
+
+	/* IO Decode Range */
+	lpc_en = COMA_RANGE | (COMB_RANGE << 4);
+	pci_write_config16(PCH_DEV_LPC, LPC_IO_DEC, lpc_en);
+	pcr_write16(PID_DMI, R_PCH_PCR_DMI_LPCIOD, lpc_en);
+
+	/* IO Decode Enable */
+	lpc_en = CNF1_LPC_EN | CNF2_LPC_EN | GAMEL_LPC_EN | GAMEH_LPC_EN |
+		COMA_LPC_EN | KBC_LPC_EN | MC_LPC_EN;
+	pci_write_config16(PCH_DEV_LPC, LPC_EN, lpc_en);
+	pcr_write16(PID_DMI, R_PCH_PCR_DMI_LPCIOE, lpc_en);
 
 	dev = dev_find_slot(0, PCI_DEVFN(PCH_DEV_SLOT_LPC, 0));
 	if (!dev || !dev->chip_info)
 		return;
 	config = dev->chip_info;
 
+	/* Set in PCI generic decode range registers */
 	pci_write_config32(PCH_DEV_LPC, LPC_GEN1_DEC, config->gen1_dec);
 	pci_write_config32(PCH_DEV_LPC, LPC_GEN2_DEC, config->gen2_dec);
 	pci_write_config32(PCH_DEV_LPC, LPC_GEN3_DEC, config->gen3_dec);
 	pci_write_config32(PCH_DEV_LPC, LPC_GEN4_DEC, config->gen4_dec);
+
+	/* Mirror these same settings in DMI PCR */
+	pcr_write32(PID_DMI, R_PCH_PCR_DMI_LPCLGIR1, config->gen1_dec);
+	pcr_write32(PID_DMI, R_PCH_PCR_DMI_LPCLGIR2, config->gen2_dec);
+	pcr_write32(PID_DMI, R_PCH_PCR_DMI_LPCLGIR3, config->gen3_dec);
+	pcr_write32(PID_DMI, R_PCH_PCR_DMI_LPCLGIR4, config->gen4_dec);
 }
 
 static void pch_device_init(void)
