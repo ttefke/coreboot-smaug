@@ -38,6 +38,7 @@
 #include <soc/pm.h>
 #include <soc/ramstage.h>
 #include <soc/spi.h>
+#include <spi-generic.h>
 #include <stdint.h>
 #include <uart8250.h>
 
@@ -503,6 +504,7 @@ static void finalize_chipset(void *unused)
 		write32(spi + UVSCC, cfg.uvscc);
 		write32(spi + LVSCC, cfg.lvscc | VCL);
 	}
+	spi_init();
 
 	printk(BIOS_DEBUG, "Finalizing SMM.\n");
 	outb(APM_CNT_FINALIZE, APM_CNT);
