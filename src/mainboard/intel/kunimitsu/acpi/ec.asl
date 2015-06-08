@@ -1,8 +1,7 @@
 /*
  * This file is part of the coreboot project.
  *
- * Copyright (C) 2014 Google Inc.
- * Copyright (C) 2015 Intel Corporation.
+ * Copyright (C) 2015 Google Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,30 +14,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * Foundation, Inc.
  */
 
-Scope (\_SB)
-{
-	Device (LID0)
-	{
-		Name (_HID, EisaId("PNP0C0D"))
-		Method (_LID, 0)
-		{
-			Return (\_SB.PCI0.LPCB.EC0.LIDS)
-		}
-	}
+/* mainboard configuration */
+#include <mainboard/google/glados/ec.h>
 
-	Device (PWRB)
-	{
-		Name(_HID, EisaId("PNP0C0C"))
-	}
-}
+/* Enable EC backed PD MCU device in ACPI */
+#define EC_ENABLE_PD_MCU_DEVICE
 
-/*
- * LPC Trusted Platform Module
- */
-Scope (\_SB.PCI0.LPCB)
-{
-	#include <drivers/pc80/tpm/acpi/tpm.asl>
-}
+/* ACPI code for EC functions */
+#include <ec/google/chromeec/acpi/ec.asl>
