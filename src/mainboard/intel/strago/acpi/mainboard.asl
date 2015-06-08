@@ -57,18 +57,38 @@ Scope (\_SB.I2C1)
 		Name (_UID, 4)
 		Name (ISTP, 0) /* TouchScreen */
 
-		Name (_CRS, ResourceTemplate()
+		Method(_CRS, 0x0, NotSerialized)
 		{
-			I2cSerialBus (
-				0x26,                     /* SlaveAddress */
-				ControllerInitiated,      /* SlaveMode */
-				400000,                   /* ConnectionSpeed */
-				AddressingMode7Bit,       /* AddressingMode */
-				"\\_SB.I2C1",             /* ResourceSource */
-			)
-			GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-				 "\\_SB.GPSW") { STRAGO_TOUCH_GPIO_INDEX }
-		})
+			Name (BUF0, ResourceTemplate ()
+			{
+				I2cSerialBus(
+					0x26,                     /* SlaveAddress */
+					ControllerInitiated,      /* SlaveMode */
+					400000,                   /* ConnectionSpeed */
+					AddressingMode7Bit,       /* AddressingMode */
+					"\\_SB.I2C1",             /* ResourceSource */
+				)
+				GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
+					 "\\_SB.GPSW") { STRAGO_TOUCH_GPIO_INDEX }
+			})
+			Name (BUF1, ResourceTemplate ()
+			{
+				I2cSerialBus(
+					0x26,                     /* SlaveAddress */
+					ControllerInitiated,      /* SlaveMode */
+					400000,                   /* ConnectionSpeed */
+					AddressingMode7Bit,       /* AddressingMode */
+					"\\_SB.I2C1",             /* ResourceSource */
+				)
+				GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
+					 "\\_SB.GPNC") { STRAGO_DVT_TOUCH_GPIO_INDEX }
+			})
+			If (LEqual (\BDID, BOARD_DVT)) {
+				Return (BUF1)
+			} Else {
+				Return (BUF0)
+			}
+		}
 
 		Method (_STA)
 		{

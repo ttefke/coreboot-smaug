@@ -21,6 +21,8 @@
 #include "irqroute.h"
 #include <soc/gpio.h>
 #include <stdlib.h>
+#include <boardid.h>
+#include "onboard.h"
 #include "gpio.h"
 
 /* South East Community */
@@ -130,7 +132,7 @@ static const struct soc_gpio_map  gpsw_gpio_map[] = {
 	NATIVE_PU1K_CSEN_INVTX(1), /* 66  I2C2_SCL */
 	GPIO_INPUT_NO_PULL,/* 67  I2C3_SCL,RAMID1 */
 	GPIO_OUT_HIGH, /* 75 SATA_GP0 */
-	GPI(trig_edge_low, L0, P_1K_H, non_maskable, NA, NA, NA),
+	GPIO_NC,
 	/* 76 GPI SATA_GP1 */
 	Native_M1, /* 77 SATA_LEDN */
 	GPIO_NC, /* 80 SATA_GP3 */
@@ -171,9 +173,10 @@ static const struct soc_gpio_map  gpn_gpio_map[] = {
 	/* 17 GPIO_SUS3 */
 	GPI(trig_edge_low, L1, P_1K_H, non_maskable, NA, UNMASK_WAKE, NA),
 	/* 18 GPIO_SUS7 */
-	GPO_FUNC(0, 0), /* 19 GPIO_SUS1 */
+	GPI(trig_edge_low, L3, P_1K_H, non_maskable, NA, UNMASK_WAKE, NA),
+	/* 19 GPIO_SUS1 */
 	GPIO_NC, /* 20 GPIO_SUS5 */
-	GPI(trig_edge_high, L2, NA, non_maskable, en_edge_rx_data, NA , NA),
+	GPI(trig_edge_high, L2, P_20K_H, non_maskable, en_edge_rx_data,	NA , NA),
 	/* 21 SEC_GPIO_SUS11 */
 	GPIO_NC, /* 22 GPIO_SUS4 */
 	GPIO_NC,
@@ -261,13 +264,10 @@ static struct soc_gpio_config gpio_config = {
 	.east = gpe_gpio_map
 };
 
-struct soc_gpio_config *mainboard_get_gpios(void)
+struct soc_gpio_config *get_override_gpios(struct soc_gpio_config *config)
 {
-	return get_override_gpios(&gpio_config);
-}
+	if (board_id() == BOARD_DVT)
+		return &gpio_config;
 
-__attribute__((weak)) struct soc_gpio_config *get_override_gpios(
-		struct soc_gpio_config *config)
-{
 	return config;
 }

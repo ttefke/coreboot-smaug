@@ -50,6 +50,8 @@
 #define STRAGO_TRACKPAD_GPIO_INDEX	18
 /* Touch: Gpio index in SW bank */
 #define STRAGO_TOUCH_GPIO_INDEX		76
+/* Touch: Gpio index in SW bank */
+#define STRAGO_DVT_TOUCH_GPIO_INDEX	19
 
 #define BOARD_TRACKPAD_NAME             "trackpad"
 #define BOARD_TRACKPAD_WAKE_GPIO        ACPI_ENABLE_WAKE_SUS_GPIO(1)
@@ -72,5 +74,7 @@
 #define AUDIO_CODEC_CID			"10EC5650"
 #define AUDIO_CODEC_DDN			"RTEK Codec Controller "
 #define AUDIO_CODEC_I2C_ADDR		0x1A
+
+#define BOARD_DVT			0x03
 
 #endif
