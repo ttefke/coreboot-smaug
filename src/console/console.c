@@ -108,7 +108,8 @@ void console_init(void)
 	enable_usbdebug(CONFIG_USBDEBUG_DEFAULT_PORT);
 	early_usbdebug_init();
 #endif
-#if CONFIG_CONSOLE_SERIAL8250
+#if (IS_ENABLED(CONFIG_CONSOLE_SERIAL8250) || \
+	IS_ENABLED(CONFIG_CONSOLE_SERIAL_UART))
 	uart_init();
 #endif
 #if CONFIG_CONSOLE_SERIAL8250MEM
