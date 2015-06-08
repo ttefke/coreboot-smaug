@@ -197,7 +197,7 @@ config SERIRQ_CONTINUOUS_MODE
 
 config SMM_RESERVED_SIZE
 	hex
-	default 0x100000
+	default 0x200000
 
 config SMM_TSEG_SIZE
 	hex

@@ -103,6 +103,13 @@ void soc_memory_init_params(UPD_DATA_REGION *upd_ptr)
 	upd_ptr->SataPortsEnable[0] = config->sata_ports_enable;
 	upd_ptr->SsicPortEnable = config->ssic_port_enable;
 	upd_ptr->EnableTraceHub = config->enable_trace_hub;
+	upd_ptr->ScsEmmcEnabled = config->scs_emmc_enabled;
+	upd_ptr->ScsEmmcHs400Enabled = config->scs_emmchs400_enabled;
+	upd_ptr->ScsSdCardEnabled = config->scs_sdcard_enabled;
+
+	upd_ptr->IshEnable = 0;
+	upd_ptr->MmioSize = 0x800; /* 2GB in MB */
+	upd_ptr->TsegSize = CONFIG_SMM_TSEG_SIZE;
 
 	for (i = 0; i < PchSerialIoIndexMax; i++) {
 		upd_ptr->SerialIoDevMode[i] = config->sio_device_mode[i];
