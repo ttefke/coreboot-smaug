@@ -86,6 +86,7 @@ unsigned long write_acpi_tables(unsigned long start)
 	acpi_rsdp_t *rsdp;
 	acpi_rsdt_t *rsdt;
 	acpi_xsdt_t *xsdt;
+	acpi_hpet_t *hpet;
 	acpi_madt_t *madt;
 	acpi_mcfg_t *mcfg;
 	acpi_fadt_t *fadt;
@@ -143,6 +144,12 @@ unsigned long write_acpi_tables(unsigned long start)
 
 	/* We explicitly add these tables later on */
 	printk(BIOS_DEBUG, "ACPI:    * HPET\n");
+
+	hpet = (acpi_hpet_t *) current;
+	current += sizeof(acpi_hpet_t);
+	ALIGN_CURRENT;
+	acpi_create_intel_hpet(hpet);
+	acpi_add_table(rsdp, hpet);
 
 	/* If we want to use HPET Timers Linux wants an MADT */
 	printk(BIOS_DEBUG, "ACPI:    * MADT\n");
