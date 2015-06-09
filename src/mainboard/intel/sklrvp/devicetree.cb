@@ -58,8 +58,6 @@ chip soc/intel/skylake
 	register "gpe0_en_3" = "0x00000000"
 	register "gpe0_en_4" = "0x00000000"
 
-	register "sio_acpi_mode" = "0"
-
 	# Force enable ASPM for PCIe Port 3
 	register "pcie_port_force_aspm" = "0x04"
 	register "pcie_port_coalesce" = "1"
