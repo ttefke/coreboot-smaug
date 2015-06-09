@@ -25,10 +25,10 @@
 #include <device/device.h>
 
 /* CPU types */
-#define SKYLAKE_FAMILY_ULT	0x406e2
+#define SKYLAKE_FAMILY_ULT	0x406e0
 
 /* Supported CPUIDs */
-#define CPUID_SKYLAKE_C0	0x406e1
+#define CPUID_SKYLAKE_C0	0x406e2
 
 /* CPU bus clock is fixed at 100MHz */
 #define CPU_BCLK		100

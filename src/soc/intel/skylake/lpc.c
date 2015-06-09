@@ -390,7 +390,10 @@ static struct device_operations device_ops = {
 };
 
 static const unsigned short pci_device_ids[] = {
-	PCH_SPT_LP,
+	PCH_SPT_LP_SAMPLE,
+	PCH_SPT_LP_U_BASE,
+	PCH_SPT_LP_U_PREMIUM,
+	PCH_SPT_LP_Y_PREMIUM,
 	0
 };
 

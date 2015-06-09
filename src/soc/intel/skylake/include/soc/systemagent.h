@@ -29,10 +29,9 @@
 #define IGD_SKYLAKE_GT2_SULXM	0x191E
 #define IGD_SKYLAKE_GT2_SULTM	0x1916
 
-#define MCH_SKYLAKE_ID_U_Y	0x1604
-#define MCH_SKYLAKE_REV_D0	0x06
-#define MCH_SKYLAKE_REV_E0	0x08
-#define MCH_SKYLAKE_REV_F0	0x09
+#define MCH_SKYLAKE_ID_U	0x1904
+#define MCH_SKYLAKE_ID_Y	0x190c
+#define MCH_SKYLAKE_ID_ULX	0x1924
 
 /* Device 0:0.0 PCI configuration space */
 

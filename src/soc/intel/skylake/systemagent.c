@@ -458,9 +458,9 @@ static struct device_operations systemagent_ops = {
 };
 
 static const unsigned short systemagent_ids[] = {
-	0x1904, /* SKL_MB_ULT_1 */
-	0x190c, /* SKL_MB_ULT_2 */
-	0x1924, /* SKL_MB_ULT_3 */
+	MCH_SKYLAKE_ID_U,
+	MCH_SKYLAKE_ID_Y,
+	MCH_SKYLAKE_ID_ULX,
 	0
 };
 

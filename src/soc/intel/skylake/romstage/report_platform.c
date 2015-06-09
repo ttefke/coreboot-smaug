@@ -34,29 +34,34 @@ static struct {
 	u32 cpuid;
 	const char *name;
 } cpu_table[] = {
-	{ CPUID_SKYLAKE_C0,   "Skylake C0" },
+	{ CPUID_SKYLAKE_C0,	"Skylake C0" },
 };
 
 static struct {
-	u8 revid;
+	u16 mchid;
 	const char *name;
-} mch_rev_table[] = {
-	{ MCH_SKYLAKE_REV_D0, "Skylake D0" },
+} mch_table[] = {
+	{ MCH_SKYLAKE_ID_U,	"Skylake-U" },
+	{ MCH_SKYLAKE_ID_Y,	"Skylake-Y" },
+	{ MCH_SKYLAKE_ID_ULX,	"Skylake-ULX" },
 };
 
 static struct {
 	u16 lpcid;
 	const char *name;
 } pch_table[] = {
-	{ PCH_SPT_LP,         "Skylake LP" },
+	{ PCH_SPT_LP_SAMPLE,	"Skylake LP Sample" },
+	{ PCH_SPT_LP_U_BASE,	"Skylake-U Base" },
+	{ PCH_SPT_LP_U_PREMIUM,	"Skylake-U Premium" },
+	{ PCH_SPT_LP_Y_PREMIUM,	"Skylake-Y Premium" },
 };
 
 static struct {
 	u16 igdid;
 	const char *name;
 } igd_table[] = {
-	{ IGD_SKYLAKE_GT2_SULXM,     "Skylake SULXM" },
-	{ IGD_SKYLAKE_GT2_SULTM,     "Skylake SULTM" },
+	{ IGD_SKYLAKE_GT2_SULXM, "Skylake SULXM" },
+	{ IGD_SKYLAKE_GT2_SULTM, "Skylake SULTM" },
 };
 
 static void report_cpu_info(void)
@@ -116,22 +121,19 @@ static void report_cpu_info(void)
 static void report_mch_info(void)
 {
 	int i;
-	u16 mch_device = pci_read_config16(SA_DEV_ROOT, PCI_DEVICE_ID);
+	u16 mchid = pci_read_config16(SA_DEV_ROOT, PCI_DEVICE_ID);
 	u8 mch_revision = pci_read_config8(SA_DEV_ROOT, PCI_REVISION_ID);
 	const char *mch_type = "Unknown";
 
-	/* Look for string to match the revision for Skylake U/Y */
-	if (mch_device == MCH_SKYLAKE_ID_U_Y) {
-		for (i = 0; i < ARRAY_SIZE(mch_rev_table); i++) {
-			if (mch_rev_table[i].revid == mch_revision) {
-				mch_type = mch_rev_table[i].name;
-				break;
-			}
+	for (i = 0; i < ARRAY_SIZE(mch_table); i++) {
+		if (mch_table[i].mchid == mchid) {
+			mch_type = mch_table[i].name;
+			break;
 		}
 	}
 
 	printk(BIOS_DEBUG, "MCH: device id %04x (rev %02x) is %s\n",
-	       mch_device, mch_revision, mch_type);
+	       mchid, mch_revision, mch_type);
 }
 
 static void report_pch_info(void)
