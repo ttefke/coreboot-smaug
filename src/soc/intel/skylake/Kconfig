@@ -36,6 +36,7 @@ config CPU_SPECIFIC_OPTIONS
 	select PCIEXP_COMMON_CLOCK
 	select PCIEXP_CLK_PM
 	select REG_SCRIPT
+	select RELOCATABLE_RAMSTAGE
 	select RELOCATABLE_MODULES
 	select SMM_MODULES
 	select SMM_TSEG
@@ -63,7 +64,7 @@ config BOOTBLOCK_SOUTHBRIDGE_INIT
 
 config CBFS_SIZE
 	hex "Size of CBFS filesystem in ROM"
-	default 0x100000
+	default 0x200000
 	help
 	  The firmware image has to store more than just coreboot, including:
 	   - a firmware descriptor
@@ -72,13 +73,17 @@ config CBFS_SIZE
 	  This option allows to limit the size of the CBFS portion in the
 	  firmware image.
 
+config CPU_ADDR_BITS
+	int
+	default 36
+
 config DCACHE_RAM_BASE
 	hex "Base address of cache-as-RAM"
-	default 0xff7c0000
+	default 0xfef00000
 
 config DCACHE_RAM_SIZE
 	hex "Length in bytes of cache-as-RAM"
-	default 0x10000
+	default 0x4000
 	help
 	  The size of the cache-as-ram region required during bootblock
 	  and/or romstage.
@@ -119,6 +124,10 @@ config HAVE_ME_BIN
 	  not and if you don't have the firmware elsewhere, you can still
 	  build coreboot without it. In this case however, you'll have to make
 	  sure that you don't overwrite your ME firmware on your flash ROM.
+
+config HEAP_SIZE
+	hex
+	default 0x80000
 
 config IED_REGION_SIZE
 	hex
