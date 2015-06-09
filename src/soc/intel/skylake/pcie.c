@@ -76,6 +76,16 @@ static void pch_pcie_init(struct device *dev)
 	pci_write_config16(dev, 0x1e, reg16);
 }
 
+static void pcie_set_L1_ss_max_latency(device_t dev, unsigned int off)
+{
+	/* Set max snoop and non-snoop latency for Skylake */
+	pci_mmio_write_config32(dev, off, 0x10031003);
+}
+
+static struct pci_operations pcie_ops = {
+	.set_L1_ss_latency = pcie_set_L1_ss_max_latency,
+};
+
 static struct device_operations device_ops = {
 	.read_resources		= pci_bus_read_resources,
 	.set_resources		= pci_dev_set_resources,
@@ -83,7 +93,7 @@ static struct device_operations device_ops = {
 	.init			= pch_pcie_init,
 	.enable			= NULL,
 	.scan_bus		= pciexp_scan_bridge,
-	.ops_pci		= NULL,
+	.ops_pci		= &pcie_ops,
 };
 
 static const unsigned short pcie_device_ids[] = {
