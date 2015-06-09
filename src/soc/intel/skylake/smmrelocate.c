@@ -35,6 +35,7 @@
 #include <soc/pci_devs.h>
 #include <soc/smm.h>
 #include <soc/systemagent.h>
+#include "chip.h"
 
 /* This gets filled in and used during relocation. */
 static struct smm_relocation_params smm_reloc_params;
@@ -216,6 +217,7 @@ static void fill_in_relocation_params(device_t dev,
 	int phys_bits;
 	/* All range registers are aligned to 4KiB */
 	const u32 rmask = ~((1 << 12) - 1);
+	config_t *conf = dev->chip_info;
 
 	/*
 	 * Some of the range registers are dependent on the number of physical
@@ -225,17 +227,16 @@ static void fill_in_relocation_params(device_t dev,
 
 	/*
 	 * The range bounded by the TSEGMB and BGSM registers encompasses the
-	 * SMRAM range as well as the IED range. However, the SMRAM available
-	 * to the handler is 4MiB since the IEDRAM lives TSEGMB + 4MiB.
+	 * SMRAM range as well as the IED range.
 	 */
 	tsegmb = northbridge_get_base_reg(dev, TSEG);
 	bgsm = northbridge_get_base_reg(dev, BGSM);
 	tseg_size = bgsm - tsegmb;
 
+	params->ied_size = conf->IedSize;
+	params->smram_size = tseg_size - params->ied_size;
 	params->smram_base = tsegmb;
-	params->smram_size = 4 << 20;
 	params->ied_base = tsegmb + params->smram_size;
-	params->ied_size = tseg_size - params->smram_size;
 
 	/* Adjust available SMM handler memory size. */
 	params->smram_size -= CONFIG_SMM_RESERVED_SIZE;
@@ -324,6 +325,9 @@ static void setup_ied_area(struct smm_relocation_params *params)
 
 	ied_base = (void *)params->ied_base;
 
+	printk(BIOS_DEBUG, "IED base = 0x%08x\n", params->ied_base);
+	printk(BIOS_DEBUG, "IED size = 0x%08x\n", params->ied_size);
+
 	/* Place IED header at IEDBASE. */
 	memcpy(ied_base, &ied, sizeof(ied));
 
@@ -367,7 +371,8 @@ static int cpu_smm_setup(void)
 
 	fill_in_relocation_params(dev, &smm_reloc_params);
 
-	setup_ied_area(&smm_reloc_params);
+	if (smm_reloc_params.ied_size)
+		setup_ied_area(&smm_reloc_params);
 
 	msr = rdmsr(CORE_THREAD_COUNT_MSR);
 	num_cpus = msr.lo & 0xffff;
