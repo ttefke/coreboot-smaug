@@ -48,6 +48,8 @@ source src/arch/mips/Kconfig
 
 menu "Chipset"
 
+comment "SoC"
+source src/soc/Kconfig
 comment "CPU"
 source src/cpu/Kconfig
 comment "Northbridge"
@@ -58,8 +60,6 @@ comment "Super I/O"
 source src/superio/Kconfig
 comment "Embedded Controllers"
 source src/ec/Kconfig
-comment "SoC"
-source src/soc/Kconfig
 
 endmenu
 
