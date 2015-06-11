@@ -32,6 +32,7 @@
 #include <soc/nvidia/tegra/pingroup.h>
 #include <soc/nvidia/tegra/dc.h>
 #include <soc/display.h>
+#include <soc/mtc.h>
 
 #include <vboot_struct.h>
 #include <vendorcode/google/chromeos/vboot_handoff.h>
@@ -202,4 +203,5 @@ struct chip_operations mainboard_ops = {
 void lb_board(struct lb_header *header)
 {
 	lb_table_add_serialno_from_vpd(header);
+	soc_add_mtc(header);
 }
