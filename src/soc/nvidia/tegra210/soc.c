@@ -31,6 +31,7 @@
 #include <soc/clock.h>
 #include <soc/cpu.h>
 #include <soc/mc.h>
+#include <soc/mtc.h>
 #include <soc/nvidia/tegra/apbmisc.h>
 #include <string.h>
 #include <timer.h>
@@ -153,6 +154,9 @@ struct chip_operations soc_nvidia_tegra210_ops = {
 
 static void tegra210_cpu_init(device_t cpu)
 {
+	if (cpu_is_bsp())
+		if (tegra210_run_mtc() != 0)
+			printk(BIOS_ERR, "MTC: Training failed\n");
 }
 
 static const struct cpu_device_id ids[] = {

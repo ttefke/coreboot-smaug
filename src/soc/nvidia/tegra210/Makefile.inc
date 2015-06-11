@@ -103,6 +103,7 @@ ramstage-y += mmu_operations.c
 ramstage-$(CONFIG_CONSOLE_SERIAL_UART) += uart.c
 ramstage-y += ../tegra/usb.c
 ramstage-$(CONFIG_ARM64_USE_SECURE_MONITOR) += secmon.c
+ramstage-$(CONFIG_HAVE_MTC) += mtc.c
 
 secmon-y += cpu.c
 secmon-y += cpu_lib.S
