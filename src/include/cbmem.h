@@ -61,6 +61,7 @@
 #define CBMEM_ID_MEMINFO	0x494D454D
 #define CBMEM_ID_MPTABLE	0x534d5054
 #define CBMEM_ID_MRCDATA	0x4d524344
+#define CBMEM_ID_MTC		0xcb31d31c
 #define CBMEM_ID_PIRQ		0x49525154
 #define CBMEM_ID_POWER_STATE	0x50535454
 #define CBMEM_ID_RAMSTAGE	0x9a357a9e
@@ -124,7 +125,8 @@ struct cbmem_id_to_name {
 	{ CBMEM_ID_SMM_SAVE_SPACE,	"SMM BACKUP " }, \
 	{ CBMEM_ID_SPINTABLE,		"SPIN TABLE " }, \
 	{ CBMEM_ID_TIMESTAMP,		"TIME STAMP " }, \
-	{ CBMEM_ID_VBOOT_HANDOFF,	"VBOOT      " },
+	{ CBMEM_ID_VBOOT_HANDOFF,	"VBOOT      " }, \
+	{ CBMEM_ID_MTC,		"MTC        " },
 
 struct cbmem_entry;
 
