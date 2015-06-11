@@ -14,9 +14,9 @@ chip soc/intel/skylake
 		[PchSerialIoIndexUart2] = PchSerialIoLegacyUart, \
 	}"
 
-	register "scs_emmc_enabled" = "1"
-	register "scs_emmchs400_enabled" = "1"
-	register "scs_sdcard_enabled" = "1"
+	register "ScsEmmcEnabled" = "1"
+	register "ScsEmmcHs400Enabled" = "1"
+	register "ScsSdCardEnabled" = "1"
 
 	# Embedded Controller host command window
 	register "gen1_dec" = "0x00fc0801"
@@ -74,7 +74,3 @@ chip soc/intel/skylake
 		device pci 1f.6 off end # GbE Controller
 	end
 end
-
-#			chip ec/google/chromeec
-#				device pnp 0c09.0 on end
-#			end
