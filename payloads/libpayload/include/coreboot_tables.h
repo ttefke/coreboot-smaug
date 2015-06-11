@@ -202,6 +202,7 @@ struct cb_range {
 #define CB_TAG_MRC_CACHE	0x0018
 #define CB_TAG_ACPI_GNVS	0x0024
 #define CB_TAG_WIFI_CALIBRATION	0x0027
+#define CB_TAG_MTC		0x002b
 struct cb_cbmem_tab {
 	uint32_t tag;
 	uint32_t size;
