@@ -53,6 +53,7 @@ romstage-y += padconfig.c
 romstage-y += funitcfg.c
 romstage-y += romstage.c
 romstage-y += power.c
+romstage-y += ram_code.c
 ifneq ($(CONFIG_BOOTROM_SDRAM_INIT),y)
 romstage-y += sdram.c
  ifeq ($(CONFIG_LP0_SUPPORT),y)
@@ -94,6 +95,7 @@ ramstage-y += monotonic_timer.c
 ramstage-y += padconfig.c
 ramstage-y += funitcfg.c
 ramstage-y += reset.c
+ramstage-y += ram_code.c
 ramstage-y += ../tegra/apbmisc.c
 ramstage-y += ../tegra/gpio.c
 ramstage-y += ../tegra/i2c.c
