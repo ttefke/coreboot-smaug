@@ -19,6 +19,7 @@
 
 #include <boardid.h>
 #include <console/console.h>
+#include <soc/sdram.h>
 #include <stdlib.h>
 
 #include "gpio.h"
@@ -34,4 +35,9 @@ uint8_t board_id(void)
 	}
 
 	return id;
+}
+
+uint32_t ram_code(void)
+{
+	return sdram_get_ram_code();
 }
