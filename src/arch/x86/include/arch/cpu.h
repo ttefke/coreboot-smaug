@@ -140,11 +140,15 @@ static inline unsigned int cpuid_edx(unsigned int op)
 #define X86_VENDOR_SIS       10
 #define X86_VENDOR_UNKNOWN 0xff
 
+#define CPUID_FEATURE_PAE (1 << 6)
+#define CPUID_FEATURE_PSE36 (1 << 17)
+
+int cpu_cpuid_extended_level(void);
+int cpu_have_cpuid(void);
+int cpu_phys_address_size(void);
+
 #if !defined(__PRE_RAM__) && !defined(__SMM__)
 #include <device/device.h>
-
-int cpu_phys_address_size(void);
-int cpu_have_cpuid(void);
 
 struct cpu_device_id {
 	unsigned vendor;

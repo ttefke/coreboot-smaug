@@ -2,6 +2,7 @@ ifeq ($(CONFIG_ARCH_ROMSTAGE_X86_32),y)
 
 romstage-$(CONFIG_EARLY_CONSOLE) += romstage_console.c
 romstage-y += cbfs_and_run.c
+romstage-$(CONFIG_ARCH_RAMSTAGE_X86_32) += cpu_common.c
 romstage-y += memset.c
 romstage-y += memcpy.c
 romstage-y += memmove.c
@@ -14,6 +15,7 @@ ifeq ($(CONFIG_ARCH_RAMSTAGE_X86_32),y)
 
 ramstage-y += c_start.S
 ramstage-y += cpu.c
+ramstage-y += cpu_common.c
 ramstage-y += pci_ops_conf1.c
 ramstage-$(CONFIG_MMCONF_SUPPORT) += pci_ops_mmconf.c
 ramstage-y += exception.c
