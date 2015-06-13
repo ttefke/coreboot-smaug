@@ -20,9 +20,11 @@
 
 #include <cbmem.h>
 #include <console/console.h>
+#include <cpu/x86/msr.h>
 #include <cpu/x86/mtrr.h>
 #include "memmap.h"
 #include "romstage.h"
+#include <soc/intel/common/util.h>
 #include "stack.h"
 #include <stdlib.h>
 
@@ -52,42 +54,45 @@ void *setup_stack_and_mtrrs(void)
 	size_t alignment;
 	uint32_t aligned_ram;
 	uint32_t mtrr_mask_upper;
-	int num_mtrrs;
+	uint32_t max_mtrrs;
+	uint32_t num_mtrrs;
 	uint32_t *slot;
 	unsigned long top_of_stack;
+
+	/* Display the MTTRs */
+	soc_display_mtrrs();
 
 	/* Top of stack needs to be aligned to a 8-byte boundary. */
 	top_of_stack = choose_top_of_stack();
 	slot = (void *)top_of_stack;
 	num_mtrrs = 0;
+	max_mtrrs = soc_get_variable_mtrr_count(NULL);
 
 	/*
 	 * The upper bits of the MTRR mask need to set according to the number
 	 * of physical address bits.
 	 */
 	mtrr_mask_upper = (1 << ((cpuid_eax(0x80000008) & 0xff) - 32)) - 1;
+	alignment = mmap_region_granluarity();
+	aligned_ram = ALIGN_DOWN(top_of_stack - romstage_ram_stack_size,
+		alignment);
 
 	/*
 	 * The order for each MTRR is value then base with upper 32-bits of
 	 * each value coming before the lower 32-bits. The reasoning for
 	 * this ordering is to create a stack layout like the following:
-	 *   +0: Number of MTRRs
-	 *   +4: MTRR base 0 31:0
-	 *   +8: MTRR base 0 63:32
-	 *  +12: MTRR mask 0 31:0
-	 *  +16: MTRR mask 0 63:32
-	 *  +20: MTRR base 1 31:0
-	 *  +24: MTRR base 1 63:32
-	 *  +28: MTRR mask 1 31:0
-	 *  +32: MTRR mask 1 63:32
+	 *
+	 *  +36: MTRR mask 1 63:32
+	 *  +32: MTRR mask 1 31:0
+	 *  +28: MTRR base 1 63:32
+	 *  +24: MTRR base 1 31:0
+	 *  +20: MTRR mask 0 63:32
+	 *  +16: MTRR mask 0 31:0
+	 *  +12: MTRR base 0 63:32
+	 *   +8: MTRR base 0 31:0
+	 *   +4: Number of MTRRs to setup (described above)
+	 *   +0: Number of variable MTRRs to clear
 	 */
-
-	/* Cache the ROM as WP just below 4GiB. */
-	slot = stack_push32(slot, mtrr_mask_upper); /* upper mask */
-	slot = stack_push32(slot, ~(CONFIG_ROM_SIZE - 1) | MTRRphysMaskValid);
-	slot = stack_push32(slot, 0); /* upper base */
-	slot = stack_push32(slot, ~(CONFIG_ROM_SIZE - 1) | MTRR_TYPE_WRPROT);
-	num_mtrrs++;
 
 	/* Cache RAM as WB from 0 -> CONFIG_RAMTOP. */
 	slot = stack_push32(slot, mtrr_mask_upper); /* upper mask */
@@ -128,10 +133,6 @@ void *setup_stack_and_mtrrs(void)
 	 * Cache the stack and the other CBMEM entries as well as part or all
 	 * of the FSP reserved memory region.
 	 */
-	alignment = mmap_region_granluarity();
-	aligned_ram = ALIGN_DOWN(top_of_stack - romstage_ram_stack_size,
-		alignment);
-
 	slot = stack_push32(slot, mtrr_mask_upper); /* upper mask */
 	slot = stack_push32(slot, ~(alignment - 1) | MTRRphysMaskValid);
 	slot = stack_push32(slot, 0); /* upper base */
@@ -158,11 +159,26 @@ void *setup_stack_and_mtrrs(void)
 	num_mtrrs++;
 #endif
 
+	/* Cache the ROM as WP just below 4GiB. */
+	slot = stack_push32(slot, mtrr_mask_upper); /* upper mask */
+	slot = stack_push32(slot, ~(CONFIG_ROM_SIZE - 1) | MTRRphysMaskValid);
+	slot = stack_push32(slot, 0); /* upper base */
+	slot = stack_push32(slot, ~(CONFIG_ROM_SIZE - 1) | MTRR_TYPE_WRPROT);
+	num_mtrrs++;
+
+	/* Validate the MTRR usage */
+	if (num_mtrrs > max_mtrrs) {
+		printk(BIOS_ERR, "MTRRs: max = %d, used = %d, available=%d",
+			max_mtrrs, num_mtrrs, max_mtrrs - num_mtrrs);
+		die("ERROR - MTRR use count incorrect!\n");
+	}
+
 	/*
-	 * Save the number of MTRRs to setup. Return the stack location
-	 * pointing to the number of MTRRs.
+	 * Save the number of MTRRs to setup and clear.  Return the stack
+	 * location pointing to the number of MTRRs.
 	 */
 	slot = stack_push32(slot, num_mtrrs);
+	slot = stack_push32(slot, max_mtrrs);
 	return slot;
 }
 

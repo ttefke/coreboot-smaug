@@ -27,6 +27,7 @@
 #include <romstage_handoff.h>
 #include <soc/intel/common/memmap.h>
 #include <soc/intel/common/ramstage.h>
+#include <soc/intel/common/util.h>
 #include <timestamp.h>
 
 /* SOC initialization after FSP silicon init */
@@ -248,6 +249,7 @@ static void fsp_run_silicon_init(struct romstage_handoff *handoff)
 		die("ERROR - Missing one or more required FSP HOBs!\n");
 #endif
 
+	soc_display_mtrrs();
 	soc_after_silicon_init();
 }
 

@@ -27,6 +27,7 @@
 #include <arch/early_variables.h>
 #include <console/console.h>
 #include <cbmem.h>
+#include <cpu/x86/msr.h>
 #include <cpu/x86/mtrr.h>
 #include <ec/google/chromeec/ec.h>
 #include <ec/google/chromeec/ec_commands.h>
@@ -36,6 +37,7 @@
 #include <reset.h>
 #include <romstage_handoff.h>
 #include <soc/intel/common/mrc_cache.h>
+#include <soc/intel/common/util.h>
 #include <soc/pei_wrapper.h>
 #include <soc/pm.h>
 #include <soc/romstage.h>
@@ -203,6 +205,7 @@ asmlinkage void romstage_after_car(void *chipset_context)
 		timestamp_add_now(TS_FSP_TEMP_RAM_EXIT_END);
 		printk(BIOS_DEBUG, "FspTempRamExit returned successfully\n");
 		soc_after_temp_ram_exit();
+		soc_display_mtrrs();
 	}
 
 	timestamp_add_now(TS_END_ROMSTAGE);

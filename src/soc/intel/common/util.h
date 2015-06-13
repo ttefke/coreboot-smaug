@@ -20,9 +20,12 @@
 #ifndef _INTEL_COMMON_UTIL_H_
 #define _INTEL_COMMON_UTIL_H_
 
+#include <arch/cpu.h>
 #include <stdint.h>
 
+asmlinkage void soc_display_mtrrs(void);
 void soc_display_upd_value(const char *name, uint32_t size, uint64_t old,
 	uint64_t new);
+uint32_t soc_get_variable_mtrr_count(uint64_t *msr);
 
 #endif /* _INTEL_COMMON_UTIL_H_ */

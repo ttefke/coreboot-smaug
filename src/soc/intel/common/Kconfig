@@ -58,6 +58,10 @@ config COMMON_ROMSTAGE
 	bool
 	default n
 
+config DISPLAY_MTRRS
+	bool "MTRRs: Display the MTRR settings
+	default n
+
 config DISPLAY_SMM_MEMORY_MAP
 	bool "SMM: Display the SMM memory map"
 	default n
