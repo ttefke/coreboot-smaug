@@ -84,6 +84,9 @@ chip soc/intel/braswell
 	# Disable SLP_X stretching after SUS power well fail.
 	register "disable_slp_x_stretch_sus_fail" = "1"
 
+	# Allow PCIe devices to wake system from suspend
+	register "pcie_wake_enable" = "1"
+
 	device cpu_cluster 0 on
 		device lapic 0 on end
 	end
