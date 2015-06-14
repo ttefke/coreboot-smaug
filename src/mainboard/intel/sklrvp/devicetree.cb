@@ -12,7 +12,7 @@ chip soc/intel/skylake
 		[PchSerialIoIndexSpi1]  = PchSerialIoPci, \
 		[PchSerialIoIndexUart0] = PchSerialIoPci, \
 		[PchSerialIoIndexUart1] = PchSerialIoPci, \
-		[PchSerialIoIndexUart2] = PchSerialIoPci, \
+		[PchSerialIoIndexUart2] = PchSerialIoLegacyUart, \
 	}"
 
 	# Enable eDP Hotplug with 6ms pulse
