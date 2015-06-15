@@ -35,6 +35,7 @@ static struct {
 	const char *name;
 } cpu_table[] = {
 	{ CPUID_SKYLAKE_C0,	"Skylake C0" },
+	{ CPUID_SKYLAKE_D0,	"Skylake D0" },
 };
 
 static struct {
