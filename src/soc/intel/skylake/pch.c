@@ -69,7 +69,7 @@ u32 pch_read_soft_strap(int id)
 	return read32(spibar + SPIBAR_FDOD);
 }
 
-#ifndef __PRE_RAM__
+#if !defined(__PRE_RAM__) && !defined(__SMM__)
 void skylake_pch_enable_dev(device_t dev)
 {
 	/* FSP should implement routines to disable PCH IPs */

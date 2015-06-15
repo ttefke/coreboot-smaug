@@ -51,6 +51,7 @@ ramstage-y += xhci.c
 smm-y += cpu_info.c
 smm-y += gpio.c
 smm-y += pcr.c
+smm-y += pch.c
 smm-y += pmutil.c
 smm-y += smihandler.c
 smm-$(CONFIG_SPI_FLASH_SMM) += flash_controller.c
