@@ -29,8 +29,8 @@ void soc_add_mtc(struct lb_header *header);
 
 #else
 
-static inline tegra210_run_mtc(void) {}
-static inline soc_add_mtc(struct lb_header *header) {}
+static inline int tegra210_run_mtc(void) { return 0; }
+static inline void soc_add_mtc(struct lb_header *header) {}
 
 #endif /* CONFIG_HAVE_MTC */
 
