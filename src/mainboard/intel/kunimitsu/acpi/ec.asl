@@ -18,7 +18,7 @@
  */
 
 /* mainboard configuration */
-#include <mainboard/google/glados/ec.h>
+#include <mainboard/intel/kunimitsu/ec.h>
 
 /* Enable EC backed PD MCU device in ACPI */
 #define EC_ENABLE_PD_MCU_DEVICE

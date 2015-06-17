@@ -117,7 +117,11 @@ chip soc/intel/skylake
 		device pci 1e.2 on  end # SPI #0
 		device pci 1e.4 on  end # eMMC
 		device pci 1e.6 on  end # SDCard
-		device pci 1f.0 on  end # LPC Interface (eSPI Enable Strap = 0) eSPI Interface (eSPI Enable Strap = 1)
+		device pci 1f.0 on
+			chip ec/google/chromeec
+				device pnp 0c09.0 on end
+			end
+		end # LPC Interface
 		device pci 1f.3 on  end # Intel High Definition Audio (Intel HD Audio) (Audio, Voice, Speech)
 		device pci 1f.4 off end # SMBus Controller
 		device pci 1f.5 on  end # SPI

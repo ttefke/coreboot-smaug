@@ -18,7 +18,7 @@
  */
 
 /* mainboard configuration */
-#include <mainboard/google/glados/ec.h>
+#include <mainboard/intel/kunimitsu/ec.h>
 
 #define SIO_EC_MEMMAP_ENABLE     // EC Memory Map Resources
 #define SIO_EC_HOST_ENABLE       // EC Host Interface Resources
