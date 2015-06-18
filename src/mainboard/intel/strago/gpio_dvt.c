@@ -21,8 +21,6 @@
 #include "irqroute.h"
 #include <soc/gpio.h>
 #include <stdlib.h>
-#include <boardid.h>
-#include "onboard.h"
 #include "gpio.h"
 
 /* South East Community */
@@ -264,10 +262,8 @@ static struct soc_gpio_config gpio_config = {
 	.east = gpe_gpio_map
 };
 
-struct soc_gpio_config *get_override_gpios(struct soc_gpio_config *config)
+struct soc_gpio_config *get_override_gpios_dvt(void)
 {
-	if (board_id() == BOARD_DVT)
-		return &gpio_config;
+	return &gpio_config;
 
-	return config;
 }

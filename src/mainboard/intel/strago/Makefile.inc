@@ -27,6 +27,7 @@ ramstage-$(CONFIG_CHROMEOS) += chromeos.c
 ramstage-y += ec.c
 ramstage-$(CONFIG_CHROMEOS) += gpio.c
 ramstage-$(CONFIG_CHROMEOS) += gpio_dvt.c
+ramstage-$(CONFIG_CHROMEOS) += gpio_bcrd2.c
 ramstage-y += irqroute.c
 ramstage-y += ramstage.c
 ramstage-y += w25q64.c

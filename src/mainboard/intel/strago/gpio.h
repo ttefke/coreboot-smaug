@@ -20,5 +20,6 @@
 #ifndef _STRAGO_GPIO_H_
 #define _STRAGO_GPIO_H_
 
-struct soc_gpio_config *get_override_gpios(struct soc_gpio_config *config);
+struct soc_gpio_config *get_override_gpios_dvt(void);
+struct soc_gpio_config *get_override_gpios_bcrd2(void);
 #endif

@@ -76,5 +76,6 @@
 #define AUDIO_CODEC_I2C_ADDR		0x1A
 
 #define BOARD_DVT			0x03
+#define BOARD_BCRD2			0x04
 
 #endif
