@@ -24,7 +24,7 @@
 
 uint8_t board_id(void)
 {
-	static int id = -1;
+	MAYBE_STATIC int id = -1;
 
 #if IS_ENABLED(CONFIG_EC_GOOGLE_CHROMEEC)
 	if (id < 0)
