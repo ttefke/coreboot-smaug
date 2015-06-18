@@ -2,8 +2,8 @@
  * This file is part of the coreboot project.
  *
  * Copyright (C) 2007-2009 coresystems GmbH
- * Copyright (C) 2013 Google Inc.
- * Copyright (C) 2015 Intel Corporation.
+ * Copyright (C) 2015 Google Inc.
+ * Copyright (C) 2015 Intel Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * Foundation, Inc.
  */
 
 DefinitionBlock(
 	"dsdt.aml",
 	"DSDT",
-	0x02,		// DSDT revision: ACPI v2.0
+	0x05,		// DSDT revision: ACPI v5.0
 	"COREv4",	// OEM id
 	"COREBOOT",	// OEM table id
 	0x20110725	// OEM revision
@@ -44,6 +44,10 @@ DefinitionBlock(
 			#include <soc/intel/skylake/acpi/pch.asl>
 		}
 	}
+
+	// Chrome OS specific
+	#include "acpi/chromeos.asl"
+	#include <vendorcode/google/chromeos/acpi/chromeos.asl>
 
 	// Chipset specific sleep states
 	#include <soc/intel/skylake/acpi/sleepstates.asl>
