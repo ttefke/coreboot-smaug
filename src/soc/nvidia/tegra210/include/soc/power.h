@@ -23,6 +23,7 @@
 #include <soc/pmc.h>
 
 void power_ungate_partition(uint32_t id);
+void power_gate_partition(uint32_t id);
 
 uint8_t pmc_rst_status(void);
 void pmc_print_rst_status(void);

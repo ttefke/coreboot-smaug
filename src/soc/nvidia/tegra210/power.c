@@ -27,33 +27,66 @@
 
 static struct tegra_pmc_regs * const pmc = (void *)TEGRA_PMC_BASE;
 
+enum {
+	POWER_GATE = 0,
+	POWER_UNGATE = 1,
+};
+
 static int partition_powered(int id)
 {
-	return read32(&pmc->pwrgate_status) & (0x1 << id);
+	if (read32(&pmc->pwrgate_status) & (0x1 << id))
+		return POWER_UNGATE;
+
+	return POWER_GATE;
+}
+
+static const char * const power_gate_string[] = {
+	[POWER_GATE] = "Gat",
+	[POWER_UNGATE] = "Ungat",
+};
+
+static void power_gate_toggle_request(uint32_t id, int request)
+{
+	printk(BIOS_INFO, "%sing power partition %d.\n",
+	       power_gate_string[request], id);
+
+	int part_powered = partition_powered(id);
+
+	if (request == part_powered) {
+		printk(BIOS_INFO, "Partition %d already %sed.\n", id,
+		       power_gate_string[request]);
+		return;
+	}
+
+	uint32_t pwrgate_toggle = read32(&pmc->pwrgate_toggle);
+	pwrgate_toggle &= ~(PMC_PWRGATE_TOGGLE_PARTID_MASK);
+	pwrgate_toggle |= (id << PMC_PWRGATE_TOGGLE_PARTID_SHIFT);
+	pwrgate_toggle |= PMC_PWRGATE_TOGGLE_START;
+	write32(&pmc->pwrgate_toggle, pwrgate_toggle);
+
+	// Wait for the request to be accepted.
+	while (read32(&pmc->pwrgate_toggle) & PMC_PWRGATE_TOGGLE_START)
+		;
+	printk(BIOS_INFO, "Power gate toggle request accepted.\n");
+
+	while (1) {
+		part_powered = partition_powered(id);
+		if (request == part_powered) {
+			printk(BIOS_INFO, "Partition %d %sed.\n", id,
+			       power_gate_string[request]);
+			return;
+		}
+	}
+}
+
+void power_gate_partition(uint32_t id)
+{
+	power_gate_toggle_request(id, POWER_GATE);
 }
 
 void power_ungate_partition(uint32_t id)
 {
-	printk(BIOS_INFO, "Ungating power partition %d.\n", id);
-
-	if (!partition_powered(id)) {
-		uint32_t pwrgate_toggle = read32(&pmc->pwrgate_toggle);
-		pwrgate_toggle &= ~(PMC_PWRGATE_TOGGLE_PARTID_MASK);
-		pwrgate_toggle |= (id << PMC_PWRGATE_TOGGLE_PARTID_SHIFT);
-		pwrgate_toggle |= PMC_PWRGATE_TOGGLE_START;
-		write32(&pmc->pwrgate_toggle, pwrgate_toggle);
-
-		// Wait for the request to be accepted.
-		while (read32(&pmc->pwrgate_toggle) & PMC_PWRGATE_TOGGLE_START)
-			;
-		printk(BIOS_DEBUG, "Power gate toggle request accepted.\n");
-
-		// Wait for the partition to be powered.
-		while (!partition_powered(id))
-			;
-	}
-
-	printk(BIOS_INFO, "Ungated power partition %d.\n", id);
+	power_gate_toggle_request(id, POWER_UNGATE);
 }
 
 uint8_t pmc_rst_status(void)
