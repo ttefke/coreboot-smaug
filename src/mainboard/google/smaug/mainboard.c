@@ -33,6 +33,8 @@
 #include <soc/nvidia/tegra/dc.h>
 #include <soc/display.h>
 #include <soc/mtc.h>
+#include <soc/pmc.h>
+#include <soc/power.h>
 
 #include <vboot_struct.h>
 #include <vendorcode/google/chromeos/vboot_handoff.h>
@@ -170,6 +172,24 @@ static int configure_display_blocks(void)
 	return 0;
 }
 
+static void powergate_unused_partitions(void)
+{
+	static const uint32_t partitions[] = {
+		POWER_PARTID_PCX,
+		POWER_PARTID_SAX,
+		POWER_PARTID_XUSBA,
+		POWER_PARTID_XUSBB,
+		POWER_PARTID_XUSBC,
+		POWER_PARTID_NVDEC,
+		POWER_PARTID_NVJPG,
+		POWER_PARTID_DFD,
+	};
+
+	int i;
+	for (i = 0; i < ARRAY_SIZE(partitions); i++)
+		power_gate_partition(partitions[i]);
+}
+
 static void mainboard_init(device_t dev)
 {
 	soc_configure_pads(padcfgs, ARRAY_SIZE(padcfgs));
@@ -183,6 +203,8 @@ static void mainboard_init(device_t dev)
 	/* if panel needs to bringup */
 	if (!vboot_skip_display_init())
 		configure_display_blocks();
+
+	powergate_unused_partitions();
 }
 
 void display_startup(device_t dev)
