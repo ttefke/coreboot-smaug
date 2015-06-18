@@ -77,4 +77,6 @@
 #define BOARD_DVT			0x03
 #define BOARD_BCRD2			0x04
 
+#define BCRD2_PMIC_I2C_BUS		0x01
+
 #endif
