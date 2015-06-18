@@ -317,7 +317,7 @@ long int labs(long int j);
 long long int llabs(long long int j);
 u8 bin2hex(u8 b);
 u8 hex2bin(u8 h);
-void hexdump(unsigned long memory, int length);
+void hexdump(const void *memory, int length);
 void fatal(const char *msg) __attribute__ ((noreturn));
 
 /* Count Leading Zeroes: clz(0) == 32, clz(0xf) == 28, clz(1 << 31) == 0 */
