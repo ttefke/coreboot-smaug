@@ -43,6 +43,14 @@
  */
 static const uint32_t dual_channel_config = (1 << 0) | (1 << 1);
 
+static void configure_ramid_gpios(void)
+{
+	write32((void *)(COMMUNITY_GPSOUTHWEST_BASE + SATA_GP3_PAD_CFG0),
+		(PAD_PULL_DISABLE | PAD_GPIO_ENABLE | PAD_CONFIG0_GPI_DEFAULT));
+	write32((void *)(COMMUNITY_GPSOUTHEAST_BASE + MF_PLT_CLK1_PAD_CFG0),
+		(PAD_PULL_DISABLE | PAD_GPIO_ENABLE | PAD_CONFIG0_GPI_DEFAULT));
+}
+
 static void *get_spd_pointer(char *spd_file_content, int total_spds, int *dual)
 {
 	int ram_id = 0;
@@ -86,6 +94,8 @@ void mainboard_fill_spd_data(struct pei_data *ps)
 	spd_file = cbfs_get_file(CBFS_DEFAULT_MEDIA, "spd.bin");
 	if (!spd_file)
 		die("SPD data not found.");
+
+	configure_ramid_gpios();
 
 	/*
 	 * Both channels are always present in SPD data. Always use matched
