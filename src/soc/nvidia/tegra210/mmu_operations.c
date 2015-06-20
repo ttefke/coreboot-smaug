@@ -36,6 +36,8 @@ static void tegra210_memrange_init(struct memranges *map)
 	uintptr_t tz_base_mib;
 	size_t tz_size_mib;
 
+	print_carveouts();
+
 	memranges_init_empty(map);
 
 	memory_in_range_below_4gb(&start,&end);

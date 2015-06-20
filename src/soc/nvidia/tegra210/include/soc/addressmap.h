@@ -121,6 +121,7 @@ enum {
 
 /* Provided the careout id, obtain the base and size in 1MiB units. */
 void carveout_range(int id, uintptr_t *base_mib, size_t *size_mib);
+void print_carveouts(void);
 
 /*
  * Add any board-specific memory ranges to the address map when executing

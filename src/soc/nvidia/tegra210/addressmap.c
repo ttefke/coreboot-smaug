@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-
+#include <assert.h>
 #include <arch/io.h>
 #include <console/console.h>
 #include <soc/addressmap.h>
@@ -111,6 +111,46 @@ void carveout_range(int id, uintptr_t *base_mib, size_t *size_mib)
 	}
 }
 
+void print_carveouts(void)
+{
+	int i;
+	printk(BIOS_INFO, "Carveout ranges:\n");
+	for (i = 0; i < CARVEOUT_NUM; i++) {
+		uintptr_t base, end;
+		size_t size;
+		carveout_range(i, &base, &size);
+		end = base + size;
+		if (end && base)
+			printk(BIOS_INFO, "ID:%d [%lx - %lx)\n", i,
+			       (unsigned long)base * MiB,
+			       (unsigned long)end * MiB);
+	}
+}
+
+/*
+ *    Memory Map is as follows
+ *
+ * ------------------------------   <-- Start of DRAM
+ * |                            |
+ * |      Available DRAM        |
+ * |____________________________|
+ * |                            |
+ * |          CBMEM             |
+ * |____________________________|
+ * |                            |
+ * |      Other carveouts       |
+ * | (with dynamic allocation)  |
+ * |____________________________|
+ * |                            |
+ * |    TZ carveout of size     |
+ * | TRUSTZONE_CARVEOUT_SIZE_MB |
+ * |____________________________|   <-- 0x100000000
+ * |                            |
+ * |      Available DRAM        |
+ * |                            |
+ * ------------------------------   <-- End of DRAM
+ *
+ */
 static void memory_in_range(uintptr_t *base_mib, uintptr_t *end_mib,
 				int ignore_carveout_id)
 {
@@ -191,8 +231,19 @@ void trustzone_region_init(void)
 	 * Get memory layout below 4GiB ignoring the TZ carveout because
 	 * that's the one to initialize.
 	 */
-	memory_in_range(&tz_base_mib, &end, CARVEOUT_TZ);
 	tz_base_mib = end - tz_size_mib;
+	memory_in_range(&tz_base_mib, &end, CARVEOUT_TZ);
+
+	/*
+	 * IMPORTANT!!!!!
+	 * We need to ensure that trustzone region is located at the end of
+	 * 32-bit address space. If any carveout is allocated space before
+	 * trustzone_region_init is called, then this assert will ensure that
+	 * the boot flow fails. If you are here because of this assert, please
+	 * move your call to initialize carveout after trustzone_region_init in
+	 * romstage and ramstage.
+	 */
+	assert(end == 4096);
 
 	/* AVP cannot set the TZ registers proper as it is always non-secure. */
 	if (context_avp())
@@ -209,7 +260,7 @@ void trustzone_region_init(void)
 void gpu_region_init(void)
 {
 	struct tegra_mc_regs * const mc = (void *)(uintptr_t)TEGRA_MC_BASE;
-	uintptr_t gpu_base_mib, end = 4096;
+	uintptr_t gpu_base_mib = 0, end = 4096;
 	size_t gpu_size_mib = GPU_CARVEOUT_SIZE_MB;
 
 	/* Get memory layout below 4GiB */

@@ -103,7 +103,7 @@ config BOOTROM_SDRAM_INIT
 
 config TRUSTZONE_CARVEOUT_SIZE_MB
 	hex "Size of Trust Zone region"
-	default 20
+	default 0x14
 	help
 	  Size of Trust Zone area in MiB to reserve in memory map.
 
