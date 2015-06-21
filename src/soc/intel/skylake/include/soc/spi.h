@@ -26,7 +26,9 @@
  * should support most common flash chips.
  */
 #define SPIDVID_OFFSET	0x0
-
+/* Temporay SPI BASE ADDRESS */
+#define TEMP_SPI_BAR	0xFE010000
+/* SPI BASE ADDRESS Register */
 #define B_PCH_SPI_BAR0_MASK	0x0FFF
 #define PCH_SPI_BASE_ADDRESS	0x10
 #define  SPIBAR_MEMBAR_MASK	0xFFFFF000
@@ -37,9 +39,14 @@
 #define SPIBAR_OPTYPE		0xA6
 #define SPIBAR_OPMENU_LOWER	0xA8
 #define SPIBAR_OPMENU_UPPER	0xAc
-
+/* STRAP LOCK Register */
 #define SPIBAR_RESET_LOCK 0xF0
+#define SPIBAR_RESET_LOCK_DISABLE	0
+#define SPIBAR_RESET_LOCK_ENABLE	1
+/* STRAP MSG Control Register*/
 #define SPIBAR_RESET_CTRL 0xF4
+#define SPIBAR_RESET_CTRL_SSMC	1
+/* STRAP Data Register*/
 #define SPIBAR_RESET_DATA 0xF8
 
 #define SPI_OPMENU_0 0x01 /* WRSR: Write Status Register */

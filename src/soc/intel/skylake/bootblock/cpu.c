@@ -23,11 +23,18 @@
 #include <cpu/x86/cache.h>
 #include <cpu/x86/msr.h>
 #include <cpu/x86/mtrr.h>
+#include <device/pci_def.h>
 #include <arch/io.h>
 #include <cpu/intel/microcode/microcode.c>
 #include <reset.h>
 #include <soc/msr.h>
+#include <soc/pci_devs.h>
 #include <soc/spi.h>
+
+/* Soft Reset Data Register Bit 12 = MAX Boot Frequency */
+#define SPI_STRAP_MAX_FREQ	(1<<12)
+/* Soft Reset Data Register Bit 6-11 = Flex Ratio */
+#define FLEX_RATIO_BIT	6
 
 static void set_var_mtrr(
 	unsigned reg, unsigned base, unsigned size, unsigned type)
@@ -69,11 +76,59 @@ static void bootblock_mdelay(int ms)
 	} while ((current.lo - start.lo) < target);
 }
 
+static void set_pch_cpu_strap(u8 flex_ratio)
+{
+	device_t dev = PCH_DEV_SPI;
+	uint8_t *spibar = (void *)TEMP_SPI_BAR;
+	u32 ssl, ssms, soft_reset_data;
+	u8 pcireg;
+
+	/* Assign Resources to SPI Controller */
+	/* Clear BIT 1-2 SPI Command Register */
+	pcireg = pci_read_config8(dev, PCI_COMMAND);
+	pcireg &= ~(PCI_COMMAND_MASTER | PCI_COMMAND_MEMORY);
+	pci_write_config8(dev, PCI_COMMAND, pcireg);
+
+	/* Program Temporary BAR for SPI */
+	pci_write_config32(dev, PCH_SPI_BASE_ADDRESS, TEMP_SPI_BAR);
+
+	/* Enable Bus Master and MMIO Space */
+	pcireg = pci_read_config8(dev, PCI_COMMAND);
+	pcireg |= PCI_COMMAND_MASTER | PCI_COMMAND_MEMORY;
+	pci_write_config8(dev, PCI_COMMAND, pcireg);
+
+	/* Set Strap Lock Disable*/
+	ssl = read32(spibar + SPIBAR_RESET_LOCK);
+	ssl |= SPIBAR_RESET_LOCK_DISABLE;
+	write32(spibar + SPIBAR_RESET_LOCK, ssl);
+
+	/* Soft Reset Data Register Bit 12 = MAX Boot Frequency
+	 * Bit 6-11 = Flex Ratio
+	 * Soft Reset Data register located at SPIBAR0 offset 0xF8[0:15].
+	 */
+	soft_reset_data = SPI_STRAP_MAX_FREQ;
+	soft_reset_data |= (flex_ratio << FLEX_RATIO_BIT);
+	write32(spibar + SPIBAR_RESET_DATA, soft_reset_data);
+
+	/* Set Strap Mux Select  set to '1' */
+	ssms = read32(spibar + SPIBAR_RESET_CTRL);
+	ssms |= SPIBAR_RESET_CTRL_SSMC;
+	write32(spibar + SPIBAR_RESET_CTRL, ssms);
+
+	/* Set Strap Lock Enable*/
+	ssl = read32(spibar + SPIBAR_RESET_LOCK);
+	ssl |= SPIBAR_RESET_LOCK_ENABLE;
+	write32(spibar + SPIBAR_RESET_LOCK, ssl);
+
+	/* Disable SPI Controller MMIO space */
+	pcireg = pci_read_config8(dev, PCI_COMMAND);
+	pcireg &= ~(PCI_COMMAND_MASTER | PCI_COMMAND_MEMORY);
+	pci_write_config8(dev, PCI_COMMAND, pcireg);
+}
+
 static void set_flex_ratio_to_tdp_nominal(void)
 {
-#if 0 /* Disabled until http://crosbug.com/p/41039 is resolved */
 	msr_t flex_ratio, msr;
-	u32 soft_reset_data;
 	u8 nominal_ratio;
 
 	/* Check for Flex Ratio support */
@@ -100,12 +155,14 @@ static void set_flex_ratio_to_tdp_nominal(void)
 	flex_ratio.lo |= FLEX_RATIO_LOCK;
 	wrmsr(MSR_FLEX_RATIO, flex_ratio);
 
+	/* Set PCH Soft Reset Data Register with new Flex Ratio */
+	set_pch_cpu_strap(nominal_ratio);
+
 	/* Delay before reset to avoid potential TPM lockout */
 	bootblock_mdelay(30);
 
 	/* Issue soft reset, will be "CPU only" due to soft reset data */
 	soft_reset();
-#endif
 }
 
 static void check_for_clean_reset(void)
