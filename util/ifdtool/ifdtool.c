@@ -27,6 +27,8 @@
 #include <sys/stat.h>
 #include "ifdtool.h"
 
+static int ifd_version;
+
 static fdbar_t *find_fd(char *image, int size)
 {
 	int i, found = 0;
@@ -44,9 +46,41 @@ static fdbar_t *find_fd(char *image, int size)
 		return NULL;
 	}
 
-	printf("Found Flash Descriptor signature at 0x%08x\n", i);
-
 	return (fdbar_t *) (image + i);
+}
+
+/*
+ * There is no version field in the descriptor so to determine
+ * if this is a new descriptor format we check the hardcoded SPI
+ * read frequency to see if it is fixed at 20MHz or 17MHz.
+ */
+static void check_ifd_version(char *image, int size)
+{
+	fdbar_t *fdb = find_fd(image, size);
+	fcba_t *fcba;
+	int read_freq;
+
+	if (!fdb)
+		exit(EXIT_FAILURE);
+
+	fcba = (fcba_t *) (image + (((fdb->flmap0) & 0xff) << 4));
+	if (!fcba)
+		exit(EXIT_FAILURE);
+
+	read_freq = (fcba->flcomp >> 17) & 7;
+
+	switch (read_freq) {
+	case SPI_FREQUENCY_20MHZ:
+		ifd_version = IFD_VERSION_1;
+		break;
+	case SPI_FREQUENCY_17MHZ:
+		ifd_version = IFD_VERSION_2;
+		break;
+	default:
+		fprintf(stderr, "Unknown descriptor version: %d\n",
+			read_freq);
+		exit(EXIT_FAILURE);
+	}
 }
 
 static region_t get_region(frba_t *frba, int region_type)
@@ -75,8 +109,24 @@ static region_t get_region(frba_t *frba, int region_type)
 		region.base = (frba->flreg4 & 0x00000fff) << 12;
 		region.limit = ((frba->flreg4 & 0x0fff0000) >> 4) | 0xfff;
 		break;
+	case 5:
+		region.base = (frba->flreg5 & 0x00000fff) << 12;
+		region.limit = ((frba->flreg5 & 0x0fff0000) >> 4) | 0xfff;
+		break;
+	case 6:
+		region.base = (frba->flreg6 & 0x00000fff) << 12;
+		region.limit = ((frba->flreg6 & 0x0fff0000) >> 4) | 0xfff;
+		break;
+	case 7:
+		region.base = (frba->flreg7 & 0x00000fff) << 12;
+		region.limit = ((frba->flreg7 & 0x0fff0000) >> 4) | 0xfff;
+		break;
+	case 8:
+		region.base = (frba->flreg8 & 0x00000fff) << 12;
+		region.limit = ((frba->flreg8 & 0x0fff0000) >> 4) | 0xfff;
+		break;
 	default:
-		fprintf(stderr, "Invalid region type.\n");
+		fprintf(stderr, "Invalid region type %d.\n", region_type);
 		exit (EXIT_FAILURE);
 	}
 
@@ -87,16 +137,20 @@ static region_t get_region(frba_t *frba, int region_type)
 
 static const char *region_name(int region_type)
 {
-	static const char *regions[5] = {
+	static const char *regions[MAX_REGIONS] = {
 		"Flash Descriptor",
 		"BIOS",
 		"Intel ME",
 		"GbE",
-		"Platform Data"
+		"Platform Data",
+		"Reserved",
+		"Reserved",
+		"Reserved",
+		"EC"
 	};
 
-	if (region_type < 0 || region_type > 4) {
-		fprintf(stderr, "Invalid region type.\n");
+	if (region_type < 0 || region_type >= MAX_REGIONS) {
+		fprintf(stderr, "Invalid region type %d.\n", region_type);
 		exit (EXIT_FAILURE);
 	}
 
@@ -105,16 +159,20 @@ static const char *region_name(int region_type)
 
 static const char *region_filename(int region_type)
 {
-	static const char *region_filenames[5] = {
+	static const char *region_filenames[MAX_REGIONS] = {
 		"flashregion_0_flashdescriptor.bin",
 		"flashregion_1_bios.bin",
 		"flashregion_2_intel_me.bin",
 		"flashregion_3_gbe.bin",
-		"flashregion_4_platform_data.bin"
+		"flashregion_4_platform_data.bin",
+		"flashregion_5_reserved.bin",
+		"flashregion_6_reserved.bin",
+		"flashregion_7_reserved.bin",
+		"flashregion_8_ec.bin",
 	};
 
-	if (region_type < 0 || region_type > 4) {
-		fprintf(stderr, "Invalid region type.\n");
+	if (region_type < 0 || region_type >= MAX_REGIONS) {
+		fprintf(stderr, "Invalid region type %d.\n", region_type);
 		exit (EXIT_FAILURE);
 	}
 
@@ -142,6 +200,17 @@ static void dump_frba(frba_t * frba)
 	dump_region(3, frba);
 	printf("FLREG4:    0x%08x\n", frba->flreg4);
 	dump_region(4, frba);
+
+	if (ifd_version >= IFD_VERSION_2) {
+		printf("FLREG5:    0x%08x\n", frba->flreg5);
+		dump_region(5, frba);
+		printf("FLREG6:    0x%08x\n", frba->flreg6);
+		dump_region(6, frba);
+		printf("FLREG7:    0x%08x\n", frba->flreg7);
+		dump_region(7, frba);
+		printf("FLREG8:    0x%08x\n", frba->flreg8);
+		dump_region(8, frba);
+	}
 }
 
 static void decode_spi_frequency(unsigned int freq)
@@ -153,8 +222,21 @@ static void decode_spi_frequency(unsigned int freq)
 	case SPI_FREQUENCY_33MHZ:
 		printf("33MHz");
 		break;
-	case SPI_FREQUENCY_50MHZ:
-		printf("50MHz");
+	case SPI_FREQUENCY_48MHZ:
+		printf("48MHz");
+		break;
+	case SPI_FREQUENCY_50MHZ_30MHZ:
+		switch (ifd_version) {
+		case IFD_VERSION_1:
+			printf("50MHz");
+			break;
+		case IFD_VERSION_2:
+			printf("30MHz");
+			break;
+		}
+		break;
+	case SPI_FREQUENCY_17MHZ:
+		printf("17MHz");
 		break;
 	default:
 		printf("unknown<%x>MHz", freq);
@@ -182,6 +264,15 @@ static void decode_component_density(unsigned int density)
 	case COMPONENT_DENSITY_16MB:
 		printf("16MB");
 		break;
+	case COMPONENT_DENSITY_32MB:
+		printf("32MB");
+		break;
+	case COMPONENT_DENSITY_64MB:
+		printf("64MB");
+		break;
+	case COMPONENT_DENSITY_UNUSED:
+		printf("UNUSED");
+		break;
 	default:
 		printf("unknown<%x>MB", density);
 	}
@@ -203,10 +294,22 @@ static void dump_fcba(fcba_t * fcba)
 		(fcba->flcomp & (1 << 20))?"":"not ");
 	printf("\n  Read Clock Frequency:                ");
 	decode_spi_frequency((fcba->flcomp >> 17) & 7);
-	printf("\n  Component 2 Density:                 ");
-	decode_component_density((fcba->flcomp >> 3) & 7);
-	printf("\n  Component 1 Density:                 ");
-	decode_component_density(fcba->flcomp & 7);
+
+	switch (ifd_version) {
+	case IFD_VERSION_1:
+		printf("\n  Component 2 Density:                 ");
+		decode_component_density((fcba->flcomp >> 3) & 7);
+		printf("\n  Component 1 Density:                 ");
+		decode_component_density(fcba->flcomp & 7);
+		break;
+	case IFD_VERSION_2:
+		printf("\n  Component 2 Density:                 ");
+		decode_component_density((fcba->flcomp >> 4) & 0xf);
+		printf("\n  Component 1 Density:                 ");
+		decode_component_density(fcba->flcomp & 0xf);
+		break;
+	}
+
 	printf("\n");
 	printf("FLILL      0x%08x\n", fcba->flill);
 	printf("  Invalid Instruction 3: 0x%02x\n",
@@ -247,6 +350,9 @@ static void dump_fpsba(fpsba_t * fpsba)
 
 static void decode_flmstr(uint32_t flmstr)
 {
+	if (ifd_version >= IFD_VERSION_2)
+		printf("  EC Region Write Access:            %s\n",
+		       (flmstr & (1 << 29)) ? "enabled" : "disabled");
 	printf("  Platform Data Region Write Access: %s\n",
 		(flmstr & (1 << 28)) ? "enabled" : "disabled");
 	printf("  GbE Region Write Access:           %s\n",
@@ -258,6 +364,9 @@ static void decode_flmstr(uint32_t flmstr)
 	printf("  Flash Descriptor Write Access:     %s\n",
 		(flmstr & (1 << 24)) ? "enabled" : "disabled");
 
+	if (ifd_version >= IFD_VERSION_2)
+		printf("  EC Region Read Access:             %s\n",
+		       (flmstr & (1 << 21)) ? "enabled" : "disabled");
 	printf("  Platform Data Region Read Access:  %s\n",
 		(flmstr & (1 << 20)) ? "enabled" : "disabled");
 	printf("  GbE Region Read Access:            %s\n",
@@ -282,6 +391,10 @@ static void dump_fmba(fmba_t * fmba)
 	decode_flmstr(fmba->flmstr2);
 	printf("FLMSTR3:   0x%08x (GbE)\n", fmba->flmstr3);
 	decode_flmstr(fmba->flmstr3);
+	if (ifd_version >= IFD_VERSION_2) {
+		printf("FLMSTR5:   0x%08x (EC)\n", fmba->flmstr5);
+		decode_flmstr(fmba->flmstr5);
+	}
 }
 
 static void dump_fmsba(fmsba_t * fmsba)
@@ -425,6 +538,7 @@ static void dump_fd(char *image, int size)
 static void write_regions(char *image, int size)
 {
 	int i;
+	int max_regions = MAX_REGIONS;
 
 	fdbar_t *fdb = find_fd(image, size);
 	if (!fdb)
@@ -433,7 +547,11 @@ static void write_regions(char *image, int size)
 	frba_t *frba =
 	    (frba_t *) (image + (((fdb->flmap0 >> 16) & 0xff) << 4));
 
-	for (i = 0; i<5; i++) {
+	/* Older descriptor images have fewer regions */
+	if (ifd_version < IFD_VERSION_2)
+		max_regions = MAX_REGIONS_OLD;
+
+	for (i = 0; i < max_regions; i++) {
 		region_t region = get_region(frba, i);
 		dump_region(i, frba);
 		if (region.size > 0) {
@@ -489,9 +607,19 @@ static void set_em100_mode(char *filename, char *image, int size)
 {
 	fdbar_t *fdb = find_fd(image, size);
 	fcba_t *fcba = (fcba_t *) (image + (((fdb->flmap0) & 0xff) << 4));
+	int freq;
+
+	switch (ifd_version) {
+	case IFD_VERSION_1:
+		freq = SPI_FREQUENCY_20MHZ;
+		break;
+	case IFD_VERSION_2:
+		freq = SPI_FREQUENCY_17MHZ;
+		break;
+	}
 
 	fcba->flcomp &= ~(1 << 30);
-	set_spi_frequency(filename, image, size, SPI_FREQUENCY_20MHZ);
+	set_spi_frequency(filename, image, size, freq);
 }
 
 static void lock_descriptor(char *filename, char *image, int size)
@@ -607,16 +735,16 @@ static void print_usage(const char *name)
 {
 	printf("usage: %s [-vhdix?] <filename>\n", name);
 	printf("\n"
-	       "   -d | --dump:                      dump intel firmware descriptor\n"
-	       "   -x | --extract:                   extract intel fd modules\n"
-	       "   -i | --inject <region>:<module>   inject file <module> into region <region>\n"
-	       "   -s | --spifreq <20|33|50>         set the SPI frequency\n"
-	       "   -e | --em100                      set SPI frequency to 20MHz and disable\n"
-	       "                                     Dual Output Fast Read Support\n"
-	       "   -l | --lock                       Lock firmware descriptor and ME region\n"
-	       "   -u | --unlock                     Unlock firmware descriptor and ME region\n"
-	       "   -v | --version:                   print the version\n"
-	       "   -h | --help:                      print this help\n\n"
+	       "   -d | --dump:                       dump intel firmware descriptor\n"
+	       "   -x | --extract:                    extract intel fd modules\n"
+	       "   -i | --inject <region>:<module>    inject file <module> into region <region>\n"
+	       "   -s | --spifreq <17|20|30|33|48|50> set the SPI frequency\n"
+	       "   -e | --em100                       set SPI frequency to 20MHz and disable\n"
+	       "                                      Dual Output Fast Read Support\n"
+	       "   -l | --lock                        Lock firmware descriptor and ME region\n"
+	       "   -u | --unlock                      Unlock firmware descriptor and ME region\n"
+	       "   -v | --version:                    print the version\n"
+	       "   -h | --help:                       print this help\n\n"
 	       "<region> is one of Descriptor, BIOS, ME, GbE, Platform\n"
 	       "\n");
 }
@@ -674,6 +802,8 @@ int main(int argc, char *argv[])
 				region_type = 3;
 			else if (!strcasecmp("Platform", region_type_string))
 				region_type = 4;
+			else if (!strcasecmp("EC", region_type_string))
+				region_type = 8;
 			if (region_type == -1) {
 				fprintf(stderr, "No such region type: '%s'\n\n",
 					region_type_string);
@@ -686,14 +816,23 @@ int main(int argc, char *argv[])
 			// Parse the requested SPI frequency
 			inputfreq = strtol(optarg, NULL, 0);
 			switch (inputfreq) {
+			case 17:
+				spifreq = SPI_FREQUENCY_17MHZ;
+				break;
 			case 20:
 				spifreq = SPI_FREQUENCY_20MHZ;
+				break;
+			case 30:
+				spifreq = SPI_FREQUENCY_50MHZ_30MHZ;
 				break;
 			case 33:
 				spifreq = SPI_FREQUENCY_33MHZ;
 				break;
+			case 48:
+				spifreq = SPI_FREQUENCY_48MHZ;
+				break;
 			case 50:
-				spifreq = SPI_FREQUENCY_50MHZ;
+				spifreq = SPI_FREQUENCY_50MHZ_30MHZ;
 				break;
 			default:
 				fprintf(stderr, "Invalid SPI Frequency: %d\n",
@@ -781,6 +920,8 @@ int main(int argc, char *argv[])
 	}
 
 	close(bios_fd);
+
+	check_ifd_version(image, size);
 
 	if (mode_dump)
 		dump_fd(image, size);
