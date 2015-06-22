@@ -21,7 +21,6 @@ chip soc/intel/braswell
 	register "PcdEnableHsuart0" = "0"
 	register "PcdEnableHsuart1" = "1"
 	register "PcdEnableAzalia" = "1"
-	register "PcdEnableSata" = "1"
 	register "PcdEnableXhci" = "1"
 	register "PcdEnableLpe" = "1"
 	register "PcdEnableDma0" = "1"
