@@ -1,7 +1,7 @@
 chip soc/intel/skylake
 
 	# SerialIO device modes
-	register "sio_device_mode" = "{ \
+	register "SerialIoDevMode" = "{ \
 		[PchSerialIoIndexI2C0]  = PchSerialIoPci, \
 		[PchSerialIoIndexI2C1]  = PchSerialIoPci, \
 		[PchSerialIoIndexI2C2]  = PchSerialIoPci, \

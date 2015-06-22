@@ -56,32 +56,6 @@ struct soc_intel_skylake_config {
 	uint32_t gen3_dec;
 	uint32_t gen4_dec;
 
-	/*
-	 * SerialIO device mode selection:
-	 *
-	 * Device index:
-	 * PchSerialIoIndexI2C0
-	 * PchSerialIoIndexI2C1
-	 * PchSerialIoIndexI2C2
-	 * PchSerialIoIndexI2C3
-	 * PchSerialIoIndexI2C4
-	 * PchSerialIoIndexI2C5
-	 * PchSerialIoIndexI2C6
-	 * PchSerialIoIndexSpi0
-	 * PchSerialIoIndexSpi1
-	 * PchSerialIoIndexUart0
-	 * PchSerialIoIndexUart1
-	 * PchSerialIoIndexUart2
-	 *
-	 * Mode select:
-	 * PchSerialIoDisabled
-	 * PchSerialIoAcpi
-	 * PchSerialIoPci
-	 * PchSerialIoAcpiHidden
-	 * PchSerialIoLegacyUart
-	 */
-	u8 sio_device_mode[PchSerialIoIndexMax];
-
 	/* Enable linear PCIe Root Port function numbers starting at zero */
 	uint8_t pcie_port_coalesce;
 
@@ -188,8 +162,31 @@ struct soc_intel_skylake_config {
 	/* SMBus */
 	u8 SmbusEnable;
 
-	/* Serial IO */
-	u8 SerialIoDevMode[11];
+	/*
+	 * SerialIO device mode selection:
+	 *
+	 * Device index:
+	 * PchSerialIoIndexI2C0
+	 * PchSerialIoIndexI2C1
+	 * PchSerialIoIndexI2C2
+	 * PchSerialIoIndexI2C3
+	 * PchSerialIoIndexI2C4
+	 * PchSerialIoIndexI2C5
+	 * PchSerialIoIndexI2C6
+	 * PchSerialIoIndexSpi0
+	 * PchSerialIoIndexSpi1
+	 * PchSerialIoIndexUart0
+	 * PchSerialIoIndexUart1
+	 * PchSerialIoIndexUart2
+	 *
+	 * Mode select:
+	 * PchSerialIoDisabled
+	 * PchSerialIoAcpi
+	 * PchSerialIoPci
+	 * PchSerialIoAcpiHidden
+	 * PchSerialIoLegacyUart
+	 */
+	u8 SerialIoDevMode[PchSerialIoIndexMax];
 
 	/* Camera */
 	u8 Cio2Enable;

@@ -96,7 +96,7 @@ void soc_memory_init_params(MEMORY_INIT_UPD *params)
 	config = dev->chip_info;
 
 	for (i = 0; i < PchSerialIoIndexMax; i++)
-		params->SerialIoDevMode[i] = config->sio_device_mode[i];
+		params->SerialIoDevMode[i] = config->SerialIoDevMode[i];
 
 	params->MmioSize = 0x800; /* 2GB in MB */
 	params->TsegSize = CONFIG_SMM_TSEG_SIZE;
