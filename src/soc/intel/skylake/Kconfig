@@ -35,7 +35,8 @@ config CPU_SPECIFIC_OPTIONS
 	select PCIEXP_ASPM
 	select PCIEXP_COMMON_CLOCK
 	select PCIEXP_CLK_PM
-	select PCIEXP_L1_SUB_STATE
+	# External devices not working on glados
+	#select PCIEXP_L1_SUB_STATE
 	select REG_SCRIPT
 	select RELOCATABLE_RAMSTAGE
 	select RELOCATABLE_MODULES
