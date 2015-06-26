@@ -14,6 +14,7 @@ romstage-y += iosf.c
 romstage-y += memmap.c
 romstage-y += stage_cache.c
 romstage-y += tsc_freq.c
+romstage-y += lpc_init.c
 
 ramstage-y += acpi.c
 ramstage-y += chip.c
@@ -51,6 +52,7 @@ smm-y += pmutil.c
 smm-y += smihandler.c
 smm-y += spi.c
 smm-y += tsc_freq.c
+smm-y += lpc_init.c
 
 INCLUDES += -Isrc/soc/intel/braswell/
 INCLUDES += -Isrc/soc/intel/braswell/include

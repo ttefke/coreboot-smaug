@@ -194,6 +194,7 @@ void soc_romstage_init(struct romstage_params *params)
 	/* Ensure the EC is in the right mode for recovery */
 	google_chromeec_early_init();
 #endif
+	lpc_init();
 }
 
 /* SOC initialization after RAM is enabled */

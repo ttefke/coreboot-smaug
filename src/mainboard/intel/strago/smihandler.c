@@ -28,6 +28,9 @@
 
 #include <soc/nvs.h>
 #include <soc/pm.h>
+#include <soc/gpio.h>
+
+#include "onboard.h"
 
 /* The wake gpio is SUS_GPIO[0]. */
 #define WAKE_GPIO_EN SUS_GPIO_EN0
@@ -139,6 +142,12 @@ void mainboard_smi_sleep(uint8_t slp_typ)
 	/* Clear pending events that may trigger immediate wake */
 	while (google_chromeec_get_event() != 0)
 		;
+
+	if (smm_get_gnvs()->bdid == BOARD_DVT) {
+		/* Set LPC lines to low power in S3/S5. */
+		if ((slp_typ == SLEEP_STATE_S3) || (slp_typ == SLEEP_STATE_S5))
+			lpc_set_low_power();
+	}
 #endif
 }
 
