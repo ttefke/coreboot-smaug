@@ -32,6 +32,18 @@ const char *smbios_mainboard_family(void);
 #define BIOS_EXT2_CHARACTERISTICS_TARGET  (1 << 2)
 
 typedef enum {
+	MEMORY_BUS_WIDTH_8 = 0,
+	MEMORY_BUS_WIDTH_16 = 1,
+	MEMORY_BUS_WIDTH_32 = 2,
+	MEMORY_BUS_WIDTH_64 = 3,
+	MEMORY_BUS_WIDTH_128 = 4,
+	MEMORY_BUS_WIDTH_256 = 5,
+	MEMORY_BUS_WIDTH_512 = 6,
+	MEMORY_BUS_WIDTH_1024 = 7,
+	MEMORY_BUS_WIDTH_MAX = 7,
+} smbios_memory_bus_width;
+
+typedef enum {
 	MEMORY_DEVICE_OTHER = 0x01,
 	MEMORY_DEVICE_UNKNOWN = 0x02,
 	MEMORY_DEVICE_DRAM = 0x03,

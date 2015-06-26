@@ -36,6 +36,7 @@
 #include <ramstage_cache.h>
 #include <reset.h>
 #include <romstage_handoff.h>
+#include <smbios.h>
 #include <soc/intel/common/mrc_cache.h>
 #include <soc/intel/common/util.h>
 #include <soc/pei_wrapper.h>
@@ -288,8 +289,10 @@ __attribute__((weak)) void mainboard_save_dimm_info(
 			memory_info_hob->Revision);
 		printk(BIOS_DEBUG, "    0x%02x: MemoryType\n",
 			memory_info_hob->MemoryType);
-		printk(BIOS_DEBUG, "  0x%04x: MemoryFrequencyInMHz\n",
+		printk(BIOS_DEBUG, "    %d: MemoryFrequencyInMHz\n",
 			memory_info_hob->MemoryFrequencyInMHz);
+		printk(BIOS_DEBUG, "    %d: DataWidth in bits\n",
+			memory_info_hob->DataWidth);
 		printk(BIOS_DEBUG, "    0x%02x: ErrorCorrectionType\n",
 			memory_info_hob->ErrorCorrectionType);
 		printk(BIOS_DEBUG, "    0x%02x: ChannelCount\n",
@@ -308,7 +311,7 @@ __attribute__((weak)) void mainboard_save_dimm_info(
 				printk(BIOS_DEBUG, "   DIMM %d\n", dimm);
 				printk(BIOS_DEBUG, "      0x%02x: DimmId\n",
 					dimm_info->DimmId);
-				printk(BIOS_DEBUG, "      0x%02x: SizeInMb\n",
+				printk(BIOS_DEBUG, "      %d: SizeInMb\n",
 					dimm_info->SizeInMb);
 			}
 		}
@@ -348,6 +351,33 @@ __attribute__((weak)) void mainboard_save_dimm_info(
 					channel_info->ChannelId;
 				mem_info->dimm[index].dimm_num =
 					dimm_info->DimmId;
+				switch (memory_info_hob->DataWidth) {
+				default:
+				case 8:
+					mem_info->dimm[index].bus_width =
+						MEMORY_BUS_WIDTH_8;
+					break;
+
+				case 16:
+					mem_info->dimm[index].bus_width =
+						MEMORY_BUS_WIDTH_16;
+					break;
+
+				case 32:
+					mem_info->dimm[index].bus_width =
+						MEMORY_BUS_WIDTH_32;
+					break;
+
+				case 64:
+					mem_info->dimm[index].bus_width =
+						MEMORY_BUS_WIDTH_64;
+					break;
+
+				case 128:
+					mem_info->dimm[index].bus_width =
+						MEMORY_BUS_WIDTH_128;
+					break;
+				}
 				index++;
 			}
 		}
