@@ -30,6 +30,7 @@
 #define PASSIVE_TEMPERATURE		95
 
 /* Tj_max value for calculating PECI CPU temperature */
-#define MAX_TEMPERATURE			105
+/* Tj_max can be read by MSR 0x1A2, BITS[23:16] */
+#define MAX_TEMPERATURE			100
 
 #endif /* _MAINBOARD_THERMAL_H_ */
