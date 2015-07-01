@@ -59,3 +59,15 @@ VB_SOURCE := 3rdparty/vboot
 subdirs-$(CONFIG_VBOOT_VERIFY_FIRMWARE) += vboot1
 subdirs-$(CONFIG_VBOOT2_VERIFY_FIRMWARE) += vboot2
 INCLUDES += -I$(VB_SOURCE)/firmware/include
+
+VB_GRAPHICS := 3rdparty/depthcharge/src/vboot/graphics
+
+define add_cbfs_file
+cbfs-files-y += $(1)
+$(1)-file := $$(VB_GRAPHICS)/$(1)
+$(1)-type := 0x50
+endef
+
+CBFS_FILES  = $(sort $(wildcard $(VB_GRAPHICS)/*.bmp))
+CBFS_FILES += $(sort $(wildcard $(VB_GRAPHICS)/*/*.bmp))
+$(foreach f,$(CBFS_FILES),$(eval $(call add_cbfs_file,$(subst $(VB_GRAPHICS)/,,$(f)))))
