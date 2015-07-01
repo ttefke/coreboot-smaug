@@ -43,7 +43,7 @@ static bl31_params_t bl31_params;
 static void *vboot_get_bl3x_entry(uint8_t index)
 {
 	void *entry_addr;
-	struct cbfs_media *media;
+	struct cbfs_media media;
 	struct firmware_component *component;
 	struct vboot_handoff *handoff = cbmem_find(CBMEM_ID_VBOOT_HANDOFF);
 
@@ -57,8 +57,8 @@ static void *vboot_get_bl3x_entry(uint8_t index)
 	if (!component->size)
 		return NULL;
 
-	init_default_cbfs_media(media);
-	entry_addr = cbfs_load_stage_by_offset(media, component->address);
+	init_default_cbfs_media(&media);
+	entry_addr = cbfs_load_stage_by_offset(&media, component->address);
 	if (entry_addr == CBFS_LOAD_ERROR)
 		return NULL;
 
