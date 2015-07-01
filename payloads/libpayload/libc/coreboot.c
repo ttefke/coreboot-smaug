@@ -220,6 +220,18 @@ static void cb_parse_spi_flash(void *ptr, struct sysinfo_t *info)
 	info->spi_flash.erase_cmd = flash->erase_cmd;
 }
 
+static void cb_parse_boot_media_params(unsigned char *ptr,
+				       struct sysinfo_t *info)
+{
+	const char name[] = "spi";
+	struct cb_boot_media_params *const bmp =
+			(struct cb_boot_media_params *)ptr;
+	if (!strcmp(bmp->name, name))
+		info->cbfs_header_offset = bmp->offset;
+	else
+		printf("Unknown boot media name: '%s'\n", bmp->name);
+}
+
 int cb_parse_header(void *addr, int len, struct sysinfo_t *info)
 {
 	struct cb_header *header;
@@ -371,6 +383,9 @@ int cb_parse_header(void *addr, int len, struct sysinfo_t *info)
 			break;
 		case CB_TAG_MTC:
 			cb_parse_mtc(ptr, info);
+			break;
+		case CB_TAG_BOOT_MEDIA_PARAMS:
+			cb_parse_boot_media_params(ptr, info);
 			break;
 		default:
 			cb_parse_arch_specific(rec, info);

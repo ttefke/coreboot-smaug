@@ -124,6 +124,7 @@ struct sysinfo_t {
 		uint32_t sector_size;
 		uint32_t erase_cmd;
 	} spi_flash;
+	uint32_t cbfs_header_offset;
 	uint64_t mtc_start;
 	uint32_t mtc_size;
 };
