@@ -292,6 +292,15 @@ struct lb_spi_flash {
 	uint32_t erase_cmd;
 };
 
+#define LB_TAG_BOOT_MEDIA_PARAMS 0x0030
+struct lb_boot_media_params {
+	uint32_t tag;
+	uint32_t size;
+	/* offset from the start of the media */
+	uint32_t offset;
+	char name[0];
+};
+
 #define LB_TAG_SERIALNO		0x002a
 #define MAX_SERIALNO_LENGTH	32
 

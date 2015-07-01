@@ -269,6 +269,20 @@ static void lb_board_id(struct lb_header *header)
 #endif
 }
 
+static void lb_boot_media_params(struct lb_header *header)
+{
+	struct lb_boot_media_params *bmp;
+	const char name[] = "spi";
+
+	bmp = (struct lb_boot_media_params *)lb_new_record(header);
+
+	bmp->tag = LB_TAG_BOOT_MEDIA_PARAMS;
+	bmp->size = sizeof(*bmp) + sizeof(name);
+	strcpy(bmp->name, name);
+	bmp->offset = cbfs_get_header_offset();
+	printk(BIOS_DEBUG, "boot media offset=%x\n", bmp->offset);
+}
+
 static void lb_ram_code(struct lb_header *header)
 {
 #if CONFIG_RAM_CODE_SUPPORT
@@ -640,6 +654,8 @@ unsigned long write_coreboot_table(
 #if IS_ENABLED(CONFIG_CHROMEOS_RAMOOPS)
 	lb_ramoops(head);
 #endif
+
+	lb_boot_media_params(head);
 
 	/* Remember where my valid memory ranges are */
 	return lb_table_fini(head);
