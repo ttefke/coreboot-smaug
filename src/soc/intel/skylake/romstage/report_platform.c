@@ -61,8 +61,9 @@ static struct {
 	u16 igdid;
 	const char *name;
 } igd_table[] = {
-	{ IGD_SKYLAKE_GT2_SULXM, "Skylake SULXM" },
-	{ IGD_SKYLAKE_GT2_SULTM, "Skylake SULTM" },
+	{ IGD_SKYLAKE_GT1_SULTM, "Skylake ULT GT1"},
+	{ IGD_SKYLAKE_GT2_SULXM, "Skylake ULX GT2" },
+	{ IGD_SKYLAKE_GT2_SULTM, "Skylake ULT GT2" },
 };
 
 static void report_cpu_info(void)

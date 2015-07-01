@@ -134,6 +134,7 @@ static struct device_operations igd_ops = {
 };
 
 static const unsigned short pci_device_ids[] = {
+	IGD_SKYLAKE_GT1_SULTM,
 	IGD_SKYLAKE_GT2_SULXM,
 	IGD_SKYLAKE_GT2_SULTM,
 	0,
