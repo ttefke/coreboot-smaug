@@ -49,23 +49,56 @@
 #include <string.h>
 #include <symbols.h>
 
-#if IS_ENABLED(CONFIG_MULTIPLE_CBFS_INSTANCES)
+static size_t cbfs_header_offset = 0;
+
 void cbfs_set_header_offset(size_t offset)
 {
+#if (IS_ENABLED(CONFIG_MULTIPLE_CBFS_INSTANCES))
 	_cbfs_header_offset[0] = offset;
-	LOG("header set to: %#zx\n", offset);
+	LOG("cbfs header offset is set to: %#zx\n", offset);
+#else
+	cbfs_header_offset = offset;
+#endif
 }
 
-static size_t get_header_offset(void)
+/*
+ * Get the offset of cbfs header of the 'default' media.
+ */
+size_t cbfs_get_header_offset(void)
 {
+#if (IS_ENABLED(CONFIG_MULTIPLE_CBFS_INSTANCES))
 	return _cbfs_header_offset[0];
-}
 #else
-static size_t get_header_offset(void)
-{
-	return 0;
-}
+	size_t offset;
+	struct cbfs_media media;
+
+	if (cbfs_header_offset)
+		return cbfs_header_offset;
+
+	if (init_default_cbfs_media(&media) != 0) {
+		ERROR("Failed to initialize default media.\n");
+		return 0;
+	}
+	media.open(&media);
+
+	/* TODO: allow negative offsets from the end of the CBFS image at media
+	 * layer (like libpayload) so we can combine these two cases. */
+	int32_t rel_offset;
+	size_t cbfs_top = CONFIG_CBFS_SIZE;
+	DEBUG("CBFS top at offset: 0x%zx\n", cbfs_top);
+	if (!media.read(&media, &rel_offset, cbfs_top - sizeof(int32_t),
+			 sizeof(int32_t))) {
+		ERROR("Could not read master header offset!\n");
+		media.close(&media);
+		return 0;
+	}
+	offset = cbfs_top + rel_offset;
+	cbfs_set_header_offset(offset);
+	DEBUG("CBFS header offset: 0x%zx/0x%x\n", offset, CONFIG_ROM_SIZE);
+	media.close(&media);
+	return cbfs_header_offset;
 #endif
+}
 
 /* returns a pointer to CBFS master header, or CBFS_HEADER_INVALID_ADDRESS
  *  on failure */
@@ -75,6 +108,12 @@ const struct cbfs_header *cbfs_get_header(struct cbfs_media *media)
 	const struct cbfs_header *header;
 	struct cbfs_media default_media;
 
+	if (IS_ENABLED(CONFIG_ARCH_X86))
+		offset = *(int32_t *)(uintptr_t)0xfffffffc;
+	else
+		/* Note here we deal with only the default media */
+		offset = cbfs_get_header_offset();
+
 	if (media == CBFS_DEFAULT_MEDIA) {
 		media = &default_media;
 		if (init_default_cbfs_media(media) != 0) {
@@ -83,32 +122,7 @@ const struct cbfs_header *cbfs_get_header(struct cbfs_media *media)
 		}
 	}
 	media->open(media);
-
-	/* TODO: allow negative offsets from the end of the CBFS image at media
-	 * layer (like libpayload) so we can combine these two cases. */
-	if (IS_ENABLED(CONFIG_ARCH_X86)) {
-		offset = *(int32_t *)(uintptr_t)0xfffffffc;
-		header = media->map(media, offset, sizeof(*header));
-	} else {
-
-		offset = get_header_offset();
-
-		if (!offset) {
-			int32_t rel_offset;
-			size_t cbfs_top = CONFIG_CBFS_SIZE;
-			DEBUG("CBFS top at offset: 0x%zx\n", cbfs_top);
-			if (!media->read(media, &rel_offset, cbfs_top -
-					 sizeof(int32_t),
-					 sizeof(int32_t))) {
-				ERROR("Could not read master header offset!\n");
-				media->close(media);
-				return CBFS_HEADER_INVALID_ADDRESS;
-			}
-			offset = cbfs_top + rel_offset;
-		}
-		header = media->map(media, offset, sizeof(*header));
-	}
-	DEBUG("CBFS header offset: 0x%zx/0x%x\n", offset, CONFIG_ROM_SIZE);
+	header = media->map(media, offset, sizeof(*header));
 	media->close(media);
 
 	if (header == CBFS_MEDIA_INVALID_MAP_ADDRESS) {
