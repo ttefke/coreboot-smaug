@@ -24,7 +24,6 @@
 #include <device/device.h>
 #include <device/pci.h>
 #include <device/pci_ids.h>
-#include <pc80/mc146818rtc.h>
 #include <pc80/isa-dma.h>
 #include <pc80/i8259.h>
 #include <arch/io.h>
@@ -46,12 +45,7 @@
 #include <soc/ramstage.h>
 #include <soc/pcr.h>
 #include <soc/intel/skylake/chip.h>
-static void pch_power_options(void);
-static void pch_rtc_init(void);
 
-#if IS_ENABLED(CONFIG_CHROMEOS)
-#include <vendorcode/google/chromeos/chromeos.h>
-#endif
 static void pch_enable_ioapic(struct device *dev)
 {
 	u32 reg32;
@@ -140,95 +134,6 @@ static void pch_pirq_init(device_t dev)
 	}
 }
 
-static void pch_power_options()
-{
-	u16 reg16;
-	const char *state;
-	/*PMC Controller Device 0x1F, Func 02*/
-	device_t dev = PCH_DEV_PMC;
-	/* Get the chip configuration */
-	config_t *config = dev->chip_info;
-	int pwr_on = CONFIG_MAINBOARD_POWER_ON_AFTER_POWER_FAIL;
-
-	/*
-	 * Which state do we want to goto after g3 (power restored)?
-	 * 0 == S0 Full On
-	 * 1 == S5 Soft Off
-	 *
-	 * If the option is not existent (Laptops), use Kconfig setting.
-	 */
-	/*TODO: cmos_layout.bin need to verify; cause wrong CMOS setup*/
-	//get_option(&pwr_on, "power_on_after_fail");
-	pwr_on = MAINBOARD_POWER_ON;
-	reg16 = pci_read_config16(dev, GEN_PMCON_B_1);
-	reg16 &= 0xfffe;
-	switch (pwr_on) {
-	case MAINBOARD_POWER_OFF:
-		reg16 |= 1;
-		state = "off";
-		break;
-	case MAINBOARD_POWER_ON:
-		reg16 &= ~1;
-		state = "on";
-		break;
-	case MAINBOARD_POWER_KEEP:
-		reg16 &= ~1;
-		state = "state keep";
-		break;
-	default:
-		state = "undefined";
-	}
-	pci_write_config16(dev, GEN_PMCON_B_1, reg16);
-	printk(BIOS_INFO, "Set power %s after power failure.\n", state);
-	/* GPE setup based on device tree configuration */
-	enable_all_gpe(config->gpe0_en_1, config->gpe0_en_2,
-			config->gpe0_en_3, config->gpe0_en_4);
-
-	/* SMI setup based on device tree configuration */
-	enable_alt_smi(config->ec_smi_gpio, config->alt_gp_smi_en);
-}
-
-#if IS_ENABLED(CONFIG_CHROMEOS_VBNV_CMOS)
-/*
- * Preserve Vboot NV data when clearing CMOS as it will
- * have been re-initialized already by Vboot firmware init.
- */
-/* TODO  Modify for SPT Taken care of in later patch */
-
-static void pch_cmos_init_preserve(int reset)
-{
-	uint8_t vbnv[CONFIG_VBNV_SIZE];
-	if (reset)
-		read_vbnv(vbnv);
-
-	cmos_init(reset);
-
-	if (reset)
-		save_vbnv(vbnv);
-}
-
-#endif
-
-static void pch_rtc_init()
-{
-	u8 reg8;
-	int rtc_failed;
-	/*PMC Controller Device 0x1F, Func 02*/
-	device_t dev = PCH_DEV_PMC;
-	reg8 = pci_read_config8(dev, GEN_PMCON_B_1);
-	rtc_failed = reg8 & RTC_BATTERY_DEAD;
-	if (rtc_failed) {
-		reg8 &= ~RTC_BATTERY_DEAD;
-		pci_write_config8(dev, GEN_PMCON_B_1, reg8);
-		printk(BIOS_DEBUG, "rtc_failed = 0x%x\n", rtc_failed);
-	}
-
-#if IS_ENABLED(CONFIG_CHROMEOS_VBNV_CMOS)
-	pch_cmos_init_preserve(rtc_failed);
-#else
-	cmos_init(rtc_failed);
-#endif
-}
 
 static const struct reg_script pch_misc_init_script[] = {
 	/* Setup NMI on errors, disable SERR */
@@ -249,7 +154,6 @@ static void lpc_init(struct device *dev)
 {
 	/* Legacy initialization */
 	isa_dma_init();
-	pch_rtc_init();
 	reg_script_run_on_dev(dev, pch_misc_init_script);
 
 	/* Interrupt configuration */
@@ -257,9 +161,6 @@ static void lpc_init(struct device *dev)
 	pch_pirq_init(dev);
 	setup_i8259();
 	i8259_configure_irq_trigger(9, 1);
-
-	/* Initialize power management */
-	pch_power_options();
 }
 
 static void pch_lpc_add_mmio_resources(device_t dev)

@@ -23,6 +23,7 @@
 #include <arch/ioapic.h>
 #include <arch/acpi.h>
 #include <cpu/cpu.h>
+#include <pc80/mc146818rtc.h>
 #include <reg_script.h>
 #include <string.h>
 #include <soc/iomap.h>
@@ -34,13 +35,17 @@
 #include <soc/ramstage.h>
 #include <soc/intel/skylake/chip.h>
 
+#if IS_ENABLED(CONFIG_CHROMEOS)
+#include <vendorcode/google/chromeos/chromeos.h>
+#endif
+
 static const struct reg_script pch_pmc_misc_init_script[] = {
 	/* Setup SLP signal assertion, SLP_S4=4s, SLP_S3=50ms */
-	REG_PCI_RMW16(GEN_PMCON_B_1, ~((3 << 4)|(1 << 10)),
+	REG_PCI_RMW16(GEN_PMCON_B, ~((3 << 4)|(1 << 10)),
 			(1 << 3)|(1 << 11)|(1 << 12)),
 	REG_IO_RMW32(ACPI_BASE_ADDRESS + PM1_CNT, ~SLP_TYP, SCI_EN),
 	/* Indicate DRAM init done for MRC */
-	REG_PCI_OR8(GEN_PMCON_A_2, (1 << 7)),
+	REG_PCI_OR8(GEN_PMCON_A, (1 << 23)),
 	REG_SCRIPT_END
 };
 
@@ -54,7 +59,7 @@ static void pch_pmc_add_mmio_resources(device_t dev)
 	 * statically. Above the PCR base.
 	 */
 	if (PCH_PWRM_BASE_ADDRESS < default_decode_base) {
-		res = new_resource(dev, PWRM);
+		res = new_resource(dev, PWRMBASE);
 		res->base = PCH_PWRM_BASE_ADDRESS;
 		/* 64KB PMC size */
 		res->size = 0x10000;
@@ -75,7 +80,7 @@ static void pch_pmc_add_io_resource(device_t dev, u16 base, u16 size, int index)
 static void pch_pmc_add_io_resources(device_t dev)
 {
 	/* PMBASE */
-	pch_pmc_add_io_resource(dev, ACPI_BASE_ADDRESS, ACPI_BASE_SIZE, PMBASE);
+	pch_pmc_add_io_resource(dev, ACPI_BASE_ADDRESS, ACPI_BASE_SIZE, ABASE);
 }
 
 static void pch_pmc_read_resources(device_t dev)
@@ -99,10 +104,103 @@ static void pch_set_acpi_mode(void)
 	}
 }
 
+#if IS_ENABLED(CONFIG_CHROMEOS_VBNV_CMOS)
+/*
+ * Preserve Vboot NV data when clearing CMOS as it will
+ * have been re-initialized already by Vboot firmware init.
+ */
+static void pch_cmos_init_preserve(int reset)
+{
+	uint8_t vbnv[CONFIG_VBNV_SIZE];
+	if (reset)
+		read_vbnv(vbnv);
+
+	cmos_init(reset);
+
+	if (reset)
+		save_vbnv(vbnv);
+}
+#endif
+
+static void pch_rtc_init(void)
+{
+	u8 reg8;
+	int rtc_failed;
+	/*PMC Controller Device 0x1F, Func 02*/
+	device_t dev = PCH_DEV_PMC;
+	reg8 = pci_read_config8(dev, GEN_PMCON_B);
+	rtc_failed = reg8 & RTC_BATTERY_DEAD;
+	if (rtc_failed) {
+		reg8 &= ~RTC_BATTERY_DEAD;
+		pci_write_config8(dev, GEN_PMCON_B, reg8);
+		printk(BIOS_DEBUG, "rtc_failed = 0x%x\n", rtc_failed);
+	}
+
+#if IS_ENABLED(CONFIG_CHROMEOS_VBNV_CMOS)
+	pch_cmos_init_preserve(rtc_failed);
+#else
+	cmos_init(rtc_failed);
+#endif
+}
+
+static void pch_power_options(void)
+{
+	u16 reg16;
+	const char *state;
+	/*PMC Controller Device 0x1F, Func 02*/
+	device_t dev = PCH_DEV_PMC;
+	/* Get the chip configuration */
+	config_t *config = dev->chip_info;
+	int pwr_on = CONFIG_MAINBOARD_POWER_ON_AFTER_POWER_FAIL;
+
+	/*
+	 * Which state do we want to goto after g3 (power restored)?
+	 * 0 == S0 Full On
+	 * 1 == S5 Soft Off
+	 *
+	 * If the option is not existent (Laptops), use Kconfig setting.
+	 */
+	/*TODO: cmos_layout.bin need to verify; cause wrong CMOS setup*/
+	//get_option(&pwr_on, "power_on_after_fail");
+	pwr_on = MAINBOARD_POWER_ON;
+	reg16 = pci_read_config16(dev, GEN_PMCON_B);
+	reg16 &= 0xfffe;
+	switch (pwr_on) {
+	case MAINBOARD_POWER_OFF:
+		reg16 |= 1;
+		state = "off";
+		break;
+	case MAINBOARD_POWER_ON:
+		reg16 &= ~1;
+		state = "on";
+		break;
+	case MAINBOARD_POWER_KEEP:
+		reg16 &= ~1;
+		state = "state keep";
+		break;
+	default:
+		state = "undefined";
+	}
+	pci_write_config16(dev, GEN_PMCON_B, reg16);
+	printk(BIOS_INFO, "Set power %s after power failure.\n", state);
+	/* GPE setup based on device tree configuration */
+	enable_all_gpe(config->gpe0_en_1, config->gpe0_en_2,
+			config->gpe0_en_3, config->gpe0_en_4);
+
+	/* SMI setup based on device tree configuration */
+	enable_alt_smi(config->ec_smi_gpio, config->alt_gp_smi_en);
+}
+
 static void pmc_init(struct device *dev)
 {
+	pch_rtc_init();
+
+	/* Initialize power management */
+	pch_power_options();
+
 	reg_script_run_on_dev(dev, pch_pmc_misc_init_script);
 	pch_set_acpi_mode();
+
 }
 
 static struct device_operations device_ops = {

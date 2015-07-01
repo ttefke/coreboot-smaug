@@ -172,12 +172,12 @@ static void southbridge_smi_sleep(void)
 		 * Always set the flag in case CMOS was changed on runtime. For
 		 * "KEEP", switch to "OFF" - KEEP is software emulated
 		 */
-		reg8 = pci_read_config8(PCH_DEV_PMC, GEN_PMCON_B_1);
+		reg8 = pci_read_config8(PCH_DEV_PMC, GEN_PMCON_B);
 		if (s5pwr == MAINBOARD_POWER_ON)
 			reg8 &= ~1;
 		else
 			reg8 |= 1;
-		pci_write_config8(PCH_DEV_PMC, GEN_PMCON_B_1, reg8);
+		pci_write_config8(PCH_DEV_PMC, GEN_PMCON_B, reg8);
 
 		/* also iterates over all bridges on bus 0 */
 		busmaster_disable_on_bus(0);

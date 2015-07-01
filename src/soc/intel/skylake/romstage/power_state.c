@@ -74,7 +74,7 @@ static int prev_sleep_state(struct chipset_power_state *ps)
 		outl(ps->pm1_cnt & ~(SLP_TYP), ACPI_BASE_ADDRESS + PM1_CNT);
 	}
 
-	if (ps->gen_pmcon3 & (PWR_FLR | SUS_PWR_FLR))
+	if (ps->gen_pmcon_b & (PWR_FLR | SUS_PWR_FLR))
 		prev_sleep_state = SLEEP_STATE_S5;
 
 	return prev_sleep_state;
@@ -95,8 +95,8 @@ static void dump_power_state(struct chipset_power_state *ps)
 	       ps->gpe0_en[0], ps->gpe0_en[1],
 	       ps->gpe0_en[2], ps->gpe0_en[3]);
 
-	printk(BIOS_DEBUG, "GEN_PMCON: %04x %04x %04x\n",
-	       ps->gen_pmcon1, ps->gen_pmcon2, ps->gen_pmcon3);
+	printk(BIOS_DEBUG, "GEN_PMCON: %04x %04x\n",
+	       ps->gen_pmcon_a, ps->gen_pmcon_b);
 
 	printk(BIOS_DEBUG, "Previous Sleep State: S%d\n",
 	       ps->prev_sleep_state);
@@ -105,13 +105,16 @@ static void dump_power_state(struct chipset_power_state *ps)
 /* Fill power state structure from ACPI PM registers */
 struct chipset_power_state *fill_power_state(void)
 {
+	uint16_t tcobase;
 	struct chipset_power_state *ps = car_get_var_ptr(&power_state);
+
+	tcobase = pmc_tco_regs();
 
 	ps->pm1_sts = inw(ACPI_BASE_ADDRESS + PM1_STS);
 	ps->pm1_en = inw(ACPI_BASE_ADDRESS + PM1_EN);
 	ps->pm1_cnt = inl(ACPI_BASE_ADDRESS + PM1_CNT);
-	ps->tco1_sts = inw(ACPI_BASE_ADDRESS + TCO1_STS);
-	ps->tco2_sts = inw(ACPI_BASE_ADDRESS + TCO2_STS);
+	ps->tco1_sts = inw(tcobase + TCO1_STS);
+	ps->tco2_sts = inw(tcobase + TCO2_STS);
 	ps->gpe0_sts[0] = inl(ACPI_BASE_ADDRESS + GPE0_STS(0));
 	ps->gpe0_sts[1] = inl(ACPI_BASE_ADDRESS + GPE0_STS(1));
 	ps->gpe0_sts[2] = inl(ACPI_BASE_ADDRESS + GPE0_STS(2));
@@ -121,9 +124,8 @@ struct chipset_power_state *fill_power_state(void)
 	ps->gpe0_en[2] = inl(ACPI_BASE_ADDRESS + GPE0_EN(2));
 	ps->gpe0_en[3] = inl(ACPI_BASE_ADDRESS + GPE0_EN(3));
 
-	ps->gen_pmcon1 = pci_read_config16(PCH_DEV_LPC, GEN_PMCON_A_1);
-	ps->gen_pmcon2 = pci_read_config16(PCH_DEV_LPC, GEN_PMCON_A_2);
-	ps->gen_pmcon3 = pci_read_config16(PCH_DEV_LPC, GEN_PMCON_B_1);
+	ps->gen_pmcon_a = pci_read_config16(PCH_DEV_PMC, GEN_PMCON_A);
+	ps->gen_pmcon_b = pci_read_config16(PCH_DEV_PMC, GEN_PMCON_B);
 
 	ps->prev_sleep_state = prev_sleep_state(ps);
 

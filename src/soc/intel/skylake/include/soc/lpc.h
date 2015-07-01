@@ -22,9 +22,8 @@
 #define _SKYLAKE_LPC_H_
 
 /* PCI Configuration Space (D31:F0): LPC */
-#define SERIRQ_CNTL		0x64
-#define PMBASE			0x40
-#define ACPI_CNTL		0x44
+#define ABASE			0x40
+#define ACNTL			0x44
 #define  ACPI_EN		(1 << 7)
 #define  SCI_IRQ_SEL		(7 << 0)
 #define  SCIS_IRQ9		0
@@ -34,22 +33,7 @@
 #define  SCIS_IRQ21		5
 #define  SCIS_IRQ22		6
 #define  SCIS_IRQ23		7
-#define GPIOBASE		0x48
-#define BIOS_CNTL		0xdc
-#define GPIO_BASE		0x48 /* LPC GPIO Base Address Register */
-#define GPIO_CNTL		0x4C /* LPC GPIO Control Register */
-#define  GPIO_EN		(1 << 4)
-#define GPIO_ROUT		0xb8
-
-#define PIRQA_ROUT		0x60
-#define PIRQB_ROUT		0x61
-#define PIRQC_ROUT		0x62
-#define PIRQD_ROUT		0x63
-#define PIRQE_ROUT		0x68
-#define PIRQF_ROUT		0x69
-#define PIRQG_ROUT		0x6A
-#define PIRQH_ROUT		0x6B
-
+#define SERIRQ_CNTL		0x64
 #define LPC_IO_DEC		0x80 /* IO Decode Ranges Register */
 #define  COMA_RANGE		0x0 /* 0x3F8 - 0x3FF COM1*/
 #define  COMB_RANGE		0x1 /* 0x2F8 - 0x2FF COM2*/
@@ -69,6 +53,5 @@
 #define LPC_GEN3_DEC		0x8c /* LPC IF Generic Decode Range 3 */
 #define LPC_GEN4_DEC		0x90 /* LPC IF Generic Decode Range 4 */
 #define LGMR			0x98 /* LPC Generic Memory Range */
-#define RCBA			0xf0 /* Root Complex Register Block */
-
+#define BIOS_CNTL		0xdc
 #endif

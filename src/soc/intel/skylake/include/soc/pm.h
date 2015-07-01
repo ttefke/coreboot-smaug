@@ -77,12 +77,6 @@
 #define  SWGPE_CTRL		(1 << 1)
 #define DEVACT_STS		0x44
 #define PM2_CNT			0x50
-#define TCO1_CNT		0x60
-#define  TCO_TMR_HLT		(1 << 11)
-#define TCO1_STS		0x64
-#define  DMISCI_STS		(1 << 9)
-#define TCO2_STS		0x66
-#define  TCO2_STS_SECOND_TO	(1 << 1)
 
 #define GPE0_REG_MAX		4
 #define GPE0_REG_SIZE		32
@@ -130,9 +124,8 @@ struct chipset_power_state {
 	uint16_t tco2_sts;
 	uint32_t gpe0_sts[4];
 	uint32_t gpe0_en[4];
-	uint16_t gen_pmcon1;
-	uint16_t gen_pmcon2;
-	uint16_t gen_pmcon3;
+	uint16_t gen_pmcon_a;
+	uint16_t gen_pmcon_b;
 	int prev_sleep_state;
 	uint16_t hsio_version;
 	uint16_t hsio_checksum;
@@ -170,5 +163,10 @@ void disable_gpe(uint32_t mask);
 
 /* Return the selected ACPI SCI IRQ */
 int acpi_sci_irq(void);
+
+/* Get base address PMC memory mapped registers. */
+uint8_t *pmc_mmio_regs(void);
+/* Get base address of TCO I/O registers. */
+uint16_t pmc_tco_regs(void);
 
 #endif

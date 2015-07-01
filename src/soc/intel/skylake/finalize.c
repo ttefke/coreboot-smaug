@@ -27,8 +27,8 @@
 #include <spi-generic.h>
 #include <stdlib.h>
 #include <soc/pci_devs.h>
-#include <soc/pch.h>
 #include <soc/pcr.h>
+#include <soc/pm.h>
 #include <soc/pmc.h>
 #include <soc/spi.h>
 #include <soc/systemagent.h>
@@ -37,13 +37,13 @@
 static void pch_finalize_script(void)
 {
 	device_t dev;
-	uint32_t reg32, hsfs, tcobase;
+	uint32_t reg32, hsfs;
 	void *spibar = get_spi_bar();
 	u8 reg8;
-	u16 reg16;
-	u16 tcocnt = 0;
-	uint32_t pmcbase;
-	u32 pmsyncreg = 0;
+	u16 tcobase;
+	u16 tcocnt;
+	uint8_t *pmcbase;
+	u32 pmsyncreg;
 
 	/* Set SPI opcode menu */
 	write16(spibar + SPIBAR_PREOP, SPI_OPPREFIX);
@@ -56,32 +56,27 @@ static void pch_finalize_script(void)
 	write32(spibar + SPIBAR_HSFS, hsfs);
 
 	/*TCO Lock down*/
-	dev = PCH_DEV_SMBUS;
-	reg16 = pci_read_config16(dev, PCH_SMBUS_TCOBASE);
-	tcobase = reg16 & PCH_SMBUS_TCOBASE_BAR;
-	tcocnt = inw(tcobase + PCH_TCO1_CNT);
-	tcocnt |= PCH_TCO_LOCK;
-	outw(tcocnt, tcobase + PCH_TCO1_CNT);
+	tcobase = pmc_tco_regs();
+	tcocnt = inw(tcobase + TCO1_CNT);
+	tcocnt |= TCO_LOCK;
+	outw(tcocnt, tcobase + TCO1_CNT);
 
-	/*Global SMI Lock*/
-	/*PMC Controller Device 0x1F, Func 02*/
+	/* Global SMI Lock */
 	dev = PCH_DEV_PMC;
-	reg8 = pci_read_config8(dev, GEN_PMCON_A_1);
+	reg8 = pci_read_config8(dev, GEN_PMCON_A);
 	reg8 |= SMI_LOCK;
-	pci_write_config8(dev, GEN_PMCON_A_1, reg8);
+	pci_write_config8(dev, GEN_PMCON_A, reg8);
 
-	/*GEN_PMCON Lock*/
-	reg8 = pci_read_config8(dev, GEN_PMCON_LOCK_B_2);
-	reg8 |= (SLP_STR_POL_LOCK | ACPI_BASE_LOCK);
-	pci_write_config8(dev, GEN_PMCON_LOCK_B_2, reg8);
+	/* Lock down ABASE and sleep stretching policy */
+	reg32 = pci_read_config32(dev, GEN_PMCON_B);
+	reg32 |= (SLP_STR_POL_LOCK | ACPI_BASE_LOCK);
+	pci_write_config32(dev, GEN_PMCON_B, reg32);
 
 	/* PMSYNC */
-	dev = PCH_DEV_PMC;
-	reg32 = pci_read_config32(dev, PCH_MBASE);
-	pmcbase = reg32 & B_PCH_PMC_BAR0_MASK;
-	pmsyncreg = read32(&pmcbase + PCH_PWRM_PMSYNC_TPR_CONFIG);
+	pmcbase = pmc_mmio_regs();
+	pmsyncreg = read32(pmcbase + PMSYNC_TPR_CFG);
 	pmsyncreg |= PMSYNC_LOCK;
-	write32(&pmcbase + PCH_PWRM_PMSYNC_TPR_CONFIG, pmsyncreg);
+	write32(pmcbase + PMSYNC_TPR_CFG, pmsyncreg);
 }
 
 static void skylake_finalize(void *unused)

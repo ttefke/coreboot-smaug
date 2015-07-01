@@ -18,9 +18,9 @@
 #define _SKYLAKE_PMC_H_
 
 /* PCI Configuration Space (D31:F2): PMC */
-#define PMBASE			0x40
-#define ACPI_CNTL		0x44
-#define PWRM			0x48
+#define ABASE			0x40
+#define ACTL			0x44
+#define  PWRM_EN		(1 << 8)
 #define  ACPI_EN		(1 << 7)
 #define  SCI_IRQ_SEL		(7 << 0)
 #define  SCIS_IRQ9		0
@@ -30,26 +30,42 @@
 #define  SCIS_IRQ21		5
 #define  SCIS_IRQ22		6
 #define  SCIS_IRQ23		7
-
-/* Power Management */
-#define GEN_PMCON_A_1		0xa0
+#define PWRMBASE		0x48
+#define GEN_PMCON_A		0xa0
 #define  SMI_LOCK		(1 << 4)
-#define GEN_PMCON_A_2		0xa2
-#define  SYSTEM_RESET_STS	(1 << 4)
-#define  THERMTRIP_STS		(1 << 3)
-#define  SYSPWR_FLR		(1 << 1)
-#define  PWROK_FLR		(1 << 0)
-#define GEN_PMCON_B_1		0xa4
+#define GEN_PMCON_B		0xa4
+#define  SLP_STR_POL_LOCK	(1 << 18)
+#define  ACPI_BASE_LOCK		(1 << 17)
 #define  SUS_PWR_FLR		(1 << 14)
-#define  GEN_RST_STS		(1 << 9)
+#define  HOST_RST_STS		(1 << 9)
 #define  RTC_BATTERY_DEAD	(1 << 2)
 #define  PWR_FLR		(1 << 1)
 #define  SLEEP_AFTER_POWER_FAIL	(1 << 0)
-#define GEN_PMCON_LOCK_B_2	0xa6
-#define  SLP_STR_POL_LOCK	(1 << 2)
-#define  ACPI_BASE_LOCK		(1 << 1)
-#define PMIR			0xac
-#define  PMIR_CF9LOCK		(1 << 31)
-#define  PMIR_CF9GR		(1 << 20)
+#define ETR3			0xac
+#define  ETR3_CF9LOCK		(1 << 31)
+#define  ETR3_CF9GR		(1 << 20)
+
+/* Memory mapped IO registers in PMC */
+#define S3_PWRGATE_POL		0x28
+#define  S3DC_GATE_SUS		(1 << 1)
+#define  S3AC_GATE_SUS		(1 << 0)
+#define S4_PWRGATE_POL		0x2c
+#define  S4DC_GATE_SUS		(1 << 1)
+#define  S4AC_GATE_SUS		(1 << 0)
+#define S5_PWRGATE_POL		0x30
+#define  S5DC_GATE_SUS		(1 << 15)
+#define  S5AC_GATE_SUS		(1 << 14)
+#define PMSYNC_TPR_CFG		0xc4
+#define  PMSYNC_LOCK		(1 << 31)
+
+
+/* TCO registers and fields live behind TCOBASE I/O bar in SMBus device. */
+#define TCO1_STS			0x04
+#define TCO2_STS			0x06
+#define  TCO2_STS_SECOND_TO		0x02
+#define  TCO2_STS_BOOT		0x04
+#define TCO1_CNT			0x08
+#define  TCO_LOCK			(1 << 12)
+#define  TCO_TMR_HLT			(1 << 11)
 
 #endif

@@ -76,25 +76,16 @@ static void pch_log_wake_source(struct chipset_power_state *ps)
 
 static void pch_log_power_and_resets(struct chipset_power_state *ps)
 {
-	/* Thermal Trip Status */
-	if (ps->gen_pmcon2 & THERMTRIP_STS)
-		elog_add_event(ELOG_TYPE_THERM_TRIP);
+	/* TODO: Thermal Trip Status. There is a thermal device and
+	 * other status registers. */
 
 	/* PWR_FLR Power Failure */
-	if (ps->gen_pmcon2 & PWROK_FLR)
+	if (ps->gen_pmcon_b & PWR_FLR)
 		elog_add_event(ELOG_TYPE_POWER_FAIL);
 
 	/* SUS Well Power Failure */
-	if (ps->gen_pmcon3 & SUS_PWR_FLR)
+	if (ps->gen_pmcon_b & SUS_PWR_FLR)
 		elog_add_event(ELOG_TYPE_SUS_POWER_FAIL);
-
-	/* SYS_PWROK Failure */
-	if (ps->gen_pmcon2 & SYSPWR_FLR)
-		elog_add_event(ELOG_TYPE_SYS_PWROK_FAIL);
-
-	/* PWROK Failure */
-	if (ps->gen_pmcon2 & PWROK_FLR)
-		elog_add_event(ELOG_TYPE_PWROK_FAIL);
 
 	/* TCO Timeout */
 	if (ps->prev_sleep_state != 3 &&
@@ -106,15 +97,11 @@ static void pch_log_power_and_resets(struct chipset_power_state *ps)
 		elog_add_event(ELOG_TYPE_POWER_BUTTON_OVERRIDE);
 
 	/* RTC reset */
-	if (ps->gen_pmcon3 & RTC_BATTERY_DEAD)
+	if (ps->gen_pmcon_b & RTC_BATTERY_DEAD)
 		elog_add_event(ELOG_TYPE_RTC_RESET);
 
-	/* System Reset Status (reset button pushed) */
-	if (ps->gen_pmcon2 & SYSTEM_RESET_STS)
-		elog_add_event(ELOG_TYPE_RESET_BUTTON);
-
-	/* General Reset Status */
-	if (ps->gen_pmcon3 & GEN_RST_STS)
+	/* Host Reset Status */
+	if (ps->gen_pmcon_b & HOST_RST_STS)
 		elog_add_event(ELOG_TYPE_SYSTEM_RESET);
 
 	/* ACPI Wake Event */

@@ -29,12 +29,13 @@
 #include <device/pci_def.h>
 #include <console/console.h>
 #include <stdlib.h>
+#include <soc/gpio.h>
 #include <soc/iomap.h>
 #include <soc/lpc.h>
 #include <soc/pci_devs.h>
 #include <soc/pm.h>
-#include <soc/pch.h>
-#include <soc/gpio.h>
+#include <soc/pmc.h>
+#include <soc/smbus.h>
 
 /* Print status bits with descriptive names */
 static void print_status_bits(u32 status, const char *bit_names[])
@@ -272,26 +273,23 @@ void enable_alt_smi(int gpionum, u32 mask)
 /* Clear TCO status and return events that are enabled and active */
 static u32 reset_tco_status(void)
 {
-	device_t dev = PCH_DEV_SMBUS;
-	u16 reg16;
 	u16 tco1_sts;
 	u16 tco2_sts;
-	uint32_t tcobase;
+	u16 tcobase;
 
-	reg16 = pci_read_config16(dev, PCH_SMBUS_TCOBASE);
-	tcobase = reg16 & PCH_SMBUS_TCOBASE_BAR;
+	tcobase = pmc_tco_regs();
+
 	/* TCO Status 2 register*/
-	tco2_sts = inw(tcobase + PCH_TCO2_STS);
-	tco2_sts |= (PCH_TCO2_STS_SEC_TO | PCH_TCO2_STS_BOOT);
-	outw(tco2_sts, tcobase + PCH_TCO2_STS);
+	tco2_sts = inw(tcobase + TCO2_STS);
+	tco2_sts |= (TCO2_STS_SECOND_TO | TCO2_STS_BOOT);
+	outw(tco2_sts, tcobase + TCO2_STS);
 
 	/* TCO Status 1 register*/
-	tco1_sts = inw(tcobase + PCH_TCO1_STS);
+	tco1_sts = inw(tcobase + TCO1_STS);
 
 	/* Clear SECOND_TO_STS bit */
-	if (tco2_sts & PCH_TCO2_STS_SEC_TO)
-		outw(tco2_sts & ~PCH_TCO2_STS_SEC_TO,
-			tcobase + PCH_TCO2_STS);
+	if (tco2_sts & TCO2_STS_SECOND_TO)
+		outw(tco2_sts & ~TCO2_STS_SECOND_TO, tcobase + TCO2_STS);
 
 	return (tco2_sts << 16) | tco1_sts;
 }
@@ -442,7 +440,7 @@ void disable_gpe(u32 mask)
 
 int acpi_sci_irq(void)
 {
-	int scis = pci_read_config32(PCH_DEV_LPC, ACPI_CNTL) & SCI_IRQ_SEL;
+	int scis = pci_read_config32(PCH_DEV_PMC, ACTL) & SCI_IRQ_SEL;
 	int sci_irq = 9;
 
 	/* Determine how SCI is routed. */
@@ -466,4 +464,27 @@ int acpi_sci_irq(void)
 
 	printk(BIOS_DEBUG, "SCI is IRQ%d\n", sci_irq);
 	return sci_irq;
+}
+
+uint8_t *pmc_mmio_regs(void)
+{
+	uint32_t reg32;
+
+	reg32 = pci_read_config32(PCH_DEV_PMC, PWRMBASE);
+
+	/* 4KiB alignment. */
+	reg32 &= ~0xfff;
+
+	return (void *)(uintptr_t)reg32;
+}
+
+uint16_t pmc_tco_regs(void)
+{
+	uint16_t reg16;
+
+	reg16 = pci_read_config16(PCH_DEV_SMBUS, TCOBASE);
+
+	reg16 &= ~0x1f;
+
+	return reg16;
 }

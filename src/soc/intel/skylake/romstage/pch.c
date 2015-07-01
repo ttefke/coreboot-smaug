@@ -29,6 +29,7 @@
 #include <soc/pcr.h>
 #include <soc/pci_devs.h>
 #include <soc/pm.h>
+#include <soc/pmc.h>
 #include <soc/romstage.h>
 #include <soc/smbus.h>
 #include <soc/intel/skylake/chip.h>
@@ -86,24 +87,22 @@ static void pch_enable_lpc(void)
 static void pch_device_init(void)
 {
 	device_t dev;
-	u32 reg32 = 0;
-	u16 reg16 = 0;
-	uint32_t tcobase;
-	u16 tcocnt = 0;
+	u32 reg32;
+	u16 tcobase;
+	u16 tcocnt;
 
-	/* Enable ACPI in PMC Config*/
 	dev = PCH_DEV_PMC;
-	reg32 = pci_read_config32(dev, ACPI_CNTL);
-	reg32 |= ACPI_EN;
-	pci_write_config32(dev, ACPI_CNTL, reg32);
+
+	/* Enable ACPI and PMC mmio regs in PMC Config */
+	reg32 = pci_read_config32(dev, ACTL);
+	reg32 |= ACPI_EN | PWRM_EN;
+	pci_write_config32(dev, ACTL, reg32);
 
 	/* TCO timer halt */
-	dev = PCH_DEV_SMBUS;
-	reg16 = pci_read_config16(dev, PCH_SMBUS_TCOBASE);
-	tcobase = reg16 & PCH_SMBUS_TCOBASE_BAR;
-	tcocnt = inw(tcobase + PCH_TCO1_CNT);
+	tcobase = pmc_tco_regs();
+	tcocnt = inw(tcobase + TCO1_CNT);
 	tcocnt |= TCO_TMR_HLT;
-	outw(tcocnt, tcobase + PCH_TCO1_CNT);
+	outw(tcocnt, tcobase + TCO1_CNT);
 
 	/* Enable upper 128 bytes of CMOS */
 	pcr_andthenor32(PID_RTC, R_PCH_PCR_RTC_CONF, (u32)~0,
