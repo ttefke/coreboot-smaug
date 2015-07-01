@@ -109,6 +109,10 @@
 		. += sz;
 #endif
 
-#define CBFS_HEADER_OFFSET(addr) REGION(cbfs_header_offset, addr, 4, 4)
+/* space used to store cbfs header offset, which is 4 bytes */
+#define CBFS_HEADER_OFFSET(addr, sz) \
+	REGION(cbfs_header_offset, addr, sz, 4) \
+	_ = ASSERT(sz == 4, \
+		   STR(cbfs_header_offset must be exactly 4 bytes (sz)));
 
 #endif /* __MEMLAYOUT_H */
