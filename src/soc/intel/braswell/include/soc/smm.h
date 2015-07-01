@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_SMM_H_
-#define _BRASWELL_SMM_H_
+#ifndef _SOC_SMM_H_
+#define _SOC_SMM_H_
 
 #if !defined(__PRE_RAM__) && !defined(__SMM___)
 #include <stdint.h>
@@ -34,4 +34,4 @@ enum {
 	SMM_SAVE_PARAM_COUNT
 };
 
-#endif /* _BRASWELL_SMM_H_ */
+#endif /* _SOC_SMM_H_ */

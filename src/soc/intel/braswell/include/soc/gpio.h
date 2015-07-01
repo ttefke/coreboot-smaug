@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_GPIO_H_
-#define _BRASWELL_GPIO_H_
+#ifndef _SOC_GPIO_H_
+#define _SOC_GPIO_H_
 
 #include <stdint.h>
 #include <arch/io.h>
@@ -576,4 +576,4 @@ uint32_t *gpio_pad_config_reg(uint8_t community, uint8_t pad);
 void lpc_init(void);
 void lpc_set_low_power(void);
 
-#endif /* _BRASWELL_GPIO_H_ */
+#endif /* _SOC_GPIO_H_ */

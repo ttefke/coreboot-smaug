@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_DEVICE_NVS_H_
-#define _BRASWELL_DEVICE_NVS_H_
+#ifndef _SOC_DEVICE_NVS_H_
+#define _SOC_DEVICE_NVS_H_
 
 #include <stdint.h>
 
@@ -65,4 +65,4 @@ typedef struct {
 	u32	lpe_fw; /* LPE Firmware */
 } __attribute__((packed)) device_nvs_t;
 
-#endif	/* _BRASWELL_DEVICE_NVS_H_ */
+#endif	/* _SOC_DEVICE_NVS_H_ */

@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef _BRASWELL_IOSF_H_
-#define _BRASWELL_IOSF_H_
+#ifndef _SOC_IOSF_H_
+#define _SOC_IOSF_H_
 
 #include <stdint.h>
 #ifndef __PRE_RAM__
@@ -194,4 +194,4 @@ void reg_script_write_iosf(struct reg_script_context *ctx);
 	REG_SCRIPT_IOSF(POLL, unit_, reg_, mask_, value_, timeout_)
 #endif	/* __PRE_RAM */
 
-#endif /* _BRASWELL_IOSF_H_ */
+#endif /* _SOC_IOSF_H_ */

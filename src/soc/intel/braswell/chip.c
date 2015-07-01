@@ -48,7 +48,7 @@ static struct device_operations cpu_bus_ops = {
 	.read_resources   = cpu_bus_noop,
 	.set_resources    = cpu_bus_noop,
 	.enable_resources = cpu_bus_noop,
-	.init             = braswell_init_cpus
+	.init             = soc_init_cpus
 };
 
 
@@ -324,7 +324,7 @@ void soc_display_silicon_init_params(const SILICON_INIT_UPD *old,
 static void soc_init(void *chip_info)
 {
 	printk(BIOS_SPEW, "%s/%s\n", __FILE__, __func__);
-	braswell_init_pre_device(chip_info);
+	soc_init_pre_device(chip_info);
 }
 
 struct chip_operations soc_intel_braswell_ops = {

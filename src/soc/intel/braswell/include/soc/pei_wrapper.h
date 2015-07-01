@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BROADWELL_PEI_WRAPPER_H_
-#define _BROADWELL_PEI_WRAPPER_H_
+#ifndef _SOC_PEI_WRAPPER_H_
+#define _SOC_PEI_WRAPPER_H_
 
 #include <soc/pei_data.h>
 

@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_LPC_H_
-#define _BRASWELL_LPC_H_
+#ifndef _SOC_LPC_H_
+#define _SOC_LPC_H_
 
 /* PCI config registers in LPC bridge. */
 #define REVID		0x08
@@ -38,7 +38,7 @@
 #define RID_A_STEPPING_START 1
 #define RID_B_STEPPING_START 5
 #define RID_C_STEPPING_START 0xe
-enum braswell_stepping {
+enum soc_stepping {
 	STEP_A0,
 	STEP_A1,
 	STEP_B0,
@@ -52,4 +52,4 @@ enum braswell_stepping {
 #define GCS		0x00
 # define BILD		(1 << 0)
 
-#endif /* _BRASWELL_LPC_H_ */
+#endif /* _SOC_LPC_H_ */

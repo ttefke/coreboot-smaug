@@ -1,5 +1,5 @@
 /*
- * Broadwell UEFI PEI wrapper
+ * UEFI PEI wrapper
  *
  * Copyright (C) 2014 Google Inc.
  *

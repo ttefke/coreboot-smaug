@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_SPI_H_
-#define _BRASWELL_SPI_H_
+#ifndef _SOC_SPI_H_
+#define _SOC_SPI_H_
 
 #include <stdint.h>
 
@@ -72,5 +72,4 @@ struct spi_config {
 /* Return 0 on success < 0 on failure. */
 int mainboard_get_spi_config(struct spi_config *cfg);
 
-#endif /* _BRASWELL_SPI_H_ */
-
+#endif /* _SOC_SPI_H_ */

@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_PM_H_
-#define _BRASWELL_PM_H_
+#ifndef _SOC_PM_H_
+#define _SOC_PM_H_
 
 
 #define IOCOM1		0x3f8
@@ -264,4 +264,4 @@ static inline void southcluster_log_state(void) {}
 
 #endif /* !defined(__ASSEMBLER__) && !defined(__ACPI__) */
 
-#endif /* _BRASWELL_PM_H_ */
+#endif /* _SOC_PM_H_ */

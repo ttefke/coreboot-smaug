@@ -166,7 +166,7 @@ static void sc_init(device_t dev)
 	const unsigned long ir_base = ILB_BASE_ADDRESS + 0x20;
 	void *gen_pmcon1 = (void *)(PMC_BASE_ADDRESS + GEN_PMCON1);
 	void *actl = (void *)(ILB_BASE_ADDRESS + ACTL);
-	const struct braswell_irq_route *ir = &global_braswell_irq_route;
+	const struct soc_irq_route *ir = &global_soc_irq_route;
 	struct soc_intel_braswell_config *config = dev->chip_info;
 
 	printk(BIOS_SPEW, "%s/%s ( %s )\n",

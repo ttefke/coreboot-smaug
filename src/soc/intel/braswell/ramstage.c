@@ -200,7 +200,7 @@ static void set_board_id(void)
 	gnvs->bdid = board_id();
 }
 
-void braswell_init_pre_device(struct soc_intel_braswell_config *config)
+void soc_init_pre_device(struct soc_intel_braswell_config *config)
 {
 	struct soc_gpio_config *gpio_config;
 

@@ -23,8 +23,8 @@
  * specified by the devicetree.
  */
 
-#ifndef _BRASWELL_CHIP_H_
-#define _BRASWELL_CHIP_H_
+#ifndef _SOC_CHIP_H_
+#define _SOC_CHIP_H_
 
 #include <stdint.h>
 #include <fsp_util.h>
@@ -140,4 +140,5 @@ struct soc_intel_braswell_config {
 };
 
 extern struct chip_operations soc_intel_braswell_ops;
-#endif /* _BRASWELL_CHIP_H_ */
+
+#endif /* _SOC_CHIP_H_ */

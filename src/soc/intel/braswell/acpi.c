@@ -288,7 +288,7 @@ void acpi_fill_in_fadt(acpi_fadt_t *fadt)
 	fadt->x_gpe1_blk.addrh = 0x0;
 }
 
-static acpi_tstate_t braswell_tss_table[] = {
+static acpi_tstate_t soc_tss_table[] = {
 	{ 100, 1000, 0, 0x00, 0 },
 	{ 88, 875, 0, 0x1e, 0 },
 	{ 75, 750, 0, 0x1c, 0 },
@@ -314,7 +314,7 @@ static int generate_t_state_entries(int core, int cores_per_package)
 
 	/* Write TSS table for MSR access */
 	len += acpigen_write_TSS_package(
-		ARRAY_SIZE(braswell_tss_table), braswell_tss_table);
+		ARRAY_SIZE(soc_tss_table), soc_tss_table);
 
 	return len;
 }

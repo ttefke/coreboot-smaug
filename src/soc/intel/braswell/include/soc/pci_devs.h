@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_PCI_DEVS_H_
-#define _BRASWELL_PCI_DEVS_H_
+#ifndef _SOC_PCI_DEVS_H_
+#define _SOC_PCI_DEVS_H_
 
 /* All these devices live on bus 0 with the associated device and function */
 
@@ -151,4 +151,4 @@
 #define PCH_DISABLED 0
 #define PCH_PCI_MODE 1
 #define PCH_ACPI_MODE 2
-#endif /* _BRASWELL_PCI_DEVS_H_ */
+#endif /* _SOC_PCI_DEVS_H_ */

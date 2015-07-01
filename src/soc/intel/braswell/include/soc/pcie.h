@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef _BRASWELL_PCIE_H_
-#define _BRASWELL_PCIE_H_
+#ifndef _SOC_PCIE_H_
+#define _SOC_PCIE_H_
 
 /* PCIe root port config space registers. */
 #define XCAP			0x40
@@ -99,5 +99,4 @@
 #define PHYCTL4			0x408
 # define SQDIS			(1 << 27)
 
-
-#endif /* _BRASWELL_PCIE_H_ */
+#endif /* _SOC_PCIE_H_ */

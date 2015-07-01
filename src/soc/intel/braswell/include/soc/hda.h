@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_HDA_H_
-#define _BRASWELL_HDA_H_
+#ifndef _SOC_HDA_H_
+#define _SOC_HDA_H_
 
 /*
  * PCI config registers.
@@ -42,4 +42,4 @@
 # define HDA_DEVC_NFEREN	(1 << 1)
 # define HDA_DEVC_CEREN		(1 << 0)
 
-#endif /* _BRASWELL_HDA_H_ */
+#endif /* _SOC_HDA_H_ */

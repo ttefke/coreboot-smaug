@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_ROMSTAGE_H_
-#define _BRASWELL_ROMSTAGE_H_
+#ifndef _SOC_ROMSTAGE_H_
+#define _SOC_ROMSTAGE_H_
 
 #include <stdint.h>
 #include <arch/cpu.h>
@@ -40,4 +40,4 @@ void migrate_power_state(void);
 struct chipset_power_state *fill_power_state(void);
 int chipset_prev_sleep_state(struct chipset_power_state *ps);
 
-#endif /* _BRASWELL_ROMSTAGE_H_ */
+#endif /* _SOC_ROMSTAGE_H_ */

@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef _BRASWELL_MSR_H_
-#define _BRASWELL_MSR_H_
+#ifndef _SOC_MSR_H_
+#define _SOC_MSR_H_
 
 #define MSR_IA32_PLATFORM_ID		0x17
 #define MSR_IA32_BIOS_SIGN_ID		0x8B
@@ -49,4 +49,4 @@
 
 #define BUS_FREQ_KHZ			100000	/* 100 MHz */
 
-#endif /* _BRASWELL_MSR_H_ */
+#endif /* _SOC_MSR_H_ */

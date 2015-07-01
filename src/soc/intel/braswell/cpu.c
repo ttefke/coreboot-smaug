@@ -80,7 +80,7 @@ const struct reg_script core_msr_script[] = {
 	REG_SCRIPT_END
 };
 
-void braswell_init_cpus(device_t dev)
+void soc_init_cpus(device_t dev)
 {
 	struct bus *cpu_bus = dev->link_list;
 	const struct pattrs *pattrs = pattrs_get();
@@ -116,7 +116,7 @@ void braswell_init_cpus(device_t dev)
 	restore_default_smm_area(default_smm_area);
 }
 
-static void braswell_core_init(device_t cpu)
+static void soc_core_init(device_t cpu)
 {
 	printk(BIOS_SPEW, "%s/%s ( %s )\n",
 			__FILE__, __func__, dev_name(cpu));
@@ -139,7 +139,7 @@ static void braswell_core_init(device_t cpu)
 }
 
 static struct device_operations cpu_dev_ops = {
-	.init = braswell_core_init,
+	.init = soc_core_init,
 };
 
 static struct cpu_device_id cpu_table[] = {

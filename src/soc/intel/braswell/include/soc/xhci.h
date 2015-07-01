@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_XHCI_H
-#define _BRASWELL_XHCI_H
+#ifndef _SOC_XHCI_H
+#define _SOC_XHCI_H
 
 /* XHCI PCI Registers */
 #define XHCI_PWR_CTL_STS	0x74
@@ -48,4 +48,4 @@
 
 #define XHCI_RESET_TIMEOUT	100000  /* 100ms */
 
-#endif /* _BRASWELL_XHCI_H */
+#endif /* _SOC_XHCI_H */

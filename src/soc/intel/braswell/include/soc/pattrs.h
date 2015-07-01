@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_PATTRS_H_
-#define _BRASWELL_PATTRS_H_
+#ifndef _SOC_PATTRS_H_
+#define _SOC_PATTRS_H_
 
 #include <stdint.h>
 #include <cpu/x86/msr.h>
@@ -61,4 +61,4 @@ static inline const struct pattrs *pattrs_get(void)
 	return &__global_pattrs;
 }
 
-#endif /* _BRASWELL_PATTRS_H_ */
+#endif /* _SOC_PATTRS_H_ */

@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_NVS_H_
-#define _BRASWELL_NVS_H_
+#ifndef _SOC_NVS_H_
+#define _SOC_NVS_H_
 
 #include <vendorcode/google/chromeos/gnvs.h>
 #include <soc/device_nvs.h>
@@ -77,4 +77,4 @@ typedef struct {
 global_nvs_t *smm_get_gnvs(void);
 #endif
 
-#endif /* _BRASWELL_NVS_H_ */
+#endif /* _SOC_NVS_H_ */

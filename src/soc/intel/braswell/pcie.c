@@ -172,7 +172,7 @@ static void check_device_present(device_t dev)
 	static device_t port1_dev;
 
 	/*
-	 * Braswell Soc has 4 ROOT ports defined with MAX_ROOT_PORTS_BSW.
+	 * The SOC has 4 ROOT ports defined with MAX_ROOT_PORTS_BSW.
 	 * For each port initial assumption is that, each port will have
 	 * devices connected to it. Later we will scan each PORT and if
 	 * the device is not attached to that port we will update

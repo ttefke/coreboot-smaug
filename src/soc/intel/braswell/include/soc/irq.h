@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_IRQ_H_
-#define _BRASWELL_IRQ_H_
+#ifndef _SOC_IRQ_H_
+#define _SOC_IRQ_H_
 
 #define PIRQA_APIC_IRQ			16
 #define PIRQB_APIC_IRQ			17
@@ -192,17 +192,17 @@
 #define NUM_IR_DEVS 32
 #define NUM_PIRQS   8
 
-struct braswell_irq_route {
+struct soc_irq_route {
 	/* Per device configuration. */
 	uint16_t pcidev[NUM_IR_DEVS];
 	/* Route path for each internal PIRQx in PIC mode. */
 	uint8_t  pic[NUM_PIRQS];
 };
 
-extern const struct braswell_irq_route global_braswell_irq_route;
+extern const struct soc_irq_route global_soc_irq_route;
 
 #define DEFINE_IRQ_ROUTES \
-	const struct braswell_irq_route global_braswell_irq_route = { \
+	const struct soc_irq_route global_soc_irq_route = { \
 		.pcidev = { PCI_DEV_PIRQ_ROUTES, }, \
 		.pic = { PIRQ_PIC_ROUTES, }, \
 	}
@@ -217,4 +217,4 @@ extern const struct braswell_irq_route global_braswell_irq_route;
 
 #endif /* !defined(__ASSEMBLER__) && !defined(__ACPI__) */
 
-#endif /* _BRASWELL_IRQ_H_ */
+#endif /* _SOC_IRQ_H_ */

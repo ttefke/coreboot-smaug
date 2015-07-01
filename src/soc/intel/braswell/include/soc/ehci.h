@@ -18,11 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_EHCI_H_
-#define _BRASWELL_EHCI_H_
+#ifndef _SOC_EHCI_H_
+#define _SOC_EHCI_H_
 
 /* EHCI PCI Registers */
 #define EHCI_CMD_STS		0x04
 # define  INTRDIS		  (1 << 10)
 
-#endif /* _BRASWELL_EHCI_H_ */
+#endif /* _SOC_EHCI_H_ */

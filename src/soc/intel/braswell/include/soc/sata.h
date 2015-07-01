@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_SATA_H_
-#define _BRASWELL_SATA_H_
+#ifndef _SOC_SATA_H_
+#define _SOC_SATA_H_
 
 #define SATA_PORT_SUPPORT	0x03
 #define SATA_PORT_MASK		0x3f
@@ -152,4 +152,4 @@
 #define AHCI_PXCMD_SUD		(1 << 1)
 #define AHCI_PXCMD_ST		(1 << 0)
 
-#endif	/* _BRASWELL_SATA_H_ */
+#endif	/* _SOC_SATA_H_ */

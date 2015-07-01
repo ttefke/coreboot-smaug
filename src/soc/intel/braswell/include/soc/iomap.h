@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_IOMAP_H_
-#define _BRASWELL_IOMAP_H_
+#ifndef _SOC_IOMAP_H_
+#define _SOC_IOMAP_H_
 
 
 /*
@@ -89,4 +89,4 @@
 uint32_t nc_read_top_of_low_memory(void);
 #endif
 
-#endif /* _BRASWELL_IOMAP_H_ */
+#endif /* _SOC_IOMAP_H_ */

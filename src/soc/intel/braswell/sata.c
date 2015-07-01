@@ -57,7 +57,7 @@ static const unsigned short pci_device_ids[] = {
 	0,
 };
 
-static const struct pci_driver braswell_sata __pci_driver = {
+static const struct pci_driver soc_sata __pci_driver = {
 	.ops     = &sata_ops,
 	.vendor  = PCI_VENDOR_ID_INTEL,
 	.devices = pci_device_ids,

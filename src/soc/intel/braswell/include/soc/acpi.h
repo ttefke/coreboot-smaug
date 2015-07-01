@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  */
 
-#ifndef _BRASWELL_ACPI_H_
-#define _BRASWELL_ACPI_H_
+#ifndef _SOC_ACPI_H_
+#define _SOC_ACPI_H_
 
 #include <arch/acpi.h>
 #include <soc/nvs.h>
@@ -34,5 +34,5 @@ void acpi_fill_in_fadt(acpi_fadt_t *fadt);
 unsigned long acpi_madt_irq_overrides(unsigned long current);
 void acpi_init_gnvs(global_nvs_t *gnvs);
 
-#endif /* _BRASWELL_ACPI_H_ */
+#endif /* _SOC_ACPI_H_ */
 

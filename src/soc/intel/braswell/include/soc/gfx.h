@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef _BRASWELL_GFX_H_
-#define _BRASWELL_GFX_H_
+#ifndef _SOC_GFX_H_
+#define _SOC_GFX_H_
 
 /*
  * PCI config registers.
@@ -95,4 +95,4 @@
 
 #define BACKLIGHT_CTL		0x61254
 
-#endif /* _BRASWELL_GFX_H_ */
+#endif /* _SOC_GFX_H_ */
