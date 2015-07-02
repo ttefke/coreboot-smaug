@@ -20,7 +20,7 @@
  * MA 02110-1301 USA
  */
 
-#include <mainboard/intel/strago/onboard.h>
+#include "onboard.h"
 
 Scope (\_SB)
 {
@@ -69,7 +69,7 @@ Scope (\_SB.I2C1)
 					"\\_SB.I2C1",             /* ResourceSource */
 				)
 				GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-					 "\\_SB.GPSW") { STRAGO_TOUCH_GPIO_INDEX }
+					 "\\_SB.GPSW") { BOARD_TOUCH_GPIO_INDEX }
 			})
 			Name (BUF1, ResourceTemplate ()
 			{
@@ -81,7 +81,7 @@ Scope (\_SB.I2C1)
 					"\\_SB.I2C1",             /* ResourceSource */
 				)
 				GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-					 "\\_SB.GPNC") { STRAGO_DVT_TOUCH_GPIO_INDEX }
+					 "\\_SB.GPNC") { BOARD_DVT_TOUCH_GPIO_INDEX }
 			})
 			If (LEqual (\BDID, BOARD_DVT)) {
 				Return (BUF1)
@@ -120,7 +120,7 @@ Scope (\_SB.I2C1)
 				"\\_SB.I2C1",             /* ResourceSource */
 			)
 			GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-				 "\\_SB.GPSW") { STRAGO_TOUCH_GPIO_INDEX }
+				 "\\_SB.GPSW") { BOARD_TOUCH_GPIO_INDEX }
 		})
 
 		Method (_STA)
@@ -240,7 +240,7 @@ Scope (\_SB.I2C6)
 				"\\_SB.I2C6",             /* ResourceSource */
 			)
 			GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-				 "\\_SB.GPNC") { STRAGO_TRACKPAD_GPIO_INDEX }
+				 "\\_SB.GPNC") { BOARD_TRACKPAD_GPIO_INDEX }
 		})
 
 		Method (_STA)
@@ -275,7 +275,7 @@ Scope (\_SB.GPNC)
 		Name (RBUF, ResourceTemplate ()
 		{
 			GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-				"\\_SB.GPNC") { STRAGO_SCI_GPIO_INDEX }
+				"\\_SB.GPNC") { BOARD_SCI_GPIO_INDEX }
 		})
 		Return (RBUF)
 	}

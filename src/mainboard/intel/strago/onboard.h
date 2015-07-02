@@ -39,19 +39,19 @@
  * MAX_DIRECT_IRQ + GPSW_SIZE + 18
  */
 /* ToDo: change kbd irq to gpio bank index */
-#define STRAGO_KBD_IRQ         182
+#define BOARD_I8042_IRQ			182
 
 
 /* Audio: Gpio index in SW bank */
 #define JACK_DETECT_GPIO_INDEX		95
 /* SCI: Gpio index in N bank */
-#define STRAGO_SCI_GPIO_INDEX		15
+#define BOARD_SCI_GPIO_INDEX		15
 /* Trackpad: Gpio index in N bank */
-#define STRAGO_TRACKPAD_GPIO_INDEX	18
+#define BOARD_TRACKPAD_GPIO_INDEX	18
 /* Touch: Gpio index in SW bank */
-#define STRAGO_TOUCH_GPIO_INDEX		76
+#define BOARD_TOUCH_GPIO_INDEX		76
 /* Touch: Gpio index in SW bank */
-#define STRAGO_DVT_TOUCH_GPIO_INDEX	19
+#define BOARD_DVT_TOUCH_GPIO_INDEX	19
 
 #define BOARD_TRACKPAD_NAME             "trackpad"
 #define BOARD_TRACKPAD_WAKE_GPIO        ACPI_ENABLE_WAKE_SUS_GPIO(1)
@@ -63,7 +63,6 @@
 #define BOARD_TOUCHSCREEN_I2C_BUS       0
 #define BOARD_TOUCHSCREEN_I2C_ADDR      0x4a    /* TODO(shawnn): Check this */
 
-#define BOARD_I8042_IRQ                 STRAGO_KBD_IRQ
 #define BOARD_ALS_IRQ                   GPIO_S0_DED_IRQ(ALS_IRQ_OFFSET)
 
 

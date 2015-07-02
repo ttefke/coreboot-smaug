@@ -43,7 +43,7 @@ void mainboard_pre_console_init(struct romstage_params *params)
 	pci_write_config32(PCI_DEV(0, LPC_DEV, 0), UART_CONT, reg);
 
 	/*
-	 * Set up the pads to select the UART function for Strago
+	 * Set up the pads to select the UART function
 	 * AD12 SW16(UART1_DATAIN/UART0_DATAIN)   - Setting Mode 2 for UART0_RXD
 	 * AD10 SW20(UART1_DATAOUT/UART0_DATAOUT) - Setting Mode 2 for UART0_TXD
 	 */

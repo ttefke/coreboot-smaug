@@ -17,8 +17,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
-#ifndef _STRAGO_GPIO_H_
-#define _STRAGO_GPIO_H_
+#ifndef _BOARD_GPIO_H_
+#define _BOARD_GPIO_H_
 
 struct soc_gpio_config *get_override_gpios_dvt(void);
 struct soc_gpio_config *get_override_gpios_bcrd2(void);

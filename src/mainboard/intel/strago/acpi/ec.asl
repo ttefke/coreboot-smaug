@@ -19,7 +19,7 @@
  */
 
 /* mainboard configuration */
-#include <mainboard/intel/strago/ec.h>
+#include "ec.h"
 
 /* ACPI code for EC functions */
 #include <ec/google/chromeec/acpi/ec.asl>
