@@ -19,8 +19,8 @@
  */
 
 /* mainboard configuration */
-#include <mainboard/google/cyan/ec.h>
-#include <mainboard/google/cyan/onboard.h>
+#include <ec.h>
+#include <onboard.h>
 
 #define SIO_EC_MEMMAP_ENABLE     /* EC Memory Map Resources */
 #define SIO_EC_HOST_ENABLE       /* EC Host Interface Resources */

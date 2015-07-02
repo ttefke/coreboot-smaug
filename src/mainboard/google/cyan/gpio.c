@@ -255,9 +255,7 @@ static const struct soc_gpio_map  gpe_gpio_map[] = {
 
 static struct soc_gpio_config gpio_config = {
 	/* BSW */
-	/* gpio configuration for EVT board which
-	 * is the default configuration for Cyan.
-	 */
+	/* gpio configuration for EVT board */
 	.north = gpn_gpio_map,
 	.southeast = gpse_gpio_map,
 	.southwest  = gpsw_gpio_map,

@@ -17,8 +17,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
-#ifndef _CYAN_GPIO_H_
-#define _CYAN_GPIO_H_
+#ifndef _BOARD_GPIO_H_
+#define _BOARD_GPIO_H_
 
 struct soc_gpio_config *get_override_gpios(struct soc_gpio_config *config);
 #endif

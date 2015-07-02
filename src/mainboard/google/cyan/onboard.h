@@ -39,21 +39,21 @@
  * MAX_DIRECT_IRQ + GPSW_SIZE + 18
  */
 /* ToDO: change kbd irq to gpio bank index */
-#define CYAN_KBD_IRQ         182
+#define BOARD_I8042_IRQ			182
 
 
 /* SCI: Gpio index in N bank */
-#define CYAN_SCI_GPIO_INDEX		15
+#define BOARD_SCI_GPIO_INDEX		15
 /* Trackpad: Gpio index in N bank */
-#define CYAN_TRACKPAD_GPIO_INDEX	18
+#define BOARD_TRACKPAD_GPIO_INDEX	18
 /* Touch: Gpio index in SW bank */
-#define CYAN_TOUCH_GPIO_INDEX		76
+#define BOARD_TOUCH_GPIO_INDEX		76
 /* EVT Touch: Gpio index in N bank */
-#define CYAN_EVT_TOUCH_GPIO_INDEX	19
+#define BOARD_EVT_TOUCH_GPIO_INDEX	19
 /* TI Audio: Gpio index in SW bank */
-#define CYAN_JACK_TI_GPIO_INDEX		34
+#define BOARD_JACK_TI_GPIO_INDEX	34
 /* MAXIM Audio: Gpio index in SE bank */
-#define CYAN_JACK_MAXIM_GPIO_INDEX	77
+#define BOARD_JACK_MAXIM_GPIO_INDEX	77
 
 #define BOARD_TRACKPAD_NAME             "trackpad"
 #define BOARD_TRACKPAD_WAKE_GPIO        ACPI_ENABLE_WAKE_SUS_GPIO(1)
@@ -65,7 +65,6 @@
 #define BOARD_TOUCHSCREEN_I2C_BUS       0
 #define BOARD_TOUCHSCREEN_I2C_ADDR      0x4a    /* TODO(shawnn): Check this */
 
-#define BOARD_I8042_IRQ                 CYAN_KBD_IRQ
 #define BOARD_ALS_IRQ                   GPIO_S0_DED_IRQ(ALS_IRQ_OFFSET)
 
 /* SD CARD gpio */

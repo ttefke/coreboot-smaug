@@ -20,7 +20,7 @@
  * MA 02110-1301 USA
  */
 
-#include <mainboard/google/cyan/onboard.h>
+#include <onboard.h>
 
 Scope (\_SB)
 {
@@ -71,7 +71,7 @@ Scope (\_SB.I2C1)
 					"\\_SB.I2C1",             /* ResourceSource */
 				)
 				GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-					 "\\_SB.GPSW") { CYAN_TOUCH_GPIO_INDEX }
+					 "\\_SB.GPSW") { BOARD_TOUCH_GPIO_INDEX }
 
 			} )
 			Name(BUF1,ResourceTemplate ()
@@ -84,7 +84,7 @@ Scope (\_SB.I2C1)
 					"\\_SB.I2C1",             /* ResourceSource */
 				)
 				GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-					 "\\_SB.GPNC") { CYAN_EVT_TOUCH_GPIO_INDEX }
+					 "\\_SB.GPNC") { BOARD_EVT_TOUCH_GPIO_INDEX }
 
 			} )
 			If (LEqual (\BDID, BOARD_EVT)) {
@@ -143,7 +143,7 @@ Scope (\_SB.I2C2)
 				)
 
 				GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-					"\\_SB.GPSE") { CYAN_JACK_MAXIM_GPIO_INDEX }
+					"\\_SB.GPSE") { BOARD_JACK_MAXIM_GPIO_INDEX }
 			} )
 			Return (SBUF)
 		}
@@ -187,7 +187,7 @@ Scope (\_SB.I2C2)
 				)
 
 				GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-					"\\_SB.GPSW") { CYAN_JACK_TI_GPIO_INDEX }
+					"\\_SB.GPSW") { BOARD_JACK_TI_GPIO_INDEX }
 
 			} )
 			Return (SBUF)
@@ -259,7 +259,7 @@ Scope (\_SB.I2C6)
 				"\\_SB.I2C6",             /* ResourceSource */
 			)
 			GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-				 "\\_SB.GPNC") { CYAN_TRACKPAD_GPIO_INDEX }
+				 "\\_SB.GPNC") { BOARD_TRACKPAD_GPIO_INDEX }
 		})
 
 		Method (_STA)
@@ -284,7 +284,7 @@ Scope (\_SB.LPEA)
 	{
 		/* Jack Detect (index 0) */
 		GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-			"\\_SB.GPSE") { CYAN_JACK_MAXIM_GPIO_INDEX }
+			"\\_SB.GPSE") { BOARD_JACK_MAXIM_GPIO_INDEX }
 	})
 }
 
@@ -295,7 +295,7 @@ Scope (\_SB.GPNC)
 		Name (RBUF, ResourceTemplate ()
 		{
 			GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-				"\\_SB.GPNC") { CYAN_SCI_GPIO_INDEX }
+				"\\_SB.GPNC") { BOARD_SCI_GPIO_INDEX }
 		})
 		Return (RBUF)
 	}
