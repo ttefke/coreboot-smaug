@@ -90,4 +90,4 @@ Name (MPPC, Package ()
 })
 
 /* Include DPTF */
-#include <soc/intel/braswell/acpi/dptf/dptf.asl>
+#include <acpi/dptf/dptf.asl>

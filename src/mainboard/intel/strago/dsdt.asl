@@ -30,19 +30,18 @@ DefinitionBlock(
 )
 {
 	/* Some generic macros */
-	#include <soc/intel/braswell/acpi/platform.asl>
+	#include <acpi/platform.asl>
 
 	/* global NVS and variables */
-	#include <soc/intel/braswell/acpi/globalnvs.asl>
+	#include <acpi/globalnvs.asl>
 
-	#include <soc/intel/braswell/acpi/cpu.asl>
+	#include <acpi/cpu.asl>
 
 	Scope (\_SB) {
 		Device (PCI0)
 		{
-			/* #include <soc/intel/braswell/acpi/northcluster.asl> */
-			#include <soc/intel/braswell/acpi/southcluster.asl>
-                        #include <soc/intel/braswell/acpi/dptf/cpu.asl>
+			#include <acpi/southcluster.asl>
+                        #include <acpi/dptf/cpu.asl>
 		}
 
 		/* Dynamic Platform Thermal Framework */
@@ -53,7 +52,7 @@ DefinitionBlock(
 	#include <vendorcode/google/chromeos/acpi/chromeos.asl>
 
 	/* Chipset specific sleep states */
-	#include <soc/intel/braswell/acpi/sleepstates.asl>
+	#include <acpi/sleepstates.asl>
 
 	#include "acpi/mainboard.asl"
 }
