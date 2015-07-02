@@ -30,12 +30,13 @@
 #include <arch/io.h>
 #include <console/console.h>
 #include <device/pci_ids.h>
+#include <rules.h>
 #include <spi_flash.h>
 
 #include <soc/lpc.h>
 #include <soc/pci_devs.h>
 
-#ifdef __SMM__
+#if ENV_SMM
 #define pci_read_config_byte(dev, reg, targ)\
 	*(targ) = pci_read_config8(dev, reg)
 #define pci_read_config_word(dev, reg, targ)\
@@ -48,7 +49,7 @@
 	pci_write_config16(dev, reg, val)
 #define pci_write_config_dword(dev, reg, val)\
 	pci_write_config32(dev, reg, val)
-#else /* !__SMM__ */
+#else /* ENV_SMM */
 #include <device/device.h>
 #include <device/pci.h>
 #define pci_read_config_byte(dev, reg, targ)\
@@ -63,7 +64,7 @@
 	pci_write_config16(dev, reg, val)
 #define pci_write_config_dword(dev, reg, val)\
 	pci_write_config32(dev, reg, val)
-#endif /* !__SMM__ */
+#endif /* ENV_SMM */
 
 typedef struct spi_slave ich_spi_slave;
 
@@ -257,7 +258,7 @@ static ich9_spi_regs *spi_regs(void)
 	device_t dev;
 	uint32_t sbase;
 
-#ifdef __SMM__
+#if ENV_SMM
 	dev = PCI_DEV(0, LPC_DEV, LPC_FUNC);
 #else
 	dev = dev_find_slot(0, PCI_DEVFN(LPC_DEV, LPC_FUNC));
@@ -296,6 +297,7 @@ void spi_init(void)
 	cntlr.preop = &ich9_spi->preop;
 }
 
+#if ENV_RAMSTAGE
 
 static void spi_init_cb(void *unused)
 {
@@ -305,6 +307,8 @@ static void spi_init_cb(void *unused)
 BOOT_STATE_INIT_ENTRIES(spi_init_bscb) = {
 	BOOT_STATE_INIT_ENTRY(BS_DEV_INIT, BS_ON_ENTRY, spi_init_cb, NULL),
 };
+
+#endif /* ENV_RAMSTAGE */
 
 int spi_claim_bus(struct spi_slave *slave)
 {

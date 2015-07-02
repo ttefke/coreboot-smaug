@@ -22,7 +22,7 @@
 #include <console/console.h>
 #include <soc/iosf.h>
 
-#if !defined(__PRE_RAM__)
+#if ENV_RAMSTAGE
 #define IOSF_PCI_BASE (CONFIG_MMCONF_BASE_ADDRESS + (IOSF_PCI_DEV << 12))
 
 static inline void write_iosf_reg(int reg, uint32_t value)
@@ -42,7 +42,7 @@ static inline uint32_t read_iosf_reg(int reg)
 {
 	return pci_read_config32(IOSF_PCI_DEV, reg);
 }
-#endif
+#endif /* ENV_RAMSTAGE */
 
 /* Common sequences for all the port accesses. */
 static uint32_t iosf_read_port(uint32_t cr, int reg)
@@ -127,7 +127,7 @@ void iosf_scc_write(int reg, uint32_t val)
 }
 
 
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 uint64_t reg_script_read_iosf(struct reg_script_context *ctx)
 {
 	const struct reg_script *step = ctx->step;
@@ -193,4 +193,4 @@ const struct reg_script_bus_entry *platform_bus_table(size_t *table_entries)
 	return &reg_script_bus_table[0];
 }
 
-#endif	/* __PRE_RAM */
+#endif	/* ENV_RAMSTAGE */

@@ -21,11 +21,12 @@
 #ifndef _SOC_IOSF_H_
 #define _SOC_IOSF_H_
 
+#include <rules.h>
 #include <stdint.h>
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 #include <device/device.h>
 #include <reg_script.h>
-#endif	/* __PRE_RAM */
+#endif	/* ENV_RAMSTAGE */
 #include <soc/pci_devs.h>
 
 /*
@@ -73,10 +74,10 @@ void iosf_port58_write(int reg, uint32_t val);
 uint32_t iosf_scc_read(int reg);
 void iosf_scc_write(int reg, uint32_t val);
 
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 uint64_t reg_script_read_iosf(struct reg_script_context *ctx);
 void reg_script_write_iosf(struct reg_script_context *ctx);
-#endif	/* __PRE_RAM */
+#endif	/* ENV_RAMSTAGE */
 
 /* IOSF ports. */
 #define IOSF_PORT_AUNIT		0x00 /* IO Arbiter unit */
@@ -176,7 +177,7 @@ void reg_script_write_iosf(struct reg_script_context *ctx);
  * IO Sideband Function
  */
 
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 #define REG_SCRIPT_IOSF(cmd_, unit_, reg_, mask_, value_, timeout_) \
 	_REG_SCRIPT_ENCODE_RAW(REG_SCRIPT_COMMAND_##cmd_,      \
 			       REG_SCRIPT_TYPE_IOSF,           \
@@ -192,6 +193,6 @@ void reg_script_write_iosf(struct reg_script_context *ctx);
 	REG_IOSF_RMW(unit_, reg_, 0xffffffff, value_)
 #define REG_IOSF_POLL(unit_, reg_, mask_, value_, timeout_) \
 	REG_SCRIPT_IOSF(POLL, unit_, reg_, mask_, value_, timeout_)
-#endif	/* __PRE_RAM */
+#endif	/* ENV_RAMSTAGE */
 
 #endif /* _SOC_IOSF_H_ */

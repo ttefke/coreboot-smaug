@@ -21,7 +21,9 @@
 #ifndef _SOC_SMM_H_
 #define _SOC_SMM_H_
 
-#if !defined(__PRE_RAM__) && !defined(__SMM___)
+#include <rules.h>
+
+#if ENV_RAMSTAGE
 #include <stdint.h>
 void southcluster_smm_clear_state(void);
 void southcluster_smm_enable_smi(void);
