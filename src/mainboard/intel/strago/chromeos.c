@@ -26,6 +26,7 @@
 #include "ec.h"
 #include <ec/google/chromeec/ec.h>
 #endif
+#include <rules.h>
 #include <soc/gpio.h>
 #include <string.h>
 #include <vendorcode/google/chromeos/chromeos.h>
@@ -33,7 +34,7 @@
 /* The WP status pin lives on GPIO_SSUS_6 which is pad 36 in the SUS well. */
 #define WP_STATUS_PAD	36
 
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 #include <boot/coreboot_tables.h>
 
 #define GPIO_COUNT	6
@@ -69,7 +70,7 @@ void fill_lb_gpios(struct lb_gpios *gpios)
 	fill_lb_gpio(gpio++, -1, ACTIVE_HIGH, "power", 0);
 	fill_lb_gpio(gpio++, -1, ACTIVE_HIGH, "oprom", oprom_is_loaded);
 }
-#endif
+#endif /* ENV_RAMSTAGE */
 
 int get_lid_switch(void)
 {
@@ -134,7 +135,7 @@ int get_write_protect_state(void)
 	 * there is a 10K pullup. Disable the internal pull in romstage so that
 	 * there isn't any ambiguity in the reading.
 	 */
-#if defined(__PRE_RAM__)
+#if ENV_ROMSTAGE
 	ssus_disable_internal_pull(WP_STATUS_PAD);
 #endif
 
