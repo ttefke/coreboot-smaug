@@ -25,6 +25,7 @@
 #include "ec.h"
 #include <ec/google/chromeec/ec.h>
 #endif
+#include <rules.h>
 #include <soc/gpio.h>
 #include <string.h>
 #include <vendorcode/google/chromeos/chromeos.h>
@@ -34,7 +35,7 @@
 #define WP_STATUS_PAD_CFG0	0x4838
 #define WP_STATUS_PAD_CFG1	0x483C
 
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 #include <boot/coreboot_tables.h>
 
 #define GPIO_COUNT	6
@@ -70,7 +71,7 @@ void fill_lb_gpios(struct lb_gpios *gpios)
 	fill_lb_gpio(gpio++, -1, ACTIVE_HIGH, "power", 0);
 	fill_lb_gpio(gpio++, -1, ACTIVE_HIGH, "oprom", oprom_is_loaded);
 }
-#endif
+#endif /* ENV_RAMSTAGE */
 
 int get_lid_switch(void)
 {
@@ -134,7 +135,7 @@ int get_write_protect_state(void)
 	 * Configuring this GPIO as input so that there isn't any ambiguity
 	 * in the reading.
 	 */
-#if defined(__PRE_RAM__)
+#if ENV_ROMSTAGE
 	write32((void *)(COMMUNITY_GPEAST_BASE + WP_STATUS_PAD_CFG0),
 	(PAD_PULL_UP_20K | PAD_GPIO_ENABLE | PAD_CONFIG0_GPI_DEFAULT));
 	write32((void *)(COMMUNITY_GPEAST_BASE + WP_STATUS_PAD_CFG1),
