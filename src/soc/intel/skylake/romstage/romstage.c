@@ -115,6 +115,9 @@ void soc_memory_init_params(MEMORY_INIT_UPD *params)
 	params->ScsEmmcHs400Enabled = config->ScsEmmcHs400Enabled;
 	params->ScsSdCardEnabled = config->ScsSdCardEnabled;
 	params->IshEnable = 0;
+	params->EnableAzalia = config->EnableAzalia;
+	params->IoBufferOwnership = config->IoBufferOwnership;
+	params->DspEnable = config->DspEnable;
 }
 
 void soc_display_memory_init_params(const MEMORY_INIT_UPD *old,
