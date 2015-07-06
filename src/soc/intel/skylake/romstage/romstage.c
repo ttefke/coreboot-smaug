@@ -118,6 +118,7 @@ void soc_memory_init_params(MEMORY_INIT_UPD *params)
 	params->EnableAzalia = config->EnableAzalia;
 	params->IoBufferOwnership = config->IoBufferOwnership;
 	params->DspEnable = config->DspEnable;
+	params->XdciEnable = config->XdciEnable;
 }
 
 void soc_display_memory_init_params(const MEMORY_INIT_UPD *old,
