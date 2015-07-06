@@ -19,8 +19,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_NVS_H_
-#define _SKYLAKE_NVS_H_
+#ifndef _SOC_NVS_H_
+#define _SOC_NVS_H_
 
 #include <rules.h>
 #include <vendorcode/google/chromeos/gnvs.h>

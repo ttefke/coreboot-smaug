@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_LPC_H_
-#define _SKYLAKE_LPC_H_
+#ifndef _SOC_LPC_H_
+#define _SOC_LPC_H_
 
 /* PCI Configuration Space (D31:F0): LPC */
 #define ABASE			0x40

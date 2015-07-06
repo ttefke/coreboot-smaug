@@ -19,8 +19,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_SYSTEMAGENT_H_
-#define _SKYLAKE_SYSTEMAGENT_H_
+#ifndef _SOC_SYSTEMAGENT_H_
+#define _SOC_SYSTEMAGENT_H_
 
 #include <soc/iomap.h>
 

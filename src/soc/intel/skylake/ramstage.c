@@ -24,7 +24,7 @@
 #include <soc/ramstage.h>
 #include <soc/intel/common/ramstage.h>
 
-void skylake_init_pre_device(void *chip_info)
+void soc_init_pre_device(void *chip_info)
 {
 	/* Perform silicon specific init. */
 	intel_silicon_init();

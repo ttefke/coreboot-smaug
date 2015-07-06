@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_IOMAP_H_
-#define _SKYLAKE_IOMAP_H_
+#ifndef _SOC_IOMAP_H_
+#define _SOC_IOMAP_H_
 
 #define MCFG_BASE_ADDRESS	CONFIG_MMCONF_BASE_ADDRESS
 #define MCFG_BASE_SIZE		0x4000000

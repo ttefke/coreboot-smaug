@@ -19,13 +19,13 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_PCH_H_
-#define _SKYLAKE_PCH_H_
+#ifndef _SOC_PCH_H_
+#define _SOC_PCH_H_
 
 #include <device/device.h>
 #include <rules.h>
 
-/* Skylake PCH (SunRisePoint LP) */
+/* PCH (SunRisePoint LP) */
 #define PCH_SPT_LP_SAMPLE		0x9d41
 #define PCH_SPT_LP_U_BASE		0x9d43
 #define PCH_SPT_LP_U_PREMIUM		0x9d48
@@ -39,4 +39,4 @@ void pch_log_state(void);
 void pch_disable_devfn(device_t dev);
 #endif
 
-#endif /* _SKYLAKE_PCH_H_ */
+#endif /* _SOC_PCH_H_ */

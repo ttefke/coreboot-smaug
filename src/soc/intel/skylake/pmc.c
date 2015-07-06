@@ -15,6 +15,7 @@
  * GNU General Public License for more details.
  */
 
+#include <chip.h>
 #include <console/console.h>
 #include <device/device.h>
 #include <device/pci.h>
@@ -33,7 +34,6 @@
 #include <cpu/x86/smm.h>
 #include <soc/pcr.h>
 #include <soc/ramstage.h>
-#include <soc/intel/skylake/chip.h>
 
 #if IS_ENABLED(CONFIG_CHROMEOS)
 #include <vendorcode/google/chromeos/chromeos.h>
@@ -240,7 +240,7 @@ static struct device_operations device_ops = {
 	.enable_resources	= &pci_dev_enable_resources,
 	.init			= &pmc_init,
 	.scan_bus		= &scan_static_bus,
-	.ops_pci		= &skylake_pci_ops,
+	.ops_pci		= &soc_pci_ops,
 };
 
 static const unsigned short pci_device_ids[] = {

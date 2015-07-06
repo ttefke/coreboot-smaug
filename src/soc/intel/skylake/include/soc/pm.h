@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_PM_H_
-#define _SKYLAKE_PM_H_
+#ifndef _SOC_PM_H_
+#define _SOC_PM_H_
 
 /* ACPI_BASE_ADDRESS / PMBASE */
 

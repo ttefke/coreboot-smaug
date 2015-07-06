@@ -24,6 +24,7 @@
 #include <device/pci.h>
 #include <string.h>
 #include <arch/acpi.h>
+#include <chip.h>
 #include <cpu/cpu.h>
 #include <cpu/x86/mtrr.h>
 #include <cpu/x86/msr.h>
@@ -44,7 +45,6 @@
 #include <soc/ramstage.h>
 #include <soc/smm.h>
 #include <soc/systemagent.h>
-#include <soc/intel/skylake/chip.h>
 
 /* Convert time in seconds to POWER_LIMIT_1_TIME MSR value */
 static const u8 power_limit_time_sec_to_msr[] = {
@@ -517,7 +517,7 @@ static const struct cpu_driver driver __cpu_driver = {
 	.id_table = cpu_table,
 };
 
-void skylake_init_cpus(device_t dev)
+void soc_init_cpus(device_t dev)
 {
 	struct bus *cpu_bus = dev->link_list;
 	int num_threads;

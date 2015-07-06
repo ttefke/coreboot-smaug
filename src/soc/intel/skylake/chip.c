@@ -52,11 +52,11 @@ static struct device_operations cpu_bus_ops = {
 	.read_resources   = &cpu_bus_noop,
 	.set_resources    = &cpu_bus_noop,
 	.enable_resources = &cpu_bus_noop,
-	.init             = &skylake_init_cpus,
+	.init             = &soc_init_cpus,
 	.final            = &chip_final,
 };
 
-static void skylake_enable(device_t dev)
+static void soc_enable(device_t dev)
 {
 	/* Set the operations if it is a special bus type */
 	if (dev->path.type == DEVICE_PATH_DOMAIN) {
@@ -67,15 +67,15 @@ static void skylake_enable(device_t dev)
 		/* Handle PCH device enable */
 		if (PCI_SLOT(dev->path.pci.devfn) > SA_DEV_SLOT_IGD &&
 		    (dev->ops == NULL || dev->ops->enable == NULL)) {
-			skylake_pch_enable_dev(dev);
+			pch_enable_dev(dev);
 		}
 	}
 }
 
 struct chip_operations soc_intel_skylake_ops = {
 	CHIP_NAME("Intel Skylake")
-	.enable_dev = &skylake_enable,
-	.init       = &skylake_init_pre_device,
+	.enable_dev = &soc_enable,
+	.init       = &soc_init_pre_device,
 };
 
 /* UPD parameters to be initialized before SiliconInit */
@@ -117,6 +117,6 @@ static void pci_set_subsystem(device_t dev, unsigned vendor, unsigned device)
 				   (device << 16) | vendor);
 }
 
-struct pci_operations skylake_pci_ops = {
+struct pci_operations soc_pci_ops = {
 	.set_subsystem = &pci_set_subsystem
 };

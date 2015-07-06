@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_DEVICE_NVS_H_
-#define _SKYLAKE_DEVICE_NVS_H_
+#ifndef _SOC_DEVICE_NVS_H_
+#define _SOC_DEVICE_NVS_H_
 
 #include <stdint.h>
 

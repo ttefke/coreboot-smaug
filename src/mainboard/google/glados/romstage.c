@@ -62,10 +62,10 @@ void mainboard_memory_init_params(struct romstage_params *params,
 			sizeof(params->pei_data->dqs_map[0]));
 	memcpy(memory_params->DqsMapCpu2DramCh1, params->pei_data->dqs_map[1],
 			sizeof(params->pei_data->dqs_map[1]));
-	memcpy(memory_params->RcompResistor, params->pei_data->RcompResistorSkl,
-			sizeof(params->pei_data->RcompResistorSkl));
-	memcpy(memory_params->RcompTarget, params->pei_data->RcompTargetSkl,
-			sizeof(params->pei_data->RcompTargetSkl));
+	memcpy(memory_params->RcompResistor, params->pei_data->RcompResistor,
+			sizeof(params->pei_data->RcompResistor));
+	memcpy(memory_params->RcompTarget, params->pei_data->RcompTarget,
+			sizeof(params->pei_data->RcompTarget));
 	memory_params->MemorySpdDataLen = SPD_LEN;
 	memory_params->DqPinsInterleaved = FALSE;
 }

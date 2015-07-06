@@ -225,7 +225,7 @@ void reset_alt_smi_status(void)
 /* Print GPIO SMI status bits */
 static u32 print_alt_smi_status(void)
 {
-	u32 alt_sts[SKL_GPIO_COMMUNITY_MAX];
+	u32 alt_sts[GPIO_COMMUNITY_MAX];
 	int gpio_index;
 	/* GPIO Communities GPP_A ~ E support SMI */
 	const char gpiowell[] = {

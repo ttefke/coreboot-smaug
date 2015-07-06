@@ -20,8 +20,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_SMBUS_H_
-#define _SKYLAKE_SMBUS_H_
+#ifndef _SOC_SMBUS_H_
+#define _SOC_SMBUS_H_
 
 /* PCI Configuration Space (D31:F3): SMBus */
 #define SMB_BASE		0x20

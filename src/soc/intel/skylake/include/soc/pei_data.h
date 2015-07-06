@@ -1,5 +1,5 @@
 /*
- * Skylake UEFI PEI wrapper
+ * UEFI PEI wrapper
  *
  * Copyright (C) 2014 Google Inc.
  * Copyright (C) 2015 Intel Corporation.
@@ -175,8 +175,8 @@ struct pei_data {
 	 * [CHANNEL][MAX_BYTES]
 	 */
 	uint8_t dqs_map[2][8];
-	uint16_t RcompResistorSkl[3];
-	uint16_t RcompTargetSkl[5];
+	uint16_t RcompResistor[3];
+	uint16_t RcompTarget[5];
 	/* Data read from flash and passed into MRC */
 	const void *saved_data;
 	int saved_data_size;

@@ -79,7 +79,7 @@ static void pch_finalize_script(void)
 	write32(pmcbase + PMSYNC_TPR_CFG, pmsyncreg);
 }
 
-static void skylake_finalize(void *unused)
+static void soc_finalize(void *unused)
 {
 	printk(BIOS_DEBUG, "Finalizing chipset.\n");
 	pch_finalize_script();
@@ -90,7 +90,7 @@ static void skylake_finalize(void *unused)
 
 BOOT_STATE_INIT_ENTRIES(finalize) = {
 	BOOT_STATE_INIT_ENTRY(BS_OS_RESUME, BS_ON_ENTRY,
-			      skylake_finalize, NULL),
+			      soc_finalize, NULL),
 	BOOT_STATE_INIT_ENTRY(BS_PAYLOAD_LOAD, BS_ON_EXIT,
-			      skylake_finalize, NULL),
+			      soc_finalize, NULL),
 };

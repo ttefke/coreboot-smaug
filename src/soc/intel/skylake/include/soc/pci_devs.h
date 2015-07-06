@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_PCI_DEVS_H_
-#define _SKYLAKE_PCI_DEVS_H_
+#ifndef _SOC_PCI_DEVS_H_
+#define _SOC_PCI_DEVS_H_
 
 #include <rules.h>
 

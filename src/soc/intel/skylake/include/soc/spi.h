@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_SPI_H_
-#define _SKYLAKE_SPI_H_
+#ifndef _SOC_SPI_H_
+#define _SOC_SPI_H_
 
 /*
  * SPI Opcode Menu setup for SPIBAR lockdown

@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_ROMSTAGE_H_
-#define _SKYLAKE_ROMSTAGE_H_
+#ifndef _SOC_ROMSTAGE_H_
+#define _SOC_ROMSTAGE_H_
 
 #include <soc/intel/common/romstage.h>
 
@@ -37,4 +37,4 @@ int early_spi_read(u32 offset, u32 size, u8 *buffer);
 int early_spi_read_wpsr(u8 *sr);
 void mainboard_fill_spd_data(struct pei_data *pei_data);
 
-#endif /* _SKYLAKE_ROMSTAGE_H_ */
+#endif /* _SOC_ROMSTAGE_H_ */

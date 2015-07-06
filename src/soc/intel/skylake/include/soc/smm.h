@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_SMM_H_
-#define _SKYLAKE_SMM_H_
+#ifndef _SOC_SMM_H_
+#define _SOC_SMM_H_
 
 #include <stdint.h>
 #include <cpu/x86/msr.h>

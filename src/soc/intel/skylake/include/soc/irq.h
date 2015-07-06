@@ -14,8 +14,8 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _SKYLAKE_IRQ_H_
-#define _SKYLAKE_IRQ_H_
+#ifndef _SOC_IRQ_H_
+#define _SOC_IRQ_H_
 
 #define LPSS_I2C0_IRQ 16
 #define LPSS_I2C1_IRQ 17
@@ -30,4 +30,4 @@
 #define LPSS_UART2_IRQ 32
 #define SDIO_IRQ 22
 
-#endif /* _SKYLAKE_IRQ_H_ */
+#endif /* _SOC_IRQ_H_ */

@@ -60,7 +60,7 @@ static struct device_operations device_ops = {
 	.read_resources		= &pch_uart_read_resources,
 	.set_resources		= &pci_dev_set_resources,
 	.enable_resources	= &pci_dev_enable_resources,
-	.ops_pci		= &skylake_pci_ops,
+	.ops_pci		= &soc_pci_ops,
 };
 
 static const unsigned short pci_device_ids[] = {

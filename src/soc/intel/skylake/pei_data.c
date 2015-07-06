@@ -31,7 +31,7 @@ static void ABI_X86 send_to_console(unsigned char b)
 	console_tx_byte(b);
 }
 
-void skylake_fill_pei_data(struct pei_data *pei_data)
+void soc_fill_pei_data(struct pei_data *pei_data)
 {
 	pei_data->pei_version = PEI_VERSION;
 	pei_data->board_type = BOARD_TYPE_ULT;

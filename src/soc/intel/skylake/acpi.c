@@ -24,6 +24,7 @@
 #include <arch/io.h>
 #include <arch/smp/mpspec.h>
 #include <cbmem.h>
+#include <chip.h>
 #include <console/console.h>
 #include <cpu/x86/smm.h>
 #include <console/console.h>
@@ -42,7 +43,6 @@
 #include <soc/msr.h>
 #include <soc/pci_devs.h>
 #include <soc/pm.h>
-#include <soc/intel/skylake/chip.h>
 /*
  * List of suported C-states in this processor.
  */

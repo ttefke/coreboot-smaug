@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_ACPI_H_
-#define _SKYLAKE_ACPI_H_
+#ifndef _SOC_ACPI_H_
+#define _SOC_ACPI_H_
 
 #include <arch/acpi.h>
 #include <soc/nvs.h>

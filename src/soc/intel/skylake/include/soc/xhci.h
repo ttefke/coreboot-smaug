@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_XHCI_H_
-#define _SKYLAKE_XHCI_H_
+#ifndef _SOC_XHCI_H_
+#define _SOC_XHCI_H_
 
 #include <rules.h>
 

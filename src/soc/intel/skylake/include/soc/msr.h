@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_MSR_H_
-#define _SKYLAKE_MSR_H_
+#ifndef _SOC_MSR_H_
+#define _SOC_MSR_H_
 
 #define MSR_PIC_MSG_CONTROL		0x2e
 #define CORE_THREAD_COUNT_MSR		0x35

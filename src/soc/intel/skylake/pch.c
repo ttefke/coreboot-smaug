@@ -70,7 +70,7 @@ u32 pch_read_soft_strap(int id)
 }
 
 #if ENV_RAMSTAGE
-void skylake_pch_enable_dev(device_t dev)
+void pch_enable_dev(device_t dev)
 {
 	/* FSP should implement routines to disable PCH IPs */
 	u32 reg32;

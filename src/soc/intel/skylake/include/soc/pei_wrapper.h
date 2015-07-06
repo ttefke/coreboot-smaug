@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_PEI_WRAPPER_H_
-#define _SKYLAKE_PEI_WRAPPER_H_
+#ifndef _SOC_PEI_WRAPPER_H_
+#define _SOC_PEI_WRAPPER_H_
 
 #include <soc/pei_data.h>
 
@@ -44,7 +44,7 @@ static inline void pei_data_usb3_port(struct pei_data *pei_data, int port,
 	pei_data->usb3_ports[port].fixed_eq = fixed_eq;
 }
 
-void skylake_fill_pei_data(struct pei_data *pei_data);
+void soc_fill_pei_data(struct pei_data *pei_data);
 void mainboard_fill_pei_data(struct pei_data *pei_data);
 
 #endif

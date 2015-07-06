@@ -18,8 +18,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_CPU_H_
-#define _SKYLAKE_CPU_H_
+#ifndef _SOC_CPU_H_
+#define _SOC_CPU_H_
 
 #include <arch/cpu.h>
 #include <device/device.h>

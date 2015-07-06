@@ -19,6 +19,7 @@
  */
 
 #include <arch/io.h>
+#include <chip.h>
 #include <console/console.h>
 #include <device/device.h>
 #include <device/pci_def.h>
@@ -32,7 +33,6 @@
 #include <soc/pmc.h>
 #include <soc/romstage.h>
 #include <soc/smbus.h>
-#include <soc/intel/skylake/chip.h>
 
 /* Max PXRC registers in ITSS*/
 #define MAX_PXRC_CONFIG		0x08

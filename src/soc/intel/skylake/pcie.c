@@ -19,6 +19,7 @@
  * Foundation, Inc.
  */
 
+#include <chip.h>
 #include <console/console.h>
 #include <device/device.h>
 #include <device/pci.h>
@@ -29,7 +30,6 @@
 #include <soc/lpc.h>
 #include <soc/pch.h>
 #include <soc/pci_devs.h>
-#include <soc/intel/skylake/chip.h>
 #include <soc/cpu.h>
 #include <delay.h>
 
@@ -78,7 +78,7 @@ static void pch_pcie_init(struct device *dev)
 
 static void pcie_set_L1_ss_max_latency(device_t dev, unsigned int off)
 {
-	/* Set max snoop and non-snoop latency for Skylake */
+	/* Set max snoop and non-snoop latency for the SOC */
 	pci_mmio_write_config32(dev, off, 0x10031003);
 }
 

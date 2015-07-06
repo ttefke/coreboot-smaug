@@ -13,10 +13,10 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _SKYLAKE_PCR_H_
-#define _SKYLAKE_PCR_H_
+#ifndef _SOC_PCR_H_
+#define _SOC_PCR_H_
 
-/* Skylake PCH (SunRisePoint LP) */
+/* PCH (SunRisePoint LP) */
 #define PCH_PCR_BASE_ADDRESS	0xFD000000
 #define R_PCH_PCR_LPC_GCFD	0x3418
 
@@ -101,4 +101,4 @@ u8 pcr_andthenor32(PCH_SBI_PID pid, u16 offset, u32 anddata, u32 ordata);
 u8 pcr_andthenor16(PCH_SBI_PID pid, u16 offset, u16 anddata, u16 ordata);
 u8 pcr_andthenor8(PCH_SBI_PID pid, u16 offset, u8 anddata, u8 ordata);
 
-#endif /* _SKYLAKE_PCR_H_ */
+#endif /* _SOC_PCR_H_ */

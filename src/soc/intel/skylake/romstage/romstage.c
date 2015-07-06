@@ -58,7 +58,7 @@ void soc_pre_console_init(struct romstage_params *params)
 void soc_pre_ram_init(struct romstage_params *params)
 {
 	/* Prepare to initialize memory */
-	skylake_fill_pei_data(params->pei_data);
+	soc_fill_pei_data(params->pei_data);
 }
 
 void soc_romstage_init(struct romstage_params *params)

@@ -18,17 +18,17 @@
  * Foundation, Inc.
  */
 
-#ifndef _SKYLAKE_RAMSTAGE_H_
-#define _SKYLAKE_RAMSTAGE_H_
+#ifndef _SOC_RAMSTAGE_H_
+#define _SOC_RAMSTAGE_H_
 
 #include <chip.h>
 #include <device/device.h>
 #include <soc/intel/common/ramstage.h>
 
-void skylake_init_pre_device(void *chip_info);
-void skylake_init_cpus(device_t dev);
-void skylake_pch_enable_dev(device_t dev);
+void pch_enable_dev(device_t dev);
+void soc_init_pre_device(void *chip_info);
+void soc_init_cpus(device_t dev);
 
-extern struct pci_operations skylake_pci_ops;
+extern struct pci_operations soc_pci_ops;
 
 #endif

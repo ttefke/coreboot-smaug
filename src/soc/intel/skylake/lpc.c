@@ -19,6 +19,7 @@
  * Foundation, Inc.
  */
 
+#include "chip.h"
 #include <console/console.h>
 #include <delay.h>
 #include <device/device.h>
@@ -44,7 +45,6 @@
 #include <soc/pmc.h>
 #include <soc/ramstage.h>
 #include <soc/pcr.h>
-#include <soc/intel/skylake/chip.h>
 
 static void pch_enable_ioapic(struct device *dev)
 {
@@ -170,7 +170,7 @@ static void pch_lpc_add_mmio_resources(device_t dev)
 	/*
 	 * As per the BWG, Chapter 5.9.1. "PCH BIOS component will reserve
 	 * certain memory range as reserved range for BIOS usage.
-	 * For Skylake, this range will be from 0FD000000h till FE7FFFFFh"
+	 * For this SOC, the range will be from 0FD000000h till FE7FFFFFh"
 	 * Hence, use FD000000h as PCR_BASE
 	 */
 	const u32 default_decode_base = PCH_PCR_BASE_ADDRESS;
@@ -287,7 +287,7 @@ static struct device_operations device_ops = {
 	.enable_resources	= &pci_dev_enable_resources,
 	.init			= &lpc_init,
 	.scan_bus		= &scan_static_bus,
-	.ops_pci		= &skylake_pci_ops,
+	.ops_pci		= &soc_pci_ops,
 };
 
 static const unsigned short pci_device_ids[] = {

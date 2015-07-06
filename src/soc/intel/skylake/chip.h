@@ -23,8 +23,8 @@
 #include <soc/pci_devs.h>
 #include <soc/serialio.h>
 
-#ifndef _SOC_INTEL_SKYLAKE_CHIP_H_
-#define _SOC_INTEL_SKYLAKE_CHIP_H_
+#ifndef _SOC_CHIP_H_
+#define _SOC_CHIP_H_
 
 struct soc_intel_skylake_config {
 	/*

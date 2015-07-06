@@ -14,8 +14,8 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _SKYLAKE_PMC_H_
-#define _SKYLAKE_PMC_H_
+#ifndef _SOC_PMC_H_
+#define _SOC_PMC_H_
 
 /* PCI Configuration Space (D31:F2): PMC */
 #define ABASE			0x40

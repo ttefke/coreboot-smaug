@@ -149,7 +149,7 @@ void usb_xhci_sleep_prepare(device_t dev, u8 slp_typ)
 	u16 reg16;
 	u32 reg32;
 	u8 *mem_base = (u8 *)usb_xhci_mem_base(dev);
-	u8 is_skylake = !!(cpu_family_model() == SKYLAKE_FAMILY_ULT);
+	u8 is_ult = !!(cpu_family_model() == SKYLAKE_FAMILY_ULT);
 
 	if (!mem_base || slp_typ < 3)
 		return;
@@ -160,7 +160,7 @@ void usb_xhci_sleep_prepare(device_t dev, u8 slp_typ)
 	reg16 |= XHCI_PWR_CTL_SET_D0;
 	pci_write_config16(dev, XHCI_PWR_CTL_STS, reg16);
 
-	if (!is_skylake) {
+	if (!is_ult) {
 		/* This WA is only for lpt */
 
 		/* Clear PCI 0xB0[14:13] */
@@ -197,7 +197,7 @@ static struct device_operations usb_xhci_ops = {
 	.read_resources		= &pci_dev_read_resources,
 	.set_resources		= &pci_dev_set_resources,
 	.enable_resources	= &pci_dev_enable_resources,
-	.ops_pci		= &skylake_pci_ops,
+	.ops_pci		= &soc_pci_ops,
 };
 
 static const unsigned short pci_device_ids[] = {

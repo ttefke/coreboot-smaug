@@ -56,7 +56,7 @@ static const GPIO_GROUP_INFO gpio_group_info[] = {
 };
 
 /*
- * On SKL SPT has 7 GPIO community. Named as GPP_A to GPP_G.
+ * SPT has 7 GPIO communities named as GPP_A to GPP_G.
  * Each community has 24 GPIO PIN.
  * Below formula to calculate GPIO Pin from GPIO PAD.
  * PIN# = GROUP_PAD# + GROUP# * 24
@@ -127,32 +127,32 @@ static int convert_gpio_num_to_pad(gpio_t gpionum)
 	gpio_group = (gpionum / MAX_GPIO_PIN_PER_GROUP);
 
 	switch (gpio_group) {
-	case GPIO_SKL_LP_GROUP_A:
-		gpio_pad = GPIO_SKL_LP_GROUP_GPP_A;
+	case GPIO_LP_GROUP_A:
+		gpio_pad = GPIO_LP_GROUP_GPP_A;
 		break;
 
-	case GPIO_SKL_LP_GROUP_B:
-		gpio_pad = GPIO_SKL_LP_GROUP_GPP_B;
+	case GPIO_LP_GROUP_B:
+		gpio_pad = GPIO_LP_GROUP_GPP_B;
 		break;
 
-	case GPIO_SKL_LP_GROUP_C:
-		gpio_pad = GPIO_SKL_LP_GROUP_GPP_C;
+	case GPIO_LP_GROUP_C:
+		gpio_pad = GPIO_LP_GROUP_GPP_C;
 		break;
 
-	case GPIO_SKL_LP_GROUP_D:
-		gpio_pad = GPIO_SKL_LP_GROUP_GPP_D;
+	case GPIO_LP_GROUP_D:
+		gpio_pad = GPIO_LP_GROUP_GPP_D;
 		break;
 
-	case GPIO_SKL_LP_GROUP_E:
-		gpio_pad = GPIO_SKL_LP_GROUP_GPP_E;
+	case GPIO_LP_GROUP_E:
+		gpio_pad = GPIO_LP_GROUP_GPP_E;
 		break;
 
-	case GPIO_SKL_LP_GROUP_F:
-		gpio_pad = GPIO_SKL_LP_GROUP_GPP_F;
+	case GPIO_LP_GROUP_F:
+		gpio_pad = GPIO_LP_GROUP_GPP_F;
 		break;
 
-	case GPIO_SKL_LP_GROUP_G:
-		gpio_pad = GPIO_SKL_LP_GROUP_GPP_G;
+	case GPIO_LP_GROUP_G:
+		gpio_pad = GPIO_LP_GROUP_GPP_G;
 		break;
 	default:
 		return -1;
@@ -224,7 +224,7 @@ void clear_all_smi(void)
 	}
 }
 
-void get_smi_status(u32 status[SKL_GPIO_COMMUNITY_MAX])
+void get_smi_status(u32 status[GPIO_COMMUNITY_MAX])
 {
 	u32 num_of_communities;
 	u32 gpioindex;

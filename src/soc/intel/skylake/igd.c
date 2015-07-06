@@ -20,6 +20,7 @@
 
 #include <arch/acpi.h>
 #include <arch/io.h>
+#include <chip.h>
 #include <console/console.h>
 #include <delay.h>
 #include <device/device.h>
@@ -33,7 +34,6 @@
 #include <soc/pm.h>
 #include <soc/ramstage.h>
 #include <soc/systemagent.h>
-#include <soc/intel/skylake/chip.h>
 #include <vendorcode/google/chromeos/chromeos.h>
 
 #define GT_RETRY		1000
@@ -130,7 +130,7 @@ static struct device_operations igd_ops = {
 	.set_resources		= &pci_dev_set_resources,
 	.enable_resources	= &pci_dev_enable_resources,
 	.init			= &igd_init,
-	.ops_pci		= &skylake_pci_ops,
+	.ops_pci		= &soc_pci_ops,
 };
 
 static const unsigned short pci_device_ids[] = {

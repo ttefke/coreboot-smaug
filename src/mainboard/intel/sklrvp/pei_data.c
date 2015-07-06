@@ -39,10 +39,10 @@ void mainboard_fill_pei_data(struct pei_data *pei_data)
 		{1, 0, 4, 5, 2, 3, 6, 7} };
 
 	/* Rcomp resistor*/
-	const u16 RcompResistorSkl[3] = {200, 81, 162 };
+	const u16 RcompResistor[3] = {200, 81, 162 };
 
 	/* Rcomp target*/
-	const u16 RcompTargetSkl[5]   = {100, 40, 40, 23, 40};
+	const u16 RcompTarget[5]   = {100, 40, 40, 23, 40};
 
 	pei_data->ec_present = 1;
 	/* One installed DIMM per channel */
@@ -51,8 +51,8 @@ void mainboard_fill_pei_data(struct pei_data *pei_data)
 
 	memcpy(pei_data->dq_map, dq_map, sizeof(dq_map));
 	memcpy(pei_data->dqs_map, dqs_map, sizeof(dqs_map));
-	memcpy(pei_data->RcompResistorSkl, RcompResistorSkl,
-		 sizeof(RcompResistorSkl));
-	memcpy(pei_data->RcompTargetSkl, RcompTargetSkl,
-		 sizeof(RcompTargetSkl));
+	memcpy(pei_data->RcompResistor, RcompResistor,
+		 sizeof(RcompResistor));
+	memcpy(pei_data->RcompTarget, RcompTarget,
+		 sizeof(RcompTarget));
 }
