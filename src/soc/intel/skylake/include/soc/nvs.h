@@ -22,6 +22,7 @@
 #ifndef _SKYLAKE_NVS_H_
 #define _SKYLAKE_NVS_H_
 
+#include <rules.h>
 #include <vendorcode/google/chromeos/gnvs.h>
 #include <soc/device_nvs.h>
 
@@ -65,7 +66,7 @@ typedef struct {
 	device_nvs_t dev;
 } __attribute__((packed)) global_nvs_t;
 
-#ifdef __SMM__
+#if ENV_SMM
 /* Used in SMM to find the ACPI GNVS address */
 global_nvs_t *smm_get_gnvs(void);
 #endif

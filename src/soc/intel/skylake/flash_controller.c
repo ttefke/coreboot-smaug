@@ -39,7 +39,7 @@
 #define HSFC_FDBC_OFF		8	/* 8-13: Flash Data Byte Count */
 #define HSFC_FDBC		(0x3f << HSFC_FDBC_OFF)
 
-#ifdef __SMM__
+#if ENV_SMM
 #define pci_read_config_byte(dev, reg, targ)\
 	(*(targ) = pci_read_config8(dev, reg))
 #define pci_read_config_word(dev, reg, targ)\
@@ -52,7 +52,7 @@
 	pci_write_config16(dev, reg, val)
 #define pci_write_config_dword(dev, reg, val)\
 	pci_write_config32(dev, reg, val)
-#else /* !__SMM__ */
+#else /* !ENV_SMM */
 #include <device/device.h>
 #include <device/pci.h>
 #define pci_read_config_byte(dev, reg, targ)\
@@ -67,7 +67,7 @@
 	pci_write_config16(dev, reg, val)
 #define pci_write_config_dword(dev, reg, val)\
 	pci_write_config32(dev, reg, val)
-#endif /* !__SMM__ */
+#endif /* ENV_SMM */
 
 #define B_PCH_SPI_BAR0_MASK   0x0FFF
 

@@ -23,6 +23,7 @@
 #define _SKYLAKE_PCH_H_
 
 #include <device/device.h>
+#include <rules.h>
 
 /* Skylake PCH (SunRisePoint LP) */
 #define PCH_SPT_LP_SAMPLE		0x9d41
@@ -34,7 +35,7 @@ u8 pch_revision(void);
 u16 pch_type(void);
 u32 pch_read_soft_strap(int id);
 void pch_log_state(void);
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 void pch_disable_devfn(device_t dev);
 #endif
 

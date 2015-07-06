@@ -21,6 +21,8 @@
 #ifndef _SKYLAKE_XHCI_H_
 #define _SKYLAKE_XHCI_H_
 
+#include <rules.h>
+
 /* XHCI PCI Registers */
 #define XHCI_PWR_CTL_STS	0x74
 #define  XHCI_PWR_CTL_SET_MASK	0x3
@@ -55,7 +57,7 @@
 #define   XHCI_PLSR_POLLING	(7 << 5)	/* Port is polling */
 #define   XHCI_PLSW_ENABLE	(5 << 5)	/* Transition from disabled */
 
-#ifdef __SMM__
+#if ENV_SMM
 void usb_xhci_sleep_prepare(device_t dev, u8 slp_typ);
 #endif
 
