@@ -67,8 +67,10 @@ Scope (\_SB.I2C1)
 					AddressingMode7Bit,       /* AddressingMode */
 					"\\_SB.I2C1",             /* ResourceSource */
 				)
-				GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-					 "\\_SB.GPSW") { BOARD_TOUCH_GPIO_INDEX }
+				Interrupt (ResourceConsumer, Edge, ActiveLow)
+				{
+					BOARD_TOUCH_IRQ
+				}
 			})
 			Name (BUF1, ResourceTemplate ()
 			{
@@ -79,13 +81,15 @@ Scope (\_SB.I2C1)
 					AddressingMode7Bit,       /* AddressingMode */
 					"\\_SB.I2C1",             /* ResourceSource */
 				)
-				GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-					 "\\_SB.GPNC") { BOARD_DVT_TOUCH_GPIO_INDEX }
+				Interrupt (ResourceConsumer, Edge, ActiveLow)
+				{
+					BOARD_DVT_TOUCH_IRQ
+				}
 			})
-			If (LEqual (\BDID, BOARD_DVT)) {
-				Return (BUF1)
-			} Else {
+			If (LEqual (\BDID, BOARD_EVT)) {
 				Return (BUF0)
+			} Else {
+				Return (BUF1)
 			}
 		}
 
@@ -109,18 +113,42 @@ Scope (\_SB.I2C1)
 		Name (_UID, 5)
 		Name (ISTP, 0) /* TouchScreen */
 
-		Name (_CRS, ResourceTemplate()
+		Method(_CRS, 0x0, NotSerialized)
 		{
-			I2cSerialBus (
-				0x4b,                     /* SlaveAddress */
-				ControllerInitiated,      /* SlaveMode */
-				400000,                   /* ConnectionSpeed */
-				AddressingMode7Bit,       /* AddressingMode */
-				"\\_SB.I2C1",             /* ResourceSource */
-			)
-			GpioInt (Edge, ActiveLow, ExclusiveAndWake, PullNone,,
-				 "\\_SB.GPSW") { BOARD_TOUCH_GPIO_INDEX }
-		})
+			Name (BUF0, ResourceTemplate ()
+			{
+				I2cSerialBus(
+					0x4b,                     /* SlaveAddress */
+					ControllerInitiated,      /* SlaveMode */
+					400000,                   /* ConnectionSpeed */
+					AddressingMode7Bit,       /* AddressingMode */
+					"\\_SB.I2C1",             /* ResourceSource */
+				)
+				Interrupt (ResourceConsumer, Edge, ActiveLow)
+				{
+					BOARD_TOUCH_IRQ
+				}
+			})
+			Name (BUF1, ResourceTemplate ()
+			{
+				I2cSerialBus(
+					0x4b,                     /* SlaveAddress */
+					ControllerInitiated,      /* SlaveMode */
+					400000,                   /* ConnectionSpeed */
+					AddressingMode7Bit,       /* AddressingMode */
+					"\\_SB.I2C1",             /* ResourceSource */
+				)
+				Interrupt (ResourceConsumer, Edge, ActiveLow)
+				{
+					BOARD_DVT_TOUCH_IRQ
+				}
+			})
+			If (LEqual (\BDID, BOARD_EVT)) {
+				Return (BUF0)
+			} Else {
+				Return (BUF1)
+			}
+		}
 
 		Method (_STA)
 		{

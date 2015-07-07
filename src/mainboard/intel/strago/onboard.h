@@ -41,6 +41,9 @@
 /* ToDo: change kbd irq to gpio bank index */
 #define BOARD_I8042_IRQ			182
 
+#define BOARD_TOUCH_IRQ			156
+#define BOARD_DVT_TOUCH_IRQ		184
+
 
 /* Audio: Gpio index in SW bank */
 #define JACK_DETECT_GPIO_INDEX		95
@@ -48,10 +51,6 @@
 #define BOARD_SCI_GPIO_INDEX		15
 /* Trackpad: Gpio index in N bank */
 #define BOARD_TRACKPAD_GPIO_INDEX	18
-/* Touch: Gpio index in SW bank */
-#define BOARD_TOUCH_GPIO_INDEX		76
-/* Touch: Gpio index in SW bank */
-#define BOARD_DVT_TOUCH_GPIO_INDEX	19
 
 #define BOARD_TRACKPAD_NAME             "trackpad"
 #define BOARD_TRACKPAD_WAKE_GPIO        ACPI_ENABLE_WAKE_SUS_GPIO(1)
@@ -74,6 +73,7 @@
 #define AUDIO_CODEC_DDN			"RTEK Codec Controller "
 #define AUDIO_CODEC_I2C_ADDR		0x1A
 
+#define BOARD_EVT			0x02
 #define BOARD_DVT			0x03
 #define BOARD_BCRD2			0x04
 
