@@ -1,5 +1,8 @@
 chip soc/intel/skylake
 
+	# Enable deep Sx states
+	register "deep_s3_enable" = "1"
+	register "deep_s5_enable" = "1"
 
 	# Must leave UART0 enabled or SD/eMMC will not work as PCI
 	register "SerialIoDevMode" = "{ \
@@ -85,6 +88,7 @@ chip soc/intel/skylake
 				device pnp 0c09.0 on end
 			end
 		end # LPC Interface
+		device pci 1f.2 on  end # Power Management Controller
 		device pci 1f.3 on  end # Intel High Definition Audio
 		device pci 1f.4 off end # SMBus Controller
 		device pci 1f.5 on  end # SPI
