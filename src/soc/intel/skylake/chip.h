@@ -108,9 +108,9 @@ struct soc_intel_skylake_config {
 	/* Enable S0iX support */
 	int s0ix_enable;
 
-	/* Deep SX enable */
-	int deep_sx_enable_ac;
-	int deep_sx_enable_dc;
+	/* Deep SX enable for both AC and DC */
+	int deep_s3_enable;
+	int deep_s5_enable;
 
 	/* TCC activation offset */
 	int tcc_offset;
