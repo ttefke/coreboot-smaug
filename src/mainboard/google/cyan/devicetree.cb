@@ -28,11 +28,11 @@ chip soc/intel/braswell
 	register "PcdEnableDma1" = "1"
 	register "PcdEnableI2C0" = "1"
 	register "PcdEnableI2C1" = "1"
-	register "PcdEnableI2C2" = "1"
-	register "PcdEnableI2C3" = "1"
-	register "PcdEnableI2C4" = "1"
+	register "PcdEnableI2C2" = "0"
+	register "PcdEnableI2C3" = "0"
+	register "PcdEnableI2C4" = "0"
 	register "PcdEnableI2C5" = "1"
-	register "PcdEnableI2C6" = "1"
+	register "PcdEnableI2C6" = "0"
 	register "PunitPwrConfigDisable" = "0"	# Enable SVID
 	register "ChvSvidConfig" = "SVID_CONFIG1"
 	register "PcdEmmcMode" = "PCH_ACPI_MODE"
@@ -106,11 +106,11 @@ chip soc/intel/braswell
 		device pci 18.0 on end	# 8086 22c0 - SIO - DMA
 		device pci 18.1 on end	# 8086 22c1 -   I2C Port 1
 		device pci 18.2 on end	# 8086 22c2 -   I2C Port 2
-		device pci 18.3 on end	# 8086 22c3 -   I2C Port 3
-		device pci 18.4 on end	# 8086 22c4 -   I2C Port 4
-		device pci 18.5 on end	# 8086 22c5 -   I2C Port 5
+		device pci 18.3 off end	# 8086 22c3 -   I2C Port 3
+		device pci 18.4 off end	# 8086 22c4 -   I2C Port 4
+		device pci 18.5 off end	# 8086 22c5 -   I2C Port 5
 		device pci 18.6 on end	# 8086 22c6 -   I2C Port 6
-		device pci 18.7 on end	# 8086 22c7 -   I2C Port 7
+		device pci 18.7 off end	# 8086 22c7 -   I2C Port 7
 		device pci 1a.0 on end	# 8086 0F18 - Trusted Execution Engine
 		device pci 1b.0 on end	# 8086 0F04 - HD Audio
 		device pci 1c.0 on end	# 8086 0000 - PCIe Root Port 1
