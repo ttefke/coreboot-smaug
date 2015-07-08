@@ -20,21 +20,18 @@
 
 romstage-$(CONFIG_ENABLE_MRC_CACHE) += fastboot_cache.c
 romstage-$(CONFIG_GOP_SUPPORT) += fsp_gop.c
-romstage-y += fsp_hob.c
 romstage-y += fsp_util.c
-romstage-$(CONFIG_USING_FSP_1_0) += fsp_util_1_0.c
+romstage-y += hob.c
 
 ramstage-$(CONFIG_ENABLE_MRC_CACHE) += fastboot_cache.c
 ramstage-$(CONFIG_GOP_SUPPORT) += fsp_gop.c
-ramstage-y += fsp_hob.c
 ramstage-y += fsp_relocate.c
 ramstage-y += fsp_util.c
+ramstage-y += hob.c
 
 CPPFLAGS_common += -Isrc/drivers/intel/fsp1_1
 
-ifeq ($(CONFIG_USE_GENERIC_FSP_CAR_INC),y)
-cpu_incs += $(src)/drivers/intel/fsp1_1/cache_as_ram.inc
-endif
+cpu_incs-$(CONFIG_USE_GENERIC_FSP_CAR_INC) += $(src)/drivers/intel/fsp1_1/cache_as_ram.inc
 
 
 # Add the GOP Video BIOS Table to the cbfs image

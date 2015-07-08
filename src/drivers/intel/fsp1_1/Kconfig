@@ -35,12 +35,6 @@ config HAVE_FSP_BIN
 	  Note: Without this binary, coreboot builds relying on the FSP
 	  will not boot
 
-config USING_FSP_1_0
-	bool "Code uses FSP 1.0 API"
-	default n
-	help
-	  Select this option to use the FSP 1.0 API.
-
 config DCACHE_RAM_BASE
 	hex
 	default 0xfef00000

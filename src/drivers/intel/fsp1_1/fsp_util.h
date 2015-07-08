@@ -68,20 +68,6 @@ void *get_first_resource_hob(const EFI_GUID *guid);
  */
 FSP_INFO_HEADER *fsp_relocate(void *fsp_src, size_t size);
 
-/* The following are chipset support routines */
-#if IS_ENABLED(CONFIG_USING_FSP_1_0)
-void chipset_fsp_early_init(FSP_INIT_PARAMS * fsp_init_params,
-	FSP_INFO_HEADER *fsp_ptr);
-void chipset_fsp_return_point(EFI_STATUS status, VOID *hob_list_ptr);
-#endif
-
-/* The following are board support routines */
-#if IS_ENABLED(CONFIG_USING_FSP_1_0)
-void romstage_fsp_rt_buffer_callback(
-	FSP_INIT_RT_COMMON_BUFFER * fsp_rt_common_buffer);
-#endif
-
-
 /* Additional HOB types not included in the FSP:
  * #define EFI_HOB_TYPE_HANDOFF 0x0001
  * #define EFI_HOB_TYPE_MEMORY_ALLOCATION 0x0002
