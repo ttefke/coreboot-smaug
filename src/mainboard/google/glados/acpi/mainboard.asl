@@ -17,6 +17,9 @@
  * Foundation, Inc.
  */
 
+#define BOARD_TRACKPAD_I2C_ADDR		0x15
+#define BOARD_TRACKPAD_IRQ		0x33
+
 Scope (\_SB)
 {
 	Device (LID0)
@@ -58,4 +61,35 @@ Scope (\_SB)
 Scope (\_SB.PCI0.LPCB)
 {
 	#include <drivers/pc80/tpm/acpi/tpm.asl>
+}
+
+/* Trackpad */
+Scope (\_SB.PCI0.I2C1)
+{
+	Device (ELAN)
+	{
+		Name (_HID, "ELAN0000")
+		Name (_DDN, "Elan Touchpad")
+		Name (_UID, 3)
+		Name (_S0W, 4)
+		Name (ISTP, 1) /* TouchPad */
+		Name (_CRS, ResourceTemplate()
+		{
+			I2cSerialBus (
+				BOARD_TRACKPAD_I2C_ADDR,	/* SlaveAddress */
+				ControllerInitiated,		/* SlaveMode */
+				400000,				/* ConnectionSpeed */
+				AddressingMode7Bit,		/* AddressingMode */
+				"\\_SB.PCI0.I2C1",		/* ResourceSource */
+			)
+			Interrupt (ResourceConsumer, Edge, ActiveLow)
+			{
+				BOARD_TRACKPAD_IRQ
+			}
+		})
+		Method (_STA)
+		{
+			Return (0xF)
+		}
+	}
 }
