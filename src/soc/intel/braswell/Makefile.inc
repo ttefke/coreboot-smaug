@@ -57,7 +57,7 @@ smm-y += lpc_init.c
 INCLUDES += -Isrc/soc/intel/braswell/
 INCLUDES += -Isrc/soc/intel/braswell/include
 
-INCLUDES += -Isrc/drivers/intel/fsp
+INCLUDES += -Isrc/drivers/intel/fsp1_1
 INCLUDES += -Isrc/vendorcode/intel/fsp/fsp1_1
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4/MdePkg/Include

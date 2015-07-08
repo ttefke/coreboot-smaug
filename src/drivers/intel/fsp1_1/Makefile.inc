@@ -30,10 +30,10 @@ ramstage-y += fsp_hob.c
 ramstage-y += fsp_relocate.c
 ramstage-y += fsp_util.c
 
-CPPFLAGS_common += -Isrc/drivers/intel/fsp
+CPPFLAGS_common += -Isrc/drivers/intel/fsp1_1
 
 ifeq ($(CONFIG_USE_GENERIC_FSP_CAR_INC),y)
-cpu_incs += $(src)/drivers/intel/fsp/cache_as_ram.inc
+cpu_incs += $(src)/drivers/intel/fsp1_1/cache_as_ram.inc
 endif
 
 

@@ -58,10 +58,10 @@ smm-$(CONFIG_SPI_FLASH_SMM) += flash_controller.c
 smm-y += tsc_freq.c
 smm-y += xhci.c
 
-INCLUDES += -Isrc/drivers/intel/fsp
 INCLUDES += -Isrc/soc/intel/skylake
 INCLUDES += -Isrc/soc/intel/skylake/include
 
+INCLUDES += -Isrc/drivers/intel/fsp1_1
 INCLUDES += -Isrc/vendorcode/intel/fsp/fsp1_1
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4/MdePkg/Include

@@ -1,4 +1,4 @@
-cpu_incs += $(src)/drivers/intel/fsp/fsp_1_1.inc
+cpu_incs += $(src)/drivers/intel/fsp1_1/fsp_1_1.inc
 
 romstage-y += cpu.c
 romstage-y += pch.c
