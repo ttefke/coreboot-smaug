@@ -22,11 +22,12 @@
 #include <console/console.h>
 #include <device/device.h>
 #include <device/pci.h>
+#include <rules.h>
 #include <soc/gpio.h>
 #include <string.h>
 #include <vendorcode/google/chromeos/chromeos.h>
 
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 #include <boot/coreboot_tables.h>
 
 #define GPIO_COUNT	6
@@ -63,7 +64,7 @@ void fill_lb_gpios(struct lb_gpios *gpios)
 	fill_lb_gpio(gpio++, -1, ACTIVE_HIGH, "power", 0);
 	fill_lb_gpio(gpio++, -1, ACTIVE_HIGH, "oprom", oprom_is_loaded);
 }
-#endif
+#endif /* ENV_RAMSTAGE */
 
 int get_lid_switch(void)
 {
