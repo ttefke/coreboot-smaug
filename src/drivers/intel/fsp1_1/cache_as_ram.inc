@@ -28,7 +28,6 @@
  * performs the final stage of initialization.
  */
 
-#include <cpu/x86/stack.h>
 #include <cpu/x86/mtrr.h>
 #include <cpu/x86/cache.h>
 #include <cpu/x86/post_code.h>

@@ -19,18 +19,14 @@
  * Foundation, Inc.
  */
 
-#include <stdint.h>
-#include <string.h>
-#include <bootstate.h>
-#include <console/console.h>
 #include <cbfs.h>
-#include <ip_checksum.h>
-#include <device/device.h>
 #include <cbmem.h>
-#include <spi-generic.h>
-#include <spi_flash.h>
-#include <lib.h> // hexdump
+#include <console/console.h>
 #include "fsp_util.h"
+#include <ip_checksum.h>
+#include <lib.h> // hexdump
+#include <spi_flash.h>
+#include <string.h>
 
 #ifndef CONFIG_VIRTUAL_ROM_SIZE
 #error "CONFIG_VIRTUAL_ROM_SIZE must be set."
