@@ -471,6 +471,8 @@ void __attribute__ ((weak)) update_mrc_cache(void *unused)
 }
 #endif /* CONFIG_ENABLE_MRC_CACHE */
 
+#if ENV_RAMSTAGE
+
 static void find_fsp_hob_update_mrc(void *unused)
 {
 	void *hob_list_ptr;
@@ -494,3 +496,5 @@ BOOT_STATE_INIT_ENTRIES(fsp_hob_find) = {
 	BOOT_STATE_INIT_ENTRY(BS_WRITE_TABLES, BS_ON_ENTRY,
 				find_fsp_hob_update_mrc, NULL),
 };
+
+#endif /* ENV_RAMSTAGE */

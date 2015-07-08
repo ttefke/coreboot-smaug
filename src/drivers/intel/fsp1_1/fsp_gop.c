@@ -59,7 +59,7 @@ const optionrom_vbt_t *fsp_get_vbt(uint32_t *vbt_len)
 	return vbt.data;
 }
 
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 void fsp_gop_framebuffer(struct lb_header *header)
 {
 	struct lb_framebuffer *framebuffer;
@@ -96,5 +96,4 @@ void fsp_gop_framebuffer(struct lb_header *header)
 	framebuffer->tag = LB_TAG_FRAMEBUFFER;
 	framebuffer->size = sizeof(*framebuffer);
 }
-#endif /* __PRE_RAM__ */
-
+#endif /* ENV_RAMSTAGE */

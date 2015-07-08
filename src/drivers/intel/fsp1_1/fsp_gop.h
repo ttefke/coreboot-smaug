@@ -20,6 +20,8 @@
 #ifndef _FSP_GOP_H_
 #define _FSP_GOP_H_
 
+#include <rules.h>
+
 /* GOP support */
 #if IS_ENABLED(CONFIG_GOP_SUPPORT)
 
@@ -27,9 +29,8 @@
 #include <soc/intel/common/gma.h>
 
 const optionrom_vbt_t *fsp_get_vbt(uint32_t *vbt_len);
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 void fsp_gop_framebuffer(struct lb_header *header);
-#endif /* __PRE_RAM__ */
+#endif /* ENV_RAMSTAGE */
 #endif /* CONFIG_GOP_SUPPORT */
 #endif /* _FSP_GOP_H_ */
-

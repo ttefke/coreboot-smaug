@@ -138,7 +138,7 @@ void print_fsp_info(FSP_INFO_HEADER *fsp_header)
 #endif
 }
 
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 
 void fsp_notify(u32 phase)
 {
@@ -195,7 +195,7 @@ BOOT_STATE_INIT_ENTRIES(fsp_bscbs) = {
 		(void *)EnumInitPhaseReadyToBoot)
 };
 
-#endif	/* #ifndef __PRE_RAM__ */
+#endif	/* ENV_RAMSTAGE */
 
 struct fsp_runtime {
 	uint32_t fih;

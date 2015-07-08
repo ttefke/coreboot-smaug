@@ -24,6 +24,7 @@
 #include <types.h>
 #include <arch/cpu.h>
 #include <fsp_gop.h>
+#include <rules.h>
 
 /*
  * The following are functions with prototypes defined in the EDK2 headers. The
@@ -117,7 +118,7 @@ void update_mrc_cache(void *unused);
 #define ERROR_INFO_HEAD_SIG_MISMATCH		5
 #define ERROR_FSP_SIG_MISMATCH			6
 
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 extern void *FspHobListPtr;
 #endif
 
