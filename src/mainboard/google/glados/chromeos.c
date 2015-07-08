@@ -22,11 +22,12 @@
 #include <console/console.h>
 #include <device/device.h>
 #include <device/pci.h>
+#include <rules.h>
 #include <soc/gpio.h>
 #include <string.h>
 #include <vendorcode/google/chromeos/chromeos.h>
 
-#ifndef __PRE_RAM__
+#if ENV_RAMSTAGE
 #include <boot/coreboot_tables.h>
 
 #define GPIO_COUNT	6
