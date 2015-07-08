@@ -29,30 +29,70 @@
  * enable_gpio_groupsmi() depends on this ordering.
  */
 static const GPIO_GROUP_INFO gpio_group_info[] = {
-	{PID_GPIOCOM0, R_PCH_PCR_GPIO_GPP_A_PADCFG_OFFSET,
-	 V_PCH_GPIO_GPP_A_PAD_MAX, R_PCH_PCR_GPIO_GPP_A_SMI_STS,
-	 R_PCH_PCR_GPIO_GPP_A_SMI_EN},
-	{PID_GPIOCOM0, R_PCH_PCR_GPIO_GPP_B_PADCFG_OFFSET,
-	 V_PCH_GPIO_GPP_B_PAD_MAX, R_PCH_PCR_GPIO_GPP_B_SMI_STS,
-	 R_PCH_PCR_GPIO_GPP_B_SMI_EN},
-	{PID_GPIOCOM1, R_PCH_PCR_GPIO_GPP_C_PADCFG_OFFSET,
-	 V_PCH_GPIO_GPP_C_PAD_MAX, R_PCH_PCR_GPIO_GPP_C_SMI_STS,
-	 R_PCH_PCR_GPIO_GPP_C_SMI_EN},
-	{PID_GPIOCOM1, R_PCH_PCR_GPIO_GPP_D_PADCFG_OFFSET,
-	 V_PCH_GPIO_GPP_D_PAD_MAX, R_PCH_PCR_GPIO_GPP_D_SMI_STS,
-	 R_PCH_PCR_GPIO_GPP_D_SMI_EN},
-	{PID_GPIOCOM1, R_PCH_PCR_GPIO_GPP_E_PADCFG_OFFSET,
-	 V_PCH_GPIO_GPP_E_PAD_MAX, R_PCH_PCR_GPIO_GPP_E_SMI_STS,
-	 R_PCH_PCR_GPIO_GPP_E_SMI_EN},
-	{PID_GPIOCOM3, R_PCH_PCR_GPIO_GPP_F_PADCFG_OFFSET,
-	 V_PCH_GPIO_GPP_F_PAD_MAX, NO_REGISTER_PROPERTY,
-	 NO_REGISTER_PROPERTY},
-	{PID_GPIOCOM3, R_PCH_PCR_GPIO_GPP_G_PADCFG_OFFSET,
-	 V_PCH_GPIO_GPP_G_PAD_MAX, NO_REGISTER_PROPERTY,
-	 NO_REGISTER_PROPERTY},
-	{PID_GPIOCOM2, R_PCH_PCR_GPIO_GPD_PADCFG_OFFSET,
-	 V_PCH_GPIO_GPD_PAD_MAX, NO_REGISTER_PROPERTY,
-	 NO_REGISTER_PROPERTY},
+	/* GPP_A */
+	{
+		.community = PID_GPIOCOM0,
+		.padcfgoffset = R_PCH_PCR_GPIO_GPP_A_PADCFG_OFFSET,
+		.padpergroup = V_PCH_GPIO_GPP_A_PAD_MAX,
+		.smistsoffset = R_PCH_PCR_GPIO_GPP_A_SMI_STS,
+		.smienoffset = R_PCH_PCR_GPIO_GPP_A_SMI_EN,
+	},
+	/* GPP_B */
+	{
+		.community = PID_GPIOCOM0,
+		.padcfgoffset = R_PCH_PCR_GPIO_GPP_B_PADCFG_OFFSET,
+		.padpergroup = V_PCH_GPIO_GPP_B_PAD_MAX,
+		.smistsoffset = R_PCH_PCR_GPIO_GPP_B_SMI_STS,
+		.smienoffset = R_PCH_PCR_GPIO_GPP_B_SMI_EN,
+	},
+	/* GPP_C */
+	{
+		.community = PID_GPIOCOM1,
+		.padcfgoffset = R_PCH_PCR_GPIO_GPP_C_PADCFG_OFFSET,
+		.padpergroup = V_PCH_GPIO_GPP_C_PAD_MAX,
+		.smistsoffset = R_PCH_PCR_GPIO_GPP_C_SMI_STS,
+		.smienoffset = R_PCH_PCR_GPIO_GPP_C_SMI_EN,
+	},
+	/* GPP_D */
+	{
+		.community = PID_GPIOCOM1,
+		.padcfgoffset = R_PCH_PCR_GPIO_GPP_D_PADCFG_OFFSET,
+		.padpergroup = V_PCH_GPIO_GPP_D_PAD_MAX,
+		.smistsoffset = R_PCH_PCR_GPIO_GPP_D_SMI_STS,
+		.smienoffset = R_PCH_PCR_GPIO_GPP_D_SMI_EN,
+	},
+	/* GPP_E */
+	{
+		.community = PID_GPIOCOM1,
+		.padcfgoffset = R_PCH_PCR_GPIO_GPP_E_PADCFG_OFFSET,
+		.padpergroup = V_PCH_GPIO_GPP_E_PAD_MAX,
+		.smistsoffset = R_PCH_PCR_GPIO_GPP_E_SMI_STS,
+		.smienoffset = R_PCH_PCR_GPIO_GPP_E_SMI_EN,
+	},
+	/* GPP_F */
+	{
+		.community = PID_GPIOCOM3,
+		.padcfgoffset = R_PCH_PCR_GPIO_GPP_F_PADCFG_OFFSET,
+		.padpergroup = V_PCH_GPIO_GPP_F_PAD_MAX,
+		.smistsoffset = NO_REGISTER_PROPERTY,
+		.smienoffset = NO_REGISTER_PROPERTY,
+	},
+	/* GPP_G */
+	{
+		.community = PID_GPIOCOM3,
+		.padcfgoffset = R_PCH_PCR_GPIO_GPP_G_PADCFG_OFFSET,
+		.padpergroup = V_PCH_GPIO_GPP_G_PAD_MAX,
+		.smistsoffset = NO_REGISTER_PROPERTY,
+		.smienoffset = NO_REGISTER_PROPERTY,
+	},
+	/* GPP_H */
+	{
+		.community = PID_GPIOCOM2,
+		.padcfgoffset = R_PCH_PCR_GPIO_GPD_PADCFG_OFFSET,
+		.padpergroup = V_PCH_GPIO_GPD_PAD_MAX,
+		.smistsoffset = NO_REGISTER_PROPERTY,
+		.smienoffset = NO_REGISTER_PROPERTY,
+	},
 };
 
 /*
