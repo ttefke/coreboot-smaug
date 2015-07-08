@@ -58,7 +58,7 @@ INCLUDES += -Isrc/soc/intel/braswell/
 INCLUDES += -Isrc/soc/intel/braswell/include
 
 INCLUDES += -Isrc/drivers/intel/fsp
-INCLUDES += -Isrc/vendorcode/intel/fsp/fsp_1_1
+INCLUDES += -Isrc/vendorcode/intel/fsp/fsp1_1
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4/MdePkg/Include
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4/MdePkg/Include/Ia32

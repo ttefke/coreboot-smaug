@@ -61,7 +61,8 @@ smm-y += xhci.c
 INCLUDES += -Isrc/drivers/intel/fsp
 INCLUDES += -Isrc/soc/intel/skylake
 INCLUDES += -Isrc/soc/intel/skylake/include
-INCLUDES += -Isrc/vendorcode/intel/fsp/fsp_1_1
+
+INCLUDES += -Isrc/vendorcode/intel/fsp/fsp1_1
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4/MdePkg/Include
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4/MdePkg/Include/Ia32
