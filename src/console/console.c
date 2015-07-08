@@ -112,8 +112,9 @@ void console_init(void)
 	IS_ENABLED(CONFIG_CONSOLE_SERIAL_UART))
 	uart_init();
 #endif
-#if CONFIG_CONSOLE_SERIAL8250MEM
-	uart_mem_init();
+#if (CONFIG_CONSOLE_SERIAL8250MEM ||	\
+	CONFIG_CONSOLE_SERIAL8250MEM_32)
+	 uart_mem_init();
 #endif
 #if CONFIG_DRIVERS_OXFORD_OXPCIE
 	oxford_init();

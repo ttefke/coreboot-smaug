@@ -126,7 +126,7 @@ void uart8250_tx_flush(unsigned base_port);
  */
 void uart8250_init(unsigned base_port, unsigned divisor);
 #endif
-#if CONFIG_CONSOLE_SERIAL8250MEM
+#if (CONFIG_CONSOLE_SERIAL8250MEM || CONFIG_CONSOLE_SERIAL8250MEM_32)
 void uartmem_init(void);
 
 /* and the same for memory mapped uarts */

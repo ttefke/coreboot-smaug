@@ -52,6 +52,15 @@ config CONSOLE_SERIAL8250MEM
 	help
 	  Send coreboot debug output to a memory mapped serial port console.
 
+config CONSOLE_SERIAL8250MEM_32
+	bool "Serial port console output (memory mapped, 32bit 8250-compatible)"
+	depends on CONSOLE_SERIAL
+	depends on HAVE_UART_MEMORY_MAPPED
+	depends on !CONSOLE_SERIAL8250MEM
+	help
+	  Send coreboot debug output to a memory mapped serial port console,
+	  via a 32bit uart8250 memory mapped driver.
+
 config CONSOLE_SERIAL_UART
 	bool "Serial port console output (device-specific UART)"
 	depends on CONSOLE_SERIAL
@@ -137,7 +146,7 @@ config TTYS0_BAUD
 config TTYS0_LCS
 	int
 	default 3
-	depends on CONSOLE_SERIAL8250 || CONSOLE_SERIAL8250MEM
+	depends on CONSOLE_SERIAL8250 || CONSOLE_SERIAL8250MEM || CONSOLE_SERIAL8250MEM_32
 
 # Use "select HAVE_USBDEBUG" on southbridges which have Debug Port code.
 config HAVE_USBDEBUG

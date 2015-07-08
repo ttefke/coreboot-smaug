@@ -25,7 +25,7 @@
 #include <console/console.h>
 #include <console/vtxprintf.h>
 
-#if CONFIG_CONSOLE_SERIAL8250MEM
+#if CONFIG_CONSOLE_SERIAL8250MEM || CONFIG_CONSOLE_SERIAL8250MEM_32
 static u32 serial8250mem_base_address = 0;
 #endif
 
@@ -41,7 +41,7 @@ void console_tx_byte(unsigned char byte)
 	if (byte == '\n')
 		console_tx_byte('\r');
 
-#if CONFIG_CONSOLE_SERIAL8250MEM
+#if CONFIG_CONSOLE_SERIAL8250MEM || CONFIG_CONSOLE_SERIAL8250MEM_32
 	if (serial8250mem_base_address)
 		uart8250_mem_tx_byte(serial8250mem_base_address, byte);
 #endif
@@ -63,7 +63,7 @@ void console_init(void)
 #if CONFIG_CONSOLE_SERIAL8250
 	uart_init();
 #endif
-#if CONFIG_CONSOLE_SERIAL8250MEM
+#if CONFIG_CONSOLE_SERIAL8250MEM || CONFIG_CONSOLE_SERIAL8250MEM_32
 	serial8250mem_base_address = uart_mem_init();
 #endif
 #else

@@ -1,0 +1,143 @@
+/*
+ * This file is part of the coreboot project.
+ *
+ * Copyright (C) 2003 Eric Biederman
+ * Copyright (C) 2006-2010 coresystems GmbH
+ * Copyright (C) 2015 Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include <arch/io.h>
+#include <uart8250.h>
+#include <pc80/mc146818rtc.h>
+#if CONFIG_USE_OPTION_TABLE
+#include "option_table.h"
+#endif
+#if !defined(__SMM__) && !defined(__PRE_RAM__)
+#include <device/device.h>
+#endif
+#include <delay.h>
+
+#define read32(a) read32((void *)(a))
+#define write32(a, v) write32((void *)(a), v)
+
+/* Expected character delay at 1200bps is 9ms for a working UART
+ * and no flow-control. Assume UART as stuck if shift register
+ * or FIFO takes more than 50ms per character to appear empty.
+ */
+#define SINGLE_CHAR_TIMEOUT	(50 * 1000)
+#define FIFO_TIMEOUT		(16 * SINGLE_CHAR_TIMEOUT)
+
+static inline int uart8250_mem_can_tx_byte(unsigned base_port)
+{
+	return read32(base_port + 4 * UART8250_LSR) &
+		UART8250_LSR_THRE;
+}
+
+static inline void uart8250_mem_wait_to_tx_byte(unsigned base_port)
+{
+	unsigned long int i = SINGLE_CHAR_TIMEOUT;
+	while (i-- && !uart8250_mem_can_tx_byte(base_port))
+		udelay(1);
+}
+
+static inline void uart8250_mem_wait_until_sent(unsigned base_port)
+{
+	unsigned long int i = FIFO_TIMEOUT;
+	while (i-- && !(read32(base_port + 4 * UART8250_LSR) &
+		UART8250_LSR_TEMT))
+		udelay(1);
+}
+
+void uart8250_mem_tx_byte(unsigned base_port, unsigned char data)
+{
+	uart8250_mem_wait_to_tx_byte(base_port);
+	write32(base_port + 4 * UART8250_TBR, data);
+}
+
+void uart8250_mem_tx_flush(unsigned base_port)
+{
+	uart8250_mem_wait_until_sent(base_port);
+}
+
+int uart8250_mem_can_rx_byte(unsigned base_port)
+{
+	return read32(base_port + 4 * UART8250_LSR) &
+		UART8250_LSR_DR;
+}
+
+unsigned char uart8250_mem_rx_byte(unsigned base_port)
+{
+	unsigned long int i = SINGLE_CHAR_TIMEOUT;
+
+	while (i-- && !uart8250_mem_can_rx_byte(base_port))
+		udelay(1);
+	if (i)
+		return read32(base_port + 4 * UART8250_RBR);
+	else
+		return 0x0;
+}
+
+void uart8250_mem_init(unsigned base_port, unsigned divisor)
+{
+	/* Disable interrupts */
+	write32(base_port + 4 * UART8250_IER, 0x0);
+	/* Enable FIFOs */
+	write32(base_port + 4 * UART8250_FCR, UART8250_FCR_FIFO_EN);
+
+	/* Assert DTR and RTS so the other end is happy */
+	write32(base_port + 4 * UART8250_MCR, UART8250_MCR_DTR |
+		UART8250_MCR_RTS);
+
+	/* DLAB on */
+	write32(base_port + 4 * UART8250_LCR, UART8250_LCR_DLAB |
+		CONFIG_TTYS0_LCS);
+
+	/* Set Baud Rate Divisor. 12 ==> 9600 Baud */
+	write32(base_port + 4 * UART8250_DLL, divisor & 0xFF);
+	write32(base_port + 4 * UART8250_DLM, (divisor >> 8) & 0xFF);
+
+	/* Set to 3 for 8N1 */
+	write32(base_port + 4 * UART8250_LCR, CONFIG_TTYS0_LCS);
+}
+
+u32 uart_mem_init(void)
+{
+	unsigned uart_baud = CONFIG_TTYS0_BAUD;
+	u32 uart_bar = 0;
+	unsigned div;
+
+	/* find out the correct baud rate */
+#if !defined(__SMM__) && CONFIG_USE_OPTION_TABLE
+	static const unsigned baud[8] = { 115200, 57600, 38400,
+					19200, 9600, 4800, 2400, 1200};
+	unsigned b_index = 0;
+#if defined(__PRE_RAM__)
+	b_index = read_option(baud_rate, 0);
+	b_index &= 7;
+	uart_baud = baud[b_index];
+#else
+	if (get_option(&b_index, "baud_rate") == 0)
+		uart_baud = baud[b_index];
+#endif
+#endif
+	/* Now find the UART base address and calculate the divisor */
+	uart_bar = CONFIG_TTYS0_BASE;
+	div = CONFIG_TTYS0_BAUD / uart_baud;
+	uart8250_mem_init(uart_bar, div);
+
+	return uart_bar;
+}
+
+uint32_t uartmem_getregwidth(void)
+{
+	return sizeof(uint32_t);
+}

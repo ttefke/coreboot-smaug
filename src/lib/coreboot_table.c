@@ -128,7 +128,8 @@ static struct lb_serial *lb_serial(struct lb_header *header)
 	serial->baud = CONFIG_TTYS0_BAUD;
 	serial->regwidth = 1; /* One byte is the default register width. */
 	return serial;
-#elif CONFIG_CONSOLE_SERIAL8250MEM || CONFIG_CONSOLE_SERIAL_UART
+#elif CONFIG_CONSOLE_SERIAL8250MEM || CONFIG_CONSOLE_SERIAL8250MEM_32 || \
+	CONFIG_CONSOLE_SERIAL_UART
 	if (uartmem_getbaseaddr()) {
 		struct lb_record *rec;
 		struct lb_serial *serial;
@@ -150,7 +151,8 @@ static struct lb_serial *lb_serial(struct lb_header *header)
 }
 
 #if CONFIG_CONSOLE_SERIAL8250 || CONFIG_CONSOLE_SERIAL8250MEM || \
-	CONFIG_CONSOLE_SERIAL_UART || CONFIG_USBDEBUG
+	CONFIG_CONSOLE_SERIAL8250MEM_32 || CONFIG_CONSOLE_SERIAL_UART || \
+	CONFIG_USBDEBUG
 static void add_console(struct lb_header *header, u16 consoletype)
 {
 	struct lb_console *console;
@@ -167,7 +169,8 @@ static void lb_console(struct lb_header *header)
 #if CONFIG_CONSOLE_SERIAL8250
 	add_console(header, LB_TAG_CONSOLE_SERIAL8250);
 #endif
-#if CONFIG_CONSOLE_SERIAL8250MEM || CONFIG_CONSOLE_SERIAL_UART
+#if CONFIG_CONSOLE_SERIAL8250MEM || CONFIG_CONSOLE_SERIAL8250MEM_32 || \
+	CONFIG_CONSOLE_SERIAL_UART
 	add_console(header, LB_TAG_CONSOLE_SERIAL8250MEM);
 #endif
 #if CONFIG_USBDEBUG
