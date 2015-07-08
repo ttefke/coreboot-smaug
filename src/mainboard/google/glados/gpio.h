@@ -202,17 +202,22 @@ const GPIO_INIT_CONFIG mainboard_gpio_table[] = {
 /* EDP_HPD */
 {GPIO_LP_GPP_E17, {GpioPadModeNative1, GpioHostOwnGpio, GpioDirIn,
 	GpioOutDefault, GpioIntLevel, GpioResetDeep, GpioTermNone}},
+/*
+ * The next 4 pads are for bit banging the amplifiers. They are connected
+ * together with i2s0 signals. For default behavior of i2s make these
+ * gpio inupts.
+ */
 /* I2S2_SCLK */
-{GPIO_LP_GPP_F0, {GpioPadModeNative1, GpioHostOwnGpio, GpioDirInOut,
+{GPIO_LP_GPP_F0, {GpioPadModeGpio, GpioHostOwnGpio, GpioDirIn,
 	GpioOutDefault, GpioIntDis, GpioResetDeep, GpioTermNone}},
 /* I2S2_SFRM */
-{GPIO_LP_GPP_F1, {GpioPadModeNative1, GpioHostOwnGpio, GpioDirInOut,
+{GPIO_LP_GPP_F1, {GpioPadModeGpio, GpioHostOwnGpio, GpioDirIn,
 	GpioOutDefault, GpioIntDis, GpioResetDeep, GpioTermNone}},
 /* I2S2_TXD */
-{GPIO_LP_GPP_F2, {GpioPadModeNative1, GpioHostOwnGpio, GpioDirOut,
+{GPIO_LP_GPP_F2, {GpioPadModeGpio, GpioHostOwnGpio, GpioDirIn,
 	GpioOutDefault, GpioIntDis, GpioResetDeep, GpioTermNone}},
 /* I2S2_RXD */
-{GPIO_LP_GPP_F3, {GpioPadModeNative1, GpioHostOwnGpio, GpioDirIn,
+{GPIO_LP_GPP_F3, {GpioPadModeGpio, GpioHostOwnGpio, GpioDirIn,
 	GpioOutDefault, GpioIntDis, GpioResetDeep, GpioTermNone}},
 /* I2C4_SDA */
 {GPIO_LP_GPP_F8, {GpioPadModeNative1, GpioHostOwnGpio, GpioDirInOut,
