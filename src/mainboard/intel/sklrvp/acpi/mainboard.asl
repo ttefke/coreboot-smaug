@@ -45,13 +45,6 @@ Scope (\_SB.PCI0.RP01)
 
 		Name (_PRW, Package() { GPIO, 3 })
 
-		Method (_DSW, 3, NotSerialized)
-		{
-			If (LEqual (Arg0, 1)) {
-				// Enable GPIO as wake source
-				\_SB.PCI0.LPCB.GPIO.GWAK (^GPIO)
-			}
-		}
 	}
 }
 
