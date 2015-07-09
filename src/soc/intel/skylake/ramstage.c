@@ -29,17 +29,3 @@ void soc_init_pre_device(void *chip_info)
 	/* Perform silicon specific init. */
 	intel_silicon_init();
 }
-
-static void issue_ready_to_boot_event(void *unused)
-{
-	/*
-	 * Notify FSP for EnumInitPhaseReadyToBoot.
-	 */
-	printk(BIOS_DEBUG, "fsp_notify(EnumInitPhaseReadyToBoot)\n");
-	fsp_notify(EnumInitPhaseReadyToBoot);
-}
-
-BOOT_STATE_INIT_ENTRIES(finalize_bscb) = {
-	BOOT_STATE_INIT_ENTRY(BS_PAYLOAD_LOAD, BS_ON_EXIT,
-		issue_ready_to_boot_event, NULL)
-};
