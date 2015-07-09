@@ -45,7 +45,7 @@ ifeq ($(CONFIG_HAVE_FSP_BIN),y)
 cbfs-files-y += fsp.bin
 fsp.bin-file := $(call strip_quotes,$(CONFIG_FSP_FILE))
 fsp.bin-position := $(CONFIG_FSP_LOC)
-fsp.bin-type := 0xab
+fsp.bin-type := fsp
 endif
 
 
@@ -59,5 +59,5 @@ $(obj)/mrc.cache:
 cbfs-files-y += mrc.cache
 mrc.cache-file := $(call strip_quotes,$(CONFIG_MRC_CACHE_FILE))
 mrc.cache-position := $(CONFIG_MRC_CACHE_LOC)
-mrc.cache-type := 0xac
+mrc.cache-type := mrc_cache
 endif
