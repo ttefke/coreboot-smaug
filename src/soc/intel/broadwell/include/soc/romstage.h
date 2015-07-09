@@ -22,9 +22,9 @@
 
 #include <stdint.h>
 #include <arch/cpu.h>
-#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP)
+#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP1_1)
 #include <fsp_util.h>
-#endif	/* CONFIG_PLATFORM_USES_FSP */
+#endif	/* CONFIG_PLATFORM_USES_FSP1_1 */
 #include <soc/pei_data.h>
 #include <soc/pm.h>
 #include <soc/intel/common/romstage.h>

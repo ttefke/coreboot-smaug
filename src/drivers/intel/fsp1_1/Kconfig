@@ -17,12 +17,12 @@
 ## Foundation, Inc.
 ##
 
-config PLATFORM_USES_FSP
+config PLATFORM_USES_FSP1_1
 	bool "Use Intel Firmware Support Package"
 	help
 	  Does the code require the Intel Firmware Support Package?
 
-if PLATFORM_USES_FSP
+if PLATFORM_USES_FSP1_1
 
 comment "Intel FSP 1.1"
 
@@ -203,4 +203,4 @@ config VBT_FILE
 	depends on GOP_SUPPORT
 	default "3rdparty/blobs/mainboard/$(MAINBOARDDIR)/vbt.bin"
 
-endif #PLATFORM_USES_FSP
+endif #PLATFORM_USES_FSP1_1

@@ -20,9 +20,9 @@
 #include <console/console.h>
 #include <device/device.h>
 #include <device/pci.h>
-#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP)
+#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP1_1)
 #include <fsp_util.h>
-#endif	/* CONFIG_PLATFORM_USES_FSP */
+#endif	/* CONFIG_PLATFORM_USES_FSP1_1 */
 #include <soc/pci_devs.h>
 #include <soc/ramstage.h>
 #include <soc/intel/broadwell/chip.h>
@@ -43,7 +43,7 @@ static void cpu_bus_noop(device_t dev) { }
 
 static void broadwell_final(device_t dev)
 {
-#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP)
+#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP1_1)
 	/* Notify FSP done device setup */
 	printk(BIOS_DEBUG,
 		"Calling FspNotify(EnumInitPhaseAfterPciEnumeration)\n");
@@ -53,7 +53,7 @@ static void broadwell_final(device_t dev)
 	fsp_notify(EnumInitPhaseReadyToBoot);
 
 	printk(BIOS_DEBUG, "FspNotify Returned\n");
-#endif	/* CONFIG_PLATFORM_USES_FSP */
+#endif	/* CONFIG_PLATFORM_USES_FSP1_1 */
 }
 
 static struct device_operations cpu_bus_ops = {

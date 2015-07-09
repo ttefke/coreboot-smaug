@@ -81,15 +81,15 @@ asmlinkage void *romstage_main(unsigned int bist,
 	printk(BIOS_SPEW, "CONFIG_MMCONF_BASE_ADDRESS: 0x%08x\n",
 		CONFIG_MMCONF_BASE_ADDRESS);
 	printk(BIOS_INFO, "Using: %s\n",
-		IS_ENABLED(CONFIG_PLATFORM_USES_FSP) ? "FSP" :
+		IS_ENABLED(CONFIG_PLATFORM_USES_FSP1_1) ? "FSP 1.1" :
 		(IS_ENABLED(CONFIG_HAVE_MRC) ? "MRC" :
 		"No Memory Support"));
 
 	/* Display FSP banner */
-#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP)
+#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP1_1)
 	printk(BIOS_DEBUG, "FSP TempRamInit successful\n");
 	print_fsp_info(params.chipset_context);
-#endif	/* CONFIG_PLATFORM_USES_FSP */
+#endif	/* CONFIG_PLATFORM_USES_FSP1_1 */
 
 	/* Get power state */
 	params.power_state = fill_power_state();
@@ -110,10 +110,10 @@ asmlinkage void *romstage_main(unsigned int bist,
 
 	top_of_stack = setup_stack_and_mtrrs();
 
-#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP)
+#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP1_1)
 	printk(BIOS_DEBUG, "Calling FspTempRamExit API\n");
 	timestamp_add_now(TS_FSP_TEMP_RAM_EXIT_START);
-#endif	/* CONFIG_PLATFORM_USES_FSP */
+#endif	/* CONFIG_PLATFORM_USES_FSP1_1 */
 
 	return top_of_stack;
 }
@@ -202,7 +202,7 @@ void romstage_common(struct romstage_params *params)
 
 asmlinkage void romstage_after_car(void *chipset_context)
 {
-	if (IS_ENABLED(CONFIG_PLATFORM_USES_FSP)) {
+	if (IS_ENABLED(CONFIG_PLATFORM_USES_FSP1_1)) {
 		timestamp_add_now(TS_FSP_TEMP_RAM_EXIT_END);
 		printk(BIOS_DEBUG, "FspTempRamExit returned successfully\n");
 		soc_after_temp_ram_exit();
@@ -261,7 +261,7 @@ __attribute__((weak)) void mainboard_romstage_entry(
 }
 
 /* Save the DIMM information for SMBIOS table 17 */
-#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP)
+#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP1_1)
 __attribute__((weak)) void mainboard_save_dimm_info(
 	struct romstage_params *params)
 {

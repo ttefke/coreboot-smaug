@@ -32,4 +32,4 @@ ramstage-y += pei_data.c
 romstage-y += board_version.c
 ramstage-y += board_version.c
 
-romstage-$(CONFIG_PLATFORM_USES_FSP) += fsp.c
+romstage-$(CONFIG_PLATFORM_USES_FSP1_1) += fsp.c

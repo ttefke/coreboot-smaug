@@ -72,7 +72,7 @@ smm-y      += usbdebug.c
 endif
 
 INCLUDES += -Isrc/soc/intel/broadwell/include
-ifeq ($(CONFIG_PLATFORM_USES_FSP),y)
+ifeq ($(CONFIG_PLATFORM_USES_FSP1_1),y)
 INCLUDES += -Isrc/drivers/intel/fsp
 INCLUDES += -Isrc/vendorcode/intel/fsp/fsp_1_1
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4

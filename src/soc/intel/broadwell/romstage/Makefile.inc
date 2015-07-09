@@ -1,7 +1,7 @@
 ifeq ($(CONFIG_HAVE_MRC),y)
 cpu_incs += $(src)/soc/intel/broadwell/romstage/cache_as_ram.inc
 else
-ifeq ($(CONFIG_PLATFORM_USES_FSP),y)
+ifeq ($(CONFIG_PLATFORM_USES_FSP1_1),y)
 cpu_incs += $(src)/drivers/intel/fsp/fsp_1_1.inc
 endif
 endif

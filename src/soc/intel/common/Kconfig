@@ -48,7 +48,7 @@ config COMMON_STACK
 config COMMON_RAM_INIT
 	bool "FSP: Use the common raminit.c module"
 	default n
-	depends on PLATFORM_USES_FSP
+	depends on PLATFORM_USES_FSP1_1
 
 config COMMON_RESET
 	bool
