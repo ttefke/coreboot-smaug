@@ -17,9 +17,8 @@
  * Foundation, Inc.
  */
 
-#ifndef _CHIPSET_FSP_UTIL_H_
-
-#define _CHIPSET_FSP_UTIL_H_
+#ifndef CHIPSET_FSP_UTIL_H
+#define CHIPSET_FSP_UTIL_H
 
 /*
  * Include the FSP binary interface files
@@ -39,4 +38,4 @@
 #include <MdePkg/Include/Library/HobLib.h>	/* HOB routine declarations */
 #include <FspUpdVpd.h>		/* Vital/updatable product data definitions */
 
-#endif	/* _CHIPSET_FSP_UTIL_H_ */
+#endif	/* CHIPSET_FSP_UTIL_H */

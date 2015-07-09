@@ -38,7 +38,7 @@
 #define GetFirstGuidHob	get_first_guid_hob
 
 /* Include the EDK2 headers */
-#include <chipset_fsp_util.h>
+#include <soc/chipset_fsp_util.h>
 
 #if IS_ENABLED(CONFIG_ENABLE_MRC_CACHE)
 int save_mrc_data(void *hob_start);
