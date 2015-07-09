@@ -34,19 +34,21 @@ const optionrom_vbt_t *fsp_get_vbt(uint32_t *vbt_len)
 	/* Locate the vbt file in cbfs */
 	vbt_file = cbfs_get_file(CBFS_DEFAULT_MEDIA, "vbt.bin");
 	if (!vbt_file) {
-		printk(BIOS_DEBUG, "vbt data not found");
+		printk(BIOS_INFO,
+			"FSP_INFO: VBT data file (vbt.bin) not found in CBFS");
 		return NULL;
 	}
 
 	/* Validate the vbt file */
 	vbt.data = CBFS_SUBHEADER(vbt_file);
 	if (*vbt.signature != VBT_SIGNATURE) {
-		printk(BIOS_DEBUG, "FSP VBT not found!\n");
+		printk(BIOS_WARNING,
+			"FSP_WARNING: Invalid signature in VBT data file (vbt.bin)!\n");
 		return NULL;
 	}
 	*vbt_len = ntohl(vbt_file->len);
-	printk(BIOS_DEBUG, "VBT found at %p, 0x%08x bytes\n", vbt.data,
-		*vbt_len);
+	printk(BIOS_DEBUG, "FSP_INFO: VBT found at %p, 0x%08x bytes\n",
+		vbt.data, *vbt_len);
 
 #if IS_ENABLED(CONFIG_DISPLAY_VBT)
 	/* Display the vbt file contents */
@@ -72,10 +74,10 @@ void fsp_gop_framebuffer(struct lb_header *header)
 	EFI_PEI_GRAPHICS_INFO_HOB *vbt_gop;
 	vbt_hob = get_next_guid_hob(&vbt_guid, hob_list_ptr);
 	if (vbt_hob == NULL) {
-		printk(BIOS_DEBUG, "Graphics Data Hob is not present\n");
+		printk(BIOS_ERR, "FSP_ERR: Graphics Data HOB is not present\n");
 		return;
 	} else {
-		printk(BIOS_DEBUG, "Graphics Data present\n");
+		printk(BIOS_DEBUG, "FSP_DEBUG: Graphics Data HOB present\n");
 		vbt_gop = GET_GUID_HOB_DATA(vbt_hob);
 	}
 

@@ -92,12 +92,11 @@ struct mrc_data_container {
 	u32	mrc_signature;	// "MRCD"
 	u32	mrc_data_size;	// Actual total size of this structure
 	u32	mrc_checksum;	// IP style checksum
-	u32	reserved;		// For header alignment
+	u32	reserved;	// For header alignment
 	u8	mrc_data[0];	// Variable size, platform/run time dependent.
 } __attribute__ ((packed));
 
 struct mrc_data_container *find_current_mrc_cache(void);
-
 void update_mrc_cache(void *unused);
 
 #endif	/* CONFIG_ENABLE_MRC_CACHE */

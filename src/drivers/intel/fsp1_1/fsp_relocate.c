@@ -259,7 +259,7 @@ static int relocate_patch_table(void *fsp, size_t size, size_t offset,
 		}
 
 		printk(FSP_DBG_LVL, "Adjusting %p %x -> %x\n",
-			reloc, *reloc, *reloc + adjustment);
+			reloc, *reloc, (unsigned int)(*reloc + adjustment));
 
 		*reloc += adjustment;
 	}
