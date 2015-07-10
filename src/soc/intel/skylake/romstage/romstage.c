@@ -66,14 +66,6 @@ void soc_romstage_init(struct romstage_params *params)
 	pch_early_init();
 }
 
-void ramstage_cache_invalid(struct ramstage_cache *cache)
-{
-#if IS_ENABLED(CONFIG_RESET_ON_INVALID_RAMSTAGE_CACHE)
-	/* Perform hard reset on invalid ramstage cache. */
-	hard_reset();
-#endif
-}
-
 #if IS_ENABLED(CONFIG_CHROMEOS)
 int vboot_get_sw_write_protect(void)
 {

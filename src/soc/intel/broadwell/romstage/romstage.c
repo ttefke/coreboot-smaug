@@ -79,14 +79,6 @@ void mainboard_save_dimm_info(struct romstage_params *params)
 	memcpy(mem_info, &pei_data->meminfo, sizeof(struct memory_info));
 }
 
-void ramstage_cache_invalid(struct ramstage_cache *cache)
-{
-#if CONFIG_RESET_ON_INVALID_RAMSTAGE_CACHE
-	/* Perform cold reset on invalid ramstage cache. */
-	reset_system();
-#endif
-}
-
 #if CONFIG_CHROMEOS
 int vboot_get_sw_write_protect(void)
 {

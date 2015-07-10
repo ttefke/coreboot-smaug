@@ -168,14 +168,6 @@ int chipset_prev_sleep_state(struct chipset_power_state *ps)
 	return prev_sleep_state;
 }
 
-void ramstage_cache_invalid(struct ramstage_cache *cache)
-{
-#if IS_ENABLED(CONFIG_RESET_ON_INVALID_RAMSTAGE_CACHE)
-	/* Perform cold reset on invalid ramstage cache. */
-	hard_reset();
-#endif
-}
-
 /* SOC initialization before the console is enabled */
 void soc_pre_console_init(struct romstage_params *params)
 {
