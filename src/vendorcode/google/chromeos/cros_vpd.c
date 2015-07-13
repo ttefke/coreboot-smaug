@@ -7,6 +7,7 @@
 #include <console/console.h>
 
 #include <cbfs.h>
+#include <cbmem.h>
 #include <fmap.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,6 +19,8 @@
 /* Currently we only support Google VPD 2.0, which has a fixed offset. */
 enum {
 	GOOGLE_VPD_2_0_OFFSET = 0x600,
+	CROSVPD_CBMEM_MAGIC = 0x43524f53,
+	CROSVPD_CBMEM_VERSION = 0x0001,
 };
 
 struct vpd_gets_arg {
@@ -27,59 +30,95 @@ struct vpd_gets_arg {
 	int matched;
 };
 
-static int cros_vpd_load(uint8_t **vpd_address, int32_t *vpd_size)
+struct vpd_cbmem {
+	uint32_t magic;
+	uint32_t version;
+	uint32_t ro_size;
+	uint32_t rw_size;
+	uint8_t blob[0];
+	/* The blob contains both RO and RW data. It starts with RO (0 ..
+	 * ro_size) and then RW (ro_size .. ro_size+rw_size).
+	 */
+};
+
+/* Finds the the VPD blob from CBFS media. */
+static int cros_vpd_find_blob(struct cbfs_media *media,
+			      const struct fmap_area *area,
+			      size_t *base,
+			      size_t *size)
 {
-	MAYBE_STATIC int cached = 0;
-	MAYBE_STATIC uint8_t *cached_address = NULL;
-	MAYBE_STATIC int32_t cached_size = 0;
-	MAYBE_STATIC int result = -1;
 	struct google_vpd_info info;
-	int32_t base;
+	size_t sz_info = sizeof(info);
 
-	const struct fmap_area *area;
+	if (!area || area->size <= GOOGLE_VPD_2_0_OFFSET + sz_info)
+		return -1;
+
+	/* In Google VPD 2.0, the VPD blob lives in VPD area starting from
+	 * GOOGLE_VPD_2_0_OFFSET without precise size information. Some newer
+	 * systems may have an optinal google_vpd_info that indicates the real
+	 * size occupied by VPD blob. To support both, we compute base and size
+	 * in original way, and then reduce if google_vpd_info can be found.
+	 */
+	*base = area->offset + GOOGLE_VPD_2_0_OFFSET;
+	*size = area->size - GOOGLE_VPD_2_0_OFFSET;
+
+	if (media->read(media, &info, *base, sz_info) == sz_info &&
+	    memcmp(info.header.magic, VPD_INFO_MAGIC,
+		   sizeof(info.header.magic)) == 0 &&
+	    *size >= info.size + sz_info) {
+
+		*base += sz_info;
+		*size = info.size;
+	}
+	return 0;
+}
+
+/* Loads VPD blob from CBFS media and save into CBMEM. */
+static void cbmem_add_cros_vpd(void)
+{
+	const struct fmap_area *ro_area, *rw_area;
+	size_t ro_base = 0, rw_base = 0;
+	size_t ro_size = 0, rw_size = 0;
 	struct cbfs_media media;
+	struct vpd_cbmem *vpd;
+	const struct fmap *fmap_base = fmap_find();
 
-	if (cached) {
-		*vpd_address = cached_address;
-		*vpd_size = cached_size;
-		return result;
-	}
+	ro_area = find_fmap_area(fmap_base, "RO_VPD");
+	rw_area = find_fmap_area(fmap_base, "RW_VPD");
 
-	cached = 1;
-	area = find_fmap_area(fmap_find(), "RO_VPD");
-	if (!area) {
-		printk(BIOS_ERR, "%s: No RO_VPD FMAP section.\n", __func__);
-		return result;
-	}
-	if (area->size <= GOOGLE_VPD_2_0_OFFSET + sizeof(info)) {
-		printk(BIOS_ERR, "%s: Too small (%d) for Google VPD 2.0.\n",
-		       __func__, area->size);
-		return result;
-	}
-
-	base = area->offset + GOOGLE_VPD_2_0_OFFSET;
-	cached_size = area->size - GOOGLE_VPD_2_0_OFFSET;
 	init_default_cbfs_media(&media);
 	media.open(&media);
 
-	/* Try if we can find a google_vpd_info, otherwise read whole VPD. */
-	if (media.read(&media, &info, base, sizeof(info)) == sizeof(info) &&
-	    memcmp(info.header.magic, VPD_INFO_MAGIC, sizeof(info.header.magic))
-	    == 0 && cached_size >= info.size + sizeof(info)) {
-		base += sizeof(info);
-		cached_size = info.size;
-	}
+	cros_vpd_find_blob(&media, ro_area, &ro_base, &ro_size);
+	cros_vpd_find_blob(&media, rw_area, &rw_base, &rw_size);
 
-	cached_address = media.map(&media, base, cached_size);
-	media.close(&media);
-	if (cached_address) {
-		*vpd_address = cached_address;
-		*vpd_size = cached_size;
-		printk(BIOS_DEBUG, "%s: Got VPD: %#x+%#x\n", __func__, base,
-		       cached_size);
-		result = 0;
+	vpd = cbmem_add(CBMEM_ID_VPD, sizeof(*vpd) + ro_size + rw_size);
+	if (vpd) {
+		vpd->magic = CROSVPD_CBMEM_MAGIC;
+		vpd->version = CROSVPD_CBMEM_VERSION;
+		if (ro_size && ro_size != media.read(&media, vpd->blob, ro_base,
+						     ro_size)) {
+			ro_size = 0;
+			printk(BIOS_ERR, "%s: Failed to read RO (%#zx+%#zx).\n",
+			       __func__, ro_base, ro_size);
+		}
+		if (rw_size && rw_size != media.read(&media,
+						     vpd->blob + ro_size,
+						     rw_base, rw_size)) {
+			rw_size = 0;
+			printk(BIOS_ERR, "%s: Failed to read RW (%#zx+%#zx).\n",
+			       __func__, rw_base, rw_size);
+		}
+		vpd->ro_size = ro_size;
+		vpd->rw_size = rw_size;
+		printk(BIOS_INFO, "%s: RO (%#zx+%#zx), RW (%#zx+%#zx).\n",
+		       __func__, ro_base, ro_size, rw_base, rw_size);
+
+	} else {
+		printk(BIOS_ERR, "%s: Failed to allocate CBMEM (%zu+%zu).\n",
+		       __func__, ro_size, rw_size);
 	}
-	return result;
+	media.close(&media);
 }
 
 static int vpd_gets_callback(const uint8_t *key, int32_t key_len,
@@ -101,19 +140,19 @@ static int vpd_gets_callback(const uint8_t *key, int32_t key_len,
 
 const void *cros_vpd_find(const char *key, int *size)
 {
-	uint8_t *vpd_address = NULL;
-	int32_t vpd_size = 0;
 	struct vpd_gets_arg arg = {0};
 	int consumed = 0;
+	const struct vpd_cbmem *vpd;
 
-	if (cros_vpd_load(&vpd_address, &vpd_size) != 0) {
+	vpd = cbmem_find(CBMEM_ID_VPD);
+	if (!vpd || !vpd->ro_size)
 		return NULL;
-	}
 
 	arg.key = (const uint8_t *)key;
 	arg.key_len = strlen(key);
 
-	while (VPD_OK == decodeVpdString(vpd_size, vpd_address, &consumed,
+	/* This API currently only supports reading RO VPD. */
+	while (VPD_OK == decodeVpdString(vpd->ro_size, vpd->blob, &consumed,
 					 vpd_gets_callback, &arg)) {
 		/* Iterate until found or no more entries. */
 	}
@@ -145,3 +184,4 @@ char *cros_vpd_gets(const char *key, char *buffer, int size)
 	return buffer;
 }
 
+RAMSTAGE_CBMEM_INIT_HOOK(cbmem_add_cros_vpd)

@@ -79,6 +79,7 @@
 #define CBMEM_ID_SPINTABLE	0x59175917
 #define CBMEM_ID_TIMESTAMP	0x54494d45
 #define CBMEM_ID_VBOOT_HANDOFF	0x780074f0
+#define CBMEM_ID_VPD		0x56504420
 #define CBMEM_ID_NONE		0x00000000
 #define CBMEM_ID_HOB_POINTER	0x484f4221
 #define CBMEM_ID_FSP_RESERVED_MEMORY 0x46535052
@@ -126,6 +127,7 @@ struct cbmem_id_to_name {
 	{ CBMEM_ID_SPINTABLE,		"SPIN TABLE " }, \
 	{ CBMEM_ID_TIMESTAMP,		"TIME STAMP " }, \
 	{ CBMEM_ID_VBOOT_HANDOFF,	"VBOOT      " }, \
+	{ CBMEM_ID_VPD,			"VPD        " }, \
 	{ CBMEM_ID_MTC,		"MTC        " },
 
 struct cbmem_entry;
