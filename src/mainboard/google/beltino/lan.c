@@ -25,21 +25,8 @@
 #include <device/device.h>
 #include <device/pci.h>
 #include <southbridge/intel/bd82x6x/pch.h>
+#include <vendorcode/google/chromeos/cros_vpd.h>
 #include "onboard.h"
-
-static unsigned int search(char *p, u8 *a, unsigned int lengthp,
-			   unsigned int lengtha)
-{
-	int i, j;
-
-	/* Searching */
-	for (j = 0; j <= lengtha - lengthp; j++) {
-		for (i = 0; i < lengthp && p[i] == a[i + j]; i++) ;
-		if (i >= lengthp)
-			return j;
-	}
-	return lengtha;
-}
 
 static unsigned char get_hex_digit(u8 *offset)
 {
@@ -60,22 +47,20 @@ static unsigned char get_hex_digit(u8 *offset)
 	return retval;
 }
 
-static int get_mac_address(u32 *high_dword, u32 *low_dword,
-			   u8 *search_address, u32 search_length)
+static int get_mac_address(u32 *high_dword, u32 *low_dword)
 {
 	char key[] = "ethernet_mac";
-	unsigned int offset;
+	char buf[20];  /* hh:hh:hh:hh:ll:ll */
+	u8 *value = (u8 *)buf;
 	int i;
 
-	offset = search(key, search_address, sizeof(key) - 1, search_length);
-	if (offset == search_length) {
+	if (!cros_vpd_gets(key, buf, sizeof(buf))) {
 		printk(BIOS_DEBUG,
 		       "Error: Could not locate '%s' in VPD\n", key);
 		return 0;
 	}
 	printk(BIOS_DEBUG, "Located '%s' in VPD\n", key);
 
-	offset += sizeof(key);	/* move to next character */
 	*high_dword = 0;
 
 	/* Fetch the MAC address and put the octets in the correct order to
@@ -88,20 +73,16 @@ static int get_mac_address(u32 *high_dword, u32 *low_dword,
 	 */
 
 	for (i = 0; i < 4; i++) {
-		*high_dword |= (get_hex_digit(search_address + offset)
-				<< (4 + (i * 8)));
-		*high_dword |= (get_hex_digit(search_address + offset + 1)
-				<< (i * 8));
-		offset += 3;
+		*high_dword |= (get_hex_digit(value++) << (4 + (i * 8)));
+		*high_dword |= (get_hex_digit(value++) << (i * 8));
+		value++;  /* skip ':' */
 	}
 
 	*low_dword = 0;
 	for (i = 0; i < 2; i++) {
-		*low_dword |= (get_hex_digit(search_address + offset)
-			       << (4 + (i * 8)));
-		*low_dword |= (get_hex_digit(search_address + offset + 1)
-			       << (i * 8));
-		offset += 3;
+		*low_dword |= (get_hex_digit(value++) << (4 + (i * 8)));
+		*low_dword |= (get_hex_digit(value++) << (i * 8));
+		value++;  /* skip ':' */
 	}
 
 	return *high_dword | *low_dword;
@@ -113,14 +94,7 @@ static void program_mac_address(u16 io_base)
 	u32 high_dword = 0xD0BA00A0;	/* high dword of mac address */
 	u32 low_dword = 0x0000AD0B;	/* low word of mac address as a dword */
 
-	void *search_address = NULL;
-	int search_length = find_fmap_entry("RO_VPD", &search_address);
-
-	if (search_length < 0)
-		printk(BIOS_ERR, "LAN: Unable to find RO_VPD in FMAP\n");
-	else
-		get_mac_address(&high_dword, &low_dword, search_address,
-				search_length);
+	get_mac_address(&high_dword, &low_dword);
 
 	if (io_base) {
 		printk(BIOS_DEBUG, "Realtek NIC io_base = 0x%04x\n", io_base);

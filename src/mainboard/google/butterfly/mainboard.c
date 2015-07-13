@@ -40,22 +40,9 @@
 #include <smbios.h>
 #include <device/pci.h>
 #include <ec/quanta/ene_kb3940q/ec.h>
+#include <vendorcode/google/chromeos/cros_vpd.h>
 
-static unsigned int search(char *p, char *a, unsigned int lengthp,
-			   unsigned int lengtha)
-{
-	int i, j;
-
-	/* Searching */
-	for (j = 0; j <= lengtha - lengthp; j++) {
-		for (i = 0; i < lengthp && p[i] == a[i + j]; i++) ;
-		if (i >= lengthp)
-			return j;
-	}
-	return lengtha;
-}
-
-static unsigned char get_hex_digit(char *offset)
+static unsigned char get_hex_digit(u8 *offset)
 {
 	unsigned char retval = 0;
 
@@ -67,30 +54,27 @@ static unsigned char get_hex_digit(char *offset)
 	}
 	if (retval > 0x0F) {
 		printk(BIOS_DEBUG, "Error: Invalid Hex digit found: %c - 0x%02x\n",
-			*offset, (unsigned char)*offset);
+			*offset, *offset);
 		retval = 0;
 	}
 
 	return retval;
 }
 
-static int get_mac_address(u32 *high_dword, u32 *low_dword,
-			   u32 search_address, u32 search_length)
+static int get_mac_address(u32 *high_dword, u32 *low_dword)
 {
 	char key[] = "ethernet_mac";
-	unsigned int offset;
+	char buf[20];  /* hh:hh:hh:hh:ll:ll */
+	u8 *value = (u8 *)buf;
 	int i;
 
-	offset = search(key, (char *)search_address,
-			sizeof(key) - 1, search_length);
-	if (offset == search_length) {
+	if (!cros_vpd_gets(key, buf, sizeof(buf))) {
 		printk(BIOS_DEBUG,
 		       "Error: Could not locate '%s' in VPD\n", key);
 		return 0;
 	}
 	printk(BIOS_DEBUG, "Located '%s' in VPD\n", key);
 
-	offset += sizeof(key);	/* move to next character */
 	*high_dword = 0;
 
 	/* Fetch the MAC address and put the octets in the correct order to
@@ -103,35 +87,28 @@ static int get_mac_address(u32 *high_dword, u32 *low_dword,
 	 */
 
 	for (i = 0; i < 4; i++) {
-		*high_dword |= (get_hex_digit((char *)(search_address + offset))
-				<< (4 + (i * 8)));
-		*high_dword |= (get_hex_digit((char *)(search_address + offset + 1))
-				<< (i * 8));
-		offset += 3;
+		*high_dword |= (get_hex_digit(value++) << (4 + (i * 8)));
+		*high_dword |= (get_hex_digit(value++) << (i * 8));
+		value++;  /* skip ':' */
 	}
 
 	*low_dword = 0;
 	for (i = 0; i < 2; i++) {
-		*low_dword |= (get_hex_digit((char *)(search_address + offset))
-			       << (4 + (i * 8)));
-		*low_dword |= (get_hex_digit((char *)(search_address + offset + 1))
-			       << (i * 8));
-		offset += 3;
+		*low_dword |= (get_hex_digit(value++) << (4 + (i * 8)));
+		*low_dword |= (get_hex_digit(value++) << (i * 8));
+		value++;  /* skip ':' */
 	}
 
 	return *high_dword | *low_dword;
 }
 
-static void program_mac_address(u16 io_base, u32 search_address,
-				u32 search_length)
+static void program_mac_address(u16 io_base)
 {
 	/* Default MAC Address of A0:00:BA:D0:0B:AD */
 	u32 high_dword = 0xD0BA00A0;	/* high dword of mac address */
 	u32 low_dword = 0x0000AD0B;	/* low word of mac address as a dword */
 
-	if (search_length != -1)
-		get_mac_address(&high_dword, &low_dword, search_address,
-				search_length);
+	get_mac_address(&high_dword, &low_dword);
 
 	if (io_base) {
 		printk(BIOS_DEBUG, "Realtek NIC io_base = 0x%04x\n", io_base);
@@ -145,35 +122,24 @@ static void program_mac_address(u16 io_base, u32 search_address,
 	}
 }
 
-static void program_keyboard_type(u32 search_address, u32 search_length)
+static void program_keyboard_type(void)
 {
 	char key[] = "keyboard_layout";
 	char kbd_jpn[] = "xkb:jp::jpn";
-	unsigned int offset;
+	char value[16];  /* must be larger than kbd_jpn. */
 	char kbd_type = EC_KBD_EN;	/* Default keyboard type is English */
 
-	if (search_length != -1) {
-
+	if (cros_vpd_gets(key, value, sizeof(value))) {
 		/*
-		 * Search for keyboard_layout identifier
 		 * The only options in the EC are Japanese or English.
 		 * The English keyboard layout is actually used for multiple
 		 * different languages - English, Spanish, French...  Because
 		 * of this the code only searches for Japanese, and sets the
 		 * keyboard type to English if Japanese is not found.
 		 */
-		offset = search(key, (char *)search_address, sizeof(key) - 1,
-				search_length);
-		if (offset != search_length) {
-			printk(BIOS_DEBUG, "Located '%s' in VPD\n", key);
-
-			offset += sizeof(key);	/* move to next character */
-			search_length = sizeof(kbd_jpn);
-			offset = search(kbd_jpn, (char *)(search_address + offset),
-					sizeof(kbd_jpn) - 1, search_length);
-			if (offset != search_length)
-				kbd_type = EC_KBD_JP;
-		}
+		printk(BIOS_DEBUG, "Located '%s' in VPD\n", key);
+		if (strcmp(kbd_jpn, value) == 0)
+			kbd_type = EC_KBD_JP;
 	} else
 		printk(BIOS_DEBUG, "Error: Could not locate VPD area\n");
 
@@ -294,9 +260,6 @@ static void verb_setup(void)
 
 static void mainboard_init(device_t dev)
 {
-	char **vpd_region_ptr = NULL;
-	u32 search_length = find_fmap_entry("RO_VPD", (void **)vpd_region_ptr);
-	u32 search_address = (unsigned long)(*vpd_region_ptr);
 	u16 io_base = 0;
 	struct device *ethernet_dev = NULL;
 
@@ -304,7 +267,7 @@ static void mainboard_init(device_t dev)
 	butterfly_ec_init();
 
 	/* Program EC Keyboard locale based on VPD data */
-	program_keyboard_type(search_address, search_length);
+	program_keyboard_type();
 
 	/* Get NIC's IO base address */
 	ethernet_dev = dev_find_device(BUTTERFLY_NIC_VENDOR_ID,
@@ -322,7 +285,7 @@ static void mainboard_init(device_t dev)
 
 	if (io_base) {
 		/* Program MAC address based on VPD data */
-		program_mac_address(io_base, search_address, search_length);
+		program_mac_address(io_base);
 
 		/*
 		 * Program NIC LEDS
