@@ -19,6 +19,16 @@ chip soc/intel/skylake
 		[PchSerialIoIndexUart2] = PchSerialIoLegacyUart, \
 	}"
 
+	# Enable Root port 1 and 5.
+	register "PcieRpEnable[0]" = "1"
+	register "PcieRpEnable[4]" = "1"
+	# Enable CLKREQ#
+	register "PcieRpClkReqSupport[0]" = "1"
+	register "PcieRpClkReqSupport[4]" = "1"
+	# RP 1 uses SRCCLKREQ1# while RP 5 uses SRCCLKREQ2#
+	register "PcieRpClkReqNumber[0]" = "1"
+	register "PcieRpClkReqNumber[4]" = "2"
+
 	register "ScsEmmcEnabled" = "1"
 	register "ScsEmmcHs400Enabled" = "0"
 	register "ScsSdCardEnabled" = "1"
