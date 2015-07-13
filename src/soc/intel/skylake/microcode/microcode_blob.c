@@ -19,7 +19,7 @@
  */
 
 unsigned int microcode[] = {
-#include "microcode_blob.h"
+#include <microcode/microcode_blob.h>
 
 	/*  Dummy terminator  */
 	0x0, 0x0, 0x0, 0x0,

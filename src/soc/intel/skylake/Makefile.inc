@@ -61,6 +61,8 @@ smm-y += xhci.c
 INCLUDES += -Isrc/soc/intel/skylake
 INCLUDES += -Isrc/soc/intel/skylake/include
 
+INCLUDES += -I3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)
+
 INCLUDES += -Isrc/drivers/intel/fsp1_1
 INCLUDES += -Isrc/vendorcode/intel/fsp/fsp1_1
 INCLUDES += -Isrc/vendorcode/intel/edk2/uefi_2.4
