@@ -77,7 +77,8 @@ chip soc/intel/skylake
 		device pci 1d.3 off end # PCI Express Port 12
 		device pci 1e.0 on  end # UART #0
 		device pci 1e.1 off end # UART #1
-		device pci 1e.2 off end # SPI #0
+		device pci 1e.2 off end # GSPI #0
+		device pci 1e.3 off end # GSPI #1
 		device pci 1e.4 on  end # eMMC
 		device pci 1e.6 on  end # SDCard
 		device pci 1f.0 on
@@ -91,7 +92,7 @@ chip soc/intel/skylake
 		device pci 1f.2 on  end # Power Management Controller
 		device pci 1f.3 on  end # Intel High Definition Audio
 		device pci 1f.4 off end # SMBus Controller
-		device pci 1f.5 on  end # SPI
+		device pci 1f.5 on  end # PCH SPI
 		device pci 1f.6 off end # GbE Controller
 	end
 end
