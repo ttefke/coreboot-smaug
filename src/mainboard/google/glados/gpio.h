@@ -160,11 +160,9 @@ const GPIO_INIT_CONFIG mainboard_gpio_table[] = {
 /* DMIC_CLK0 */
 {GPIO_LP_GPP_D19, {GpioPadModeNative1, GpioHostOwnGpio, GpioDirOut,
 	GpioOutDefault, GpioIntDis, GpioResetDeep, GpioTermNone}},
-#if 0 /* TODO: This pin is causing problems in native mode */
 /* DMIC_DATA0 */
 {GPIO_LP_GPP_D20, {GpioPadModeNative1, GpioHostOwnGpio, GpioDirIn,
 	GpioOutDefault, GpioIntDis, GpioResetDeep, GpioTermNone}},
-#endif
 /* I2S_MCLK */
 {GPIO_LP_GPP_D23, {GpioPadModeNative1, GpioHostOwnGpio, GpioDirOut,
 	GpioOutDefault, GpioIntDis, GpioResetDeep, GpioTermNone}},
