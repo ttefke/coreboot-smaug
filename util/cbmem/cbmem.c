@@ -427,7 +427,22 @@ static const struct timestamp_id_to_name {
 	{ TS_FSP_BEFORE_ENUMERATE, "calling FspNotify(AfterPciEnumeration)" },
 	{ TS_FSP_AFTER_ENUMERATE, "FspNotify(AfterPciEnumeration) time" },
 	{ TS_FSP_BEFORE_FINALIZE, "calling FspNotify(ReadyToBoot)" },
-	{ TS_FSP_AFTER_FINALIZE, " FspNotify(ReadyToBoot) time" }
+	{ TS_FSP_AFTER_FINALIZE, "FspNotify(ReadyToBoot) time" },
+	{ TS_FSP_START_RELOCATION, "ready to relocate FSP" },
+	{ TS_FSP_RW_FOUND, "FSP image found" },
+	{ TS_FSP_COPIED_FROM_FLASH_TO_MEMORY,
+		"copy FSP from flash into memory" },
+	{ TS_FSP_FV_RELOCATED, "FSP flash volume relocated" },
+	{ TS_FSP_RELOCATED_REMAINING_ITEMS, "relocated remaining FSP items" },
+	{ TS_FSP_UPDATED_FIH_POINTER, "updated FSP info header pointer" },
+	{ TS_FSP_COPIED_FROM_MEMORY_TO_CACHE,
+		"copied relocated FSP into cache" },
+	{ TS_FSP_COPIED_FROM_CACHE_TO_MEMORY,
+		"copied relocated FSP from cache into memory" },
+	{ TS_FSP_GET_ORIGINAL_UPD_DATA, "copied original UPD values" },
+	{ TS_FSP_UPD_SOC_UPDATE, "SOC updated UPD values" },
+	{ TS_FSP_LOAD_VBT, "loaded Video BIOS Table (VBT)" },
+	{ TS_FSP_UPD_MAINBOARD_UPDATE, "mainboard updated UPD values" }
 };
 
 void timestamp_print_entry(uint32_t id, uint64_t stamp, uint64_t prev_stamp)

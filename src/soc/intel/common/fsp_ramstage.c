@@ -198,12 +198,17 @@ static void fsp_run_silicon_init(struct romstage_handoff *handoff)
 		upd_ptr->SiliconInitUpdOffset);
 	memcpy(&silicon_init_params, original_params,
 		sizeof(silicon_init_params));
+	timestamp_add_now(TS_FSP_GET_ORIGINAL_UPD_DATA);
 	soc_silicon_init_params(&silicon_init_params);
+	timestamp_add_now(TS_FSP_UPD_SOC_UPDATE);
 
 	/* Locate VBT and pass to FSP GOP */
-	if (IS_ENABLED(CONFIG_GOP_SUPPORT))
+	if (IS_ENABLED(CONFIG_GOP_SUPPORT)) {
 		load_vbt(handoff->s3_resume, &silicon_init_params);
+		timestamp_add_now(TS_FSP_LOAD_VBT);
+	}
 	mainboard_silicon_init_params(&silicon_init_params);
+	timestamp_add_now(TS_FSP_UPD_MAINBOARD_UPDATE);
 
 	/* Display the UPD data */
 	if (IS_ENABLED(CONFIG_DISPLAY_UPD_DATA))
@@ -287,8 +292,10 @@ static int fsp_find_and_relocate(void)
 		printk(BIOS_ERR, "Couldn't find fsp.bin in CBFS.\n");
 		return -1;
 	}
+	timestamp_add_now(TS_FSP_RW_FOUND);
 
 	fih = fsp_relocate(CBFS_SUBHEADER(file), ntohl(file->len));
+	timestamp_add_now(TS_FSP_RELOCATED_REMAINING_ITEMS);
 
 	fsp_update_fih(fih);
 
@@ -303,11 +310,16 @@ void intel_silicon_init(void)
 
 	if (handoff != NULL && handoff->s3_resume) {
 		printk(BIOS_DEBUG, "FSP: Loading binary from cache\n");
+		timestamp_add_now(TS_FSP_COPIED_FROM_CACHE_TO_MEMORY);
 		fsp_update_fih(soc_restore_support_code());
+		timestamp_add_now(TS_FSP_UPDATED_FIH_POINTER);
 	} else {
+		timestamp_add_now(TS_FSP_START_RELOCATION);
 		fsp_find_and_relocate();
+		timestamp_add_now(TS_FSP_UPDATED_FIH_POINTER);
 		printk(BIOS_DEBUG, "FSP: Saving binary in cache\n");
 		fsp_cache_save();
+		timestamp_add_now(TS_FSP_COPIED_FROM_MEMORY_TO_CACHE);
 	}
 
 	fsp_run_silicon_init(handoff);

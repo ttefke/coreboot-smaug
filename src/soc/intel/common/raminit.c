@@ -100,8 +100,11 @@ void raminit(struct romstage_params *params)
 	fsp_memory_init_params.HobListPtr = &hob_list_ptr;
 
 	/* Update the UPD data */
+	timestamp_add_now(TS_FSP_GET_ORIGINAL_UPD_DATA);
 	soc_memory_init_params(&memory_init_params);
+	timestamp_add_now(TS_FSP_UPD_SOC_UPDATE);
 	mainboard_memory_init_params(params, &memory_init_params);
+	timestamp_add_now(TS_FSP_UPD_MAINBOARD_UPDATE);
 	post_code(0x36);
 
 	/* Display the UPD data */

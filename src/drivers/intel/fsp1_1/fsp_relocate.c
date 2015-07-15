@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <timestamp.h>
 #include <uefi_types.h>
 
 #define FSP_DBG_LVL BIOS_NEVER
@@ -468,6 +469,7 @@ static FSP_INFO_HEADER *fsp_relocate_in_place(void *fsp, size_t size)
 			nparsed = relocate_fvh(fsp, size, offset, &fih_offset);
 		else
 			nparsed = relocate_fvh(fsp, size, offset, NULL);
+		timestamp_add_now(TS_FSP_FV_RELOCATED);
 
 		/* FV should be larger than 0 or failed to parse. */
 		if (nparsed <= 0) {
@@ -492,5 +494,6 @@ FSP_INFO_HEADER *fsp_relocate(void *fsp_src, size_t size)
 		return NULL;
 	}
 	memcpy(new_loc, fsp_src, size);
+	timestamp_add_now(TS_FSP_COPIED_FROM_FLASH_TO_MEMORY);
 	return fsp_relocate_in_place(new_loc, size);
 }
