@@ -377,6 +377,10 @@ __attribute__((weak)) void mainboard_save_dimm_info(
 						MEMORY_BUS_WIDTH_128;
 					break;
 				}
+
+				/* Add any mainboard specific information */
+				mainboard_add_dimm_info(params, mem_info,
+							channel, dimm, index);
 				index++;
 			}
 		}
@@ -391,6 +395,15 @@ __attribute__((weak)) void mainboard_save_dimm_info(
 	printk(BIOS_DEBUG, "WEAK: %s/%s called\n", __FILE__, __func__);
 }
 #endif
+
+/* Add any mainboard specific information */
+__attribute__((weak)) void mainboard_add_dimm_info(
+	struct romstage_params *params,
+	struct memory_info *mem_info,
+	int channel, int dimm, int index)
+{
+	printk(BIOS_DEBUG, "WEAK: %s/%s called\n", __FILE__, __func__);
+}
 
 /* Get the memory configuration data */
 __attribute__((weak)) int mrc_cache_get_current(
