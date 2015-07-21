@@ -22,12 +22,34 @@
 
 #include <stdint.h>
 #include <arch/cpu.h>
-#if IS_ENABLED(CONFIG_PLATFORM_USES_FSP1_1)
-#include <fsp_util.h>
-#endif	/* CONFIG_PLATFORM_USES_FSP1_1 */
 #include <soc/pei_data.h>
 #include <soc/pm.h>
-#include <soc/intel/common/romstage.h>
+
+struct romstage_params {
+	unsigned long bist;
+	struct chipset_power_state *power_state;
+	struct pei_data *pei_data;
+	void *chipset_context;
+};
+
+void mainboard_check_ec_image(struct romstage_params *params);
+void mainboard_pre_console_init(struct romstage_params *params);
+void mainboard_romstage_entry(struct romstage_params *params);
+void mainboard_save_dimm_info(struct romstage_params *params);
+void raminit(struct romstage_params *params);
+void report_memory_config(void);
+void report_platform_info(void);
+asmlinkage void romstage_after_car(void *chipset_context);
+void romstage_common(struct romstage_params *params);
+asmlinkage void *romstage_main(unsigned int bist, uint32_t tsc_lo,
+			       uint32_t tsc_high, void *chipset_context);
+void *setup_stack_and_mtrrs(void);
+void set_max_freq(void);
+void soc_after_ram_init(struct romstage_params *params);
+void soc_after_temp_ram_exit(void);
+void soc_pre_console_init(struct romstage_params *params);
+void soc_pre_ram_init(struct romstage_params *params);
+void soc_romstage_init(struct romstage_params *params);
 
 struct chipset_power_state;
 struct chipset_power_state *fill_power_state(void);
