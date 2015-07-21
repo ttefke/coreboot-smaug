@@ -30,9 +30,7 @@ subdirs-y += bct
 bootblock-y += bootblock.c
 bootblock-y += pmic.c
 bootblock-y += reset.c
-
-verstage-y += chromeos.c
-verstage-y += reset.c
+bootblock-y += chromeos.c
 
 romstage-y += chromeos.c
 romstage-y += pmic.c
@@ -49,4 +47,3 @@ ramstage-y += sdram_configs.c
 bootblock-y += memlayout.ld
 romstage-y += memlayout.ld
 ramstage-y += memlayout.ld
-verstage-y += memlayout.ld

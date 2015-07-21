@@ -26,6 +26,8 @@ bootblock-y += memchr.c
 bootblock-y += memcmp.c
 bootblock-$(CONFIG_COLLECT_TIMESTAMPS) += timestamp.c
 bootblock-$(CONFIG_GENERIC_UDELAY) += timer.c
+bootblock-y += delay.c
+bootblock-$(CONFIG_USE_FMAP) += fmap.c
 
 ifeq ($(CONFIG_BOOTBLOCK_CONSOLE),y)
 bootblock-$(CONFIG_CONSOLE_SERIAL8250) += uart8250.c
@@ -52,8 +54,10 @@ verstage-$(CONFIG_USE_FMAP) += fmap.c
 
 ifeq ($(MOCK_TPM),1)
 verstage-y += mocked_tlcl.c
+bootblock-y += mocked_tlcl.c
 else
 verstage-y += tlcl.c
+bootblock-y += tlcl.c
 endif
 
 verstage-$(CONFIG_GENERIC_UDELAY) += timer.c

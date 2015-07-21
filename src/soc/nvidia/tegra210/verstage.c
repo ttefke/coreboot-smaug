@@ -35,9 +35,7 @@ static void verstage(void)
 {
 	void *entry;
 
-	console_init();
 	timestamp_add_now(TS_START_VBOOT);
-	exception_init();
 	verstage_mainboard_init();
 
 	entry = vboot2_verify_firmware();
@@ -45,7 +43,7 @@ static void verstage(void)
 		stage_exit(entry);
 }
 
-void main(void)
+void soc_verstage_main(void)
 {
 	verstage();
 	hlt();

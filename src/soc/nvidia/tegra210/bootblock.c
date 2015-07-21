@@ -28,6 +28,7 @@
 #include <soc/nvidia/tegra/apbmisc.h>
 #include <soc/pmc.h>
 #include <soc/power.h>
+#include <soc/verstage.h>
 #include <timestamp.h>
 #include <vendorcode/google/chromeos/chromeos.h>
 #include <delay.h>
@@ -162,8 +163,6 @@ static void mbist_workaround(void)
 
 void main(void)
 {
-	void *entry = NULL;
-
 	timestamp_early_init(0);
 	timestamp_add_now(TS_START_BOOTBLOCK);
 
@@ -204,22 +203,9 @@ void main(void)
 
 	printk(BIOS_INFO, "T210 bootblock: Mainboard bootblock init done\n");
 
-	if (IS_ENABLED(CONFIG_VBOOT2_VERIFY_FIRMWARE)) {
-		entry = cbfs_load_stage(CBFS_DEFAULT_MEDIA,
-					CONFIG_CBFS_PREFIX "/verstage");
-		printk(BIOS_DEBUG, "T210 bootblock: jumping to verstage\n");
-	} else {
-		entry = cbfs_load_stage(CBFS_DEFAULT_MEDIA,
-					CONFIG_CBFS_PREFIX "/romstage");
-		printk(BIOS_INFO, "T210 bootblock: jumping to romstage\n");
-	}
-
 	timestamp_add_now(TS_END_BOOTBLOCK);
 
-	if (entry != CBFS_LOAD_ERROR)
-		stage_exit(entry);
-	else
-		printk(BIOS_INFO, "T210 bootblock: stage not found\n");
+	soc_verstage_main();
 
 	hlt();
 }

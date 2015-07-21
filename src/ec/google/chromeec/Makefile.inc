@@ -19,5 +19,10 @@ verstage-$(CONFIG_EC_GOOGLE_CHROMEEC_I2C) += ec_i2c.c
 verstage-$(CONFIG_EC_GOOGLE_CHROMEEC_LPC) += ec_lpc.c
 verstage-$(CONFIG_EC_GOOGLE_CHROMEEC_MEC) += ec_mec.c
 verstage-$(CONFIG_EC_GOOGLE_CHROMEEC_SPI) += ec_spi.c
+bootblock-y += ec.c crosec_proto.c
+bootblock-$(CONFIG_EC_GOOGLE_CHROMEEC_I2C) += ec_i2c.c
+bootblock-$(CONFIG_EC_GOOGLE_CHROMEEC_LPC) += ec_lpc.c
+bootblock-$(CONFIG_EC_GOOGLE_CHROMEEC_MEC) += ec_mec.c
+bootblock-$(CONFIG_EC_GOOGLE_CHROMEEC_SPI) += ec_spi.c
 endif
 

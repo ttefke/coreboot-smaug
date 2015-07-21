@@ -53,7 +53,7 @@ bootblock-y += memcpy.S
 bootblock-y += memmove.S
 bootblock-$(CONFIG_COLLECT_TIMESTAMPS) += timestamp.c
 
-$(objcbfs)/bootblock.debug: $$(bootblock-objs)
+$(objcbfs)/bootblock.debug: $$(bootblock-objs) $$(VB2_LIB)
 	@printf "    LINK       $(subst $(obj)/,,$(@))\n"
 	$(call link,bootblock,$(filter %.a %.o,$(^)),-o $(@) -L$(obj) -T $(obj)/mainboard/$(MAINBOARDDIR)/memlayout.bootblock.ld,--gc-sections)
 

@@ -20,6 +20,7 @@
 #ifndef __SOC_NVIDIA_TEGRA210_SOC_VERSTAGE_H__
 #define __SOC_NVIDIA_TEGRA210_SOC_VERSTAGE_H__
 
+void soc_verstage_main(void);
 void verstage_mainboard_init(void);
 
 #endif /* __SOC_NVIDIA_TEGRA210_SOC_VERSTAGE_H__ */
