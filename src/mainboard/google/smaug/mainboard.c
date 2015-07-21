@@ -183,6 +183,7 @@ static void powergate_unused_partitions(void)
 		POWER_PARTID_NVDEC,
 		POWER_PARTID_NVJPG,
 		POWER_PARTID_DFD,
+		POWER_PARTID_VE2,
 	};
 
 	int i;
