@@ -580,3 +580,19 @@ void soc_init_cpus(device_t dev)
 	/* Enable ROM caching if option was selected. */
 	x86_mtrr_enable_rom_caching();
 }
+
+int soc_ucode_update_required(u32 currrent_patch_id, u32 new_patch_id)
+{
+	msr_t msr;
+	/* If PRMRR/SGX is supported the FIT microcode load will set the msr
+	 * 0x08b with the Patch revision id one less than the id in the
+	 * microcode binary. The PRMRR support is indicated in the MSR
+	 * MTRRCAP[12]. Check for this feature and avoid reloading the
+	 * same microcode during cpu initialization.
+	 */
+	msr = rdmsr(MTRRcap_MSR);
+	if ((msr.lo & PRMRR_SUPPORTED) && currrent_patch_id == new_patch_id - 1) {
+		return -1;
+	}
+	return 0;
+}
