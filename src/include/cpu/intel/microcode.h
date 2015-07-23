@@ -33,6 +33,10 @@ void intel_microcode_load_unlocked(const void *microcode_patch);
 #else
 void intel_update_microcode(const void *microcode_updates);
 #endif
+
+/* SoC specific check to determine if microcode update is really
+ * required, return value of < 0 will skip microcode update. */
+int soc_ucode_update_required(u32 currrent_patch_id, u32 new_patch_id);
 #endif
 
 #endif

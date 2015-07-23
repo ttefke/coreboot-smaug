@@ -27,6 +27,7 @@
 #include <cpu/cpu.h>
 #include <cpu/x86/msr.h>
 #include <cpu/intel/microcode.h>
+#include <rules.h>
 
 #ifdef __PRE_RAM__
 #if CONFIG_CPU_MICROCODE_IN_CBFS
@@ -99,6 +100,14 @@ void intel_microcode_load_unlocked(const void *microcode_patch)
 	/* No use loading the same revision. */
 	if (current_rev == m->rev)
 		return;
+
+#if ENV_RAMSTAGE
+	/*SoC specific check to update microcode*/
+	if (soc_ucode_update_required(current_rev, m->rev) < 0) {
+		printk(BIOS_DEBUG, "Skip microcode update\n");
+		return;
+	}
+#endif
 
 	msr.lo = (unsigned long)m + sizeof(struct microcode);
 	msr.hi = 0;
@@ -264,4 +273,11 @@ void intel_update_microcode(const void *microcode_updates)
 #endif
 }
 
+#endif
+
+#if ENV_RAMSTAGE
+__attribute__((weak)) int soc_ucode_update_required(u32 currrent_patch_id, u32 new_patch_id)
+{
+	return 0;
+}
 #endif
