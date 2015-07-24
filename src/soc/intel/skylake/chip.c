@@ -40,20 +40,11 @@ static struct device_operations pci_domain_ops = {
 
 static void cpu_bus_noop(device_t dev) { }
 
-static void chip_final(device_t dev)
-{
-	/* Notify FSP done device setup */
-	printk(BIOS_DEBUG,
-		"Calling FspNotify(EnumInitPhaseAfterPciEnumeration)\n");
-	fsp_notify(EnumInitPhaseAfterPciEnumeration);
-}
-
 static struct device_operations cpu_bus_ops = {
 	.read_resources   = &cpu_bus_noop,
 	.set_resources    = &cpu_bus_noop,
 	.enable_resources = &cpu_bus_noop,
 	.init             = &soc_init_cpus,
-	.final            = &chip_final,
 };
 
 static void soc_enable(device_t dev)
