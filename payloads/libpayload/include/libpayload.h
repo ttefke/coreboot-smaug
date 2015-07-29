@@ -224,6 +224,26 @@ void video_printf(int foreground, int background, const char *fmt, ...);
 /** @} */
 
 /**
+ * @defgroup coreboot graphics library
+ * @{
+ */
+int clear_screen(uint32_t red, uint32_t green, uint32_t blue);
+/*
+ * draw a box filled with a color on screen
+ *
+ * x_rel, y_rel: coordinate of the left upper corner of the box relative to the
+ * campus (0 - 100%).
+ * width_rel, height_rel: width and height relative to the campus (0 - 100%)
+ * red, green, blue: color in RGB
+ *
+ * return: 0 on success or non-zero on error.
+ */
+int draw_box(uint32_t x_rel, uint32_t y_rel,
+	     uint32_t width_rel, uint32_t height_rel,
+	     uint32_t red, uint32_t green, uint32_t blue);
+/** @} */
+
+/**
  * @defgroup cbmem_console CBMEM memory console.
  * @ingroup input
  * @{

@@ -68,6 +68,9 @@ libc-$(CONFIG_LP_GEODELX_VIDEO_CONSOLE) += video/font8x16.c
 libc-$(CONFIG_LP_COREBOOT_VIDEO_CONSOLE) += video/corebootfb.c
 libc-$(CONFIG_LP_COREBOOT_VIDEO_CONSOLE) += video/font8x16.c
 
+# cbgfx: coreboot graphics library
+libc-y += video/graphics.c
+
 libc-$(CONFIG_LP_STORAGE) += storage/storage.c
 libc-$(CONFIG_LP_STORAGE_ATA) += storage/ata.c
 libc-$(CONFIG_LP_STORAGE_ATAPI) += storage/atapi.c
