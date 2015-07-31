@@ -43,7 +43,10 @@ ramstage-y += mainboard.c
 ramstage-y += reset.c
 ramstage-y += pmic.c
 ramstage-y += sdram_configs.c
+ramstage-y += arm_tf.c
 
 bootblock-y += memlayout.ld
 romstage-y += memlayout.ld
 ramstage-y += memlayout.ld
+
+BL31_MAKEARGS += SPD=tlkd

@@ -38,6 +38,8 @@ config BOARD_SPECIFIC_OPTIONS # dummy
 	select MAINBOARD_HAS_BOOTBLOCK_INIT
 	select VIRTUAL_DEV_SWITCH
 	select RAM_CODE_SUPPORT
+	select ARM64_USE_SECURE_OS
+	select ARM64_SECURE_OS_LOAD_RAW
 
 config MAINBOARD_DIR
         string
@@ -111,5 +113,12 @@ config DRIVER_TPM_I2C_ADDR
 config EC_GOOGLE_CHROMEEC_I2C_BUS
 	hex
 	default 1
+
+config BL31_SIZE_MB
+	hex "Maximum size of BL31 component"
+	default 0x1
+	help
+	  Maximum size of BL31 component in MiB.
+
 
 endif # BOARD_GOOGLE_SMAUG
