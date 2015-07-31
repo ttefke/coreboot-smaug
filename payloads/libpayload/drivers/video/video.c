@@ -162,6 +162,36 @@ void video_console_putchar(unsigned int ch)
 	video_console_fixup_cursor();
 }
 
+void video_printf(int foreground, int background, const char *fmt, ...)
+{
+	int i, len;
+	char str[200];
+
+	va_list ap;
+	va_start(ap, fmt);
+	len = vsnprintf(str, ARRAY_SIZE(str), fmt, ap);
+	va_end(ap);
+	if (len <= 0)
+		return;
+	/*
+	 * current implementation of vsnprintf returns the number of characters
+	 * that would have been printed regardless of buffer size provided.
+	 * Therefore, if the returned value exceeds buffer size, we need to
+	 * truncate the rest.
+	 */
+	if (len > ARRAY_SIZE(str))
+		len = ARRAY_SIZE(str);
+	str[len - 1] = '\0';
+
+	foreground &= 0xf;
+	foreground <<= 8;
+	background &= 0xf;
+	background <<= 12;
+
+	for (i = 0; i < len; i++)
+		video_console_putchar(str[i] | foreground | background);
+}
+
 void video_console_get_cursor(unsigned int *x, unsigned int *y, unsigned int *en)
 {
 	*x=0;
