@@ -39,12 +39,10 @@ static entry_point_info_t bl32_ep_info;
 static entry_point_info_t bl33_ep_info;
 static bl31_params_t bl31_params;
 
-/* TODO: Replace with glorious new CBFSv1 solution when it's available. */
-static void *vboot_get_bl3x_entry(uint8_t index)
+static struct firmware_component *vboot_find_comp(uint8_t index)
 {
-	void *entry_addr;
-	struct cbfs_media media;
 	struct firmware_component *component;
+
 	struct vboot_handoff *handoff = cbmem_find(CBMEM_ID_VBOOT_HANDOFF);
 
 	if (!handoff)
@@ -53,8 +51,20 @@ static void *vboot_get_bl3x_entry(uint8_t index)
 	assert(index < MAX_PARSED_FW_COMPONENTS);
 	component = &handoff->components[index];
 
+	return component;
+}
+
+/* TODO: Replace with glorious new CBFSv1 solution when it's available. */
+static void *vboot_get_bl3x_entry(uint8_t index)
+{
+	void *entry_addr;
+	struct cbfs_media media;
+	struct firmware_component *component;
+
+	component = vboot_find_comp(index);
+
 	/* components[] is zeroed out before filling, so size == 0 -> missing */
-	if (!component->size)
+	if ((component == NULL) || (component->size == 0))
 		return NULL;
 
 	init_default_cbfs_media(&media);
@@ -76,15 +86,61 @@ void __attribute__((weak)) *soc_get_bl31_plat_params(bl31_params_t *params)
 static entry_point_info_t *prepare_bl32(void)
 {
 	const char *bl32_filename = CONFIG_CBFS_PREFIX"/secure_os";
-	void *pc;
+	void *pc = NULL;
 
-	if (IS_ENABLED(CONFIG_VBOOT2_VERIFY_FIRMWARE))
-		pc = vboot_get_bl3x_entry(CONFIG_VBOOT_SECURE_OS_INDEX);
+	if (IS_ENABLED(CONFIG_ARM64_SECURE_OS_LOAD_RAW)) {
+		uintptr_t bl32_offset = 0;
+		size_t bl32_size = 0;
+		size_t nread;
 
-	if (!pc) {
-		pc = cbfs_load_stage(CBFS_DEFAULT_MEDIA, bl32_filename);
-		if (pc == CBFS_LOAD_ERROR)
-			die("Secure OS not found in CBFS");
+		if (IS_ENABLED(CONFIG_VBOOT2_VERIFY_FIRMWARE)) {
+			struct firmware_component *comp;
+
+			comp = vboot_find_comp(CONFIG_VBOOT_SECURE_OS_INDEX);
+			if (comp != NULL) {
+				bl32_offset = comp->address;
+				bl32_size = comp->size;
+			}
+		}
+
+		if (bl32_size == 0) {
+			struct cbfs_file file;
+
+			printk(BIOS_INFO, "Looking for %s\n", bl32_filename);
+
+			bl32_offset = cbfs_locate_file(CBFS_DEFAULT_MEDIA,
+						       &file, bl32_filename);
+
+			if (bl32_offset < 0)
+				die("ERROR: Cannot locate BL32");
+
+			bl32_size = file.len;
+		}
+
+		pc = bl32_get_load_addr(bl32_size);
+		if (!pc)
+			die("ERROR: Invalid BL32 address");
+
+		nread = cbfs_read(CBFS_DEFAULT_MEDIA, pc, bl32_offset,
+				  bl32_size);
+
+		if (nread != bl32_size)
+			die("ERROR: BL32 load failed");
+
+		printk(BIOS_INFO,
+		       "Loaded %zu bytes verified BL32 from %p to EP %p\n",
+		       bl32_size, (void *)bl32_offset, pc);
+
+	} else {
+
+		if (IS_ENABLED(CONFIG_VBOOT2_VERIFY_FIRMWARE))
+			pc = vboot_get_bl3x_entry(CONFIG_VBOOT_SECURE_OS_INDEX);
+
+		if (!pc) {
+			pc = cbfs_load_stage(CBFS_DEFAULT_MEDIA, bl32_filename);
+			if (pc == CBFS_LOAD_ERROR)
+				die("ERROR: Secure OS not found in CBFS");
+		}
 	}
 
 	SET_PARAM_HEAD(&bl32_ep_info, PARAM_EP, VERSION_1, PARAM_EP_SECURE);

@@ -215,7 +215,14 @@ ifeq ($(CONFIG_ARM64_USE_SECURE_OS),y)
 SECURE_OS_FILE := $(CONFIG_ARM64_SECURE_OS_FILE)
 SECURE_OS_FILE_CBFS := $(call strip_quotes,$(CONFIG_CBFS_PREFIX))/secure_os
 $(SECURE_OS_FILE_CBFS)-file := $(SECURE_OS_FILE)
+
+# If secure os is to be loaded as raw binary, set cbfs file type as raw.
+ifeq ($(CONFIG_ARM64_SECURE_OS_LOAD_RAW),y)
+$(SECURE_OS_FILE_CBFS)-type := raw
+else
 $(SECURE_OS_FILE_CBFS)-type := stage
+endif # CONFIG_ARM64_USE_SECURE_OS_LOAD_RAW
+
 cbfs-files-y += $(SECURE_OS_FILE_CBFS)
 
 endif # CONFIG_ARM64_USE_SECURE_OS

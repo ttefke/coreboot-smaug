@@ -31,4 +31,6 @@ void arm_tf_run_bl31(u64 payload_entry, u64 payload_arg0, u64 payload_spsr);
 /* Return platform-specific bl31_plat_params. May update bl31_params. */
 void *soc_get_bl31_plat_params(bl31_params_t *bl31_params);
 
+/* Get load address for bl32 if loaded as raw binary. */
+void *bl32_get_load_addr(size_t bl32_len);
 #endif /* __ARM_TF_H__ */

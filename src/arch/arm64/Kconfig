@@ -51,3 +51,8 @@ config ARM64_SECURE_OS_FILE
 	depends on ARM64_USE_SECURE_OS
 	help
 	  Secure OS binary file.
+
+config ARM64_SECURE_OS_LOAD_RAW
+	bool "Load secure OS as raw binary"
+	default n
+	depends on ARM64_USE_SECURE_OS
