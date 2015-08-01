@@ -33,4 +33,7 @@ void *soc_get_bl31_plat_params(bl31_params_t *bl31_params);
 
 /* Get load address for bl32 if loaded as raw binary. */
 void *bl32_get_load_addr(size_t bl32_len);
+
+/* Allow SoC or mainboard to customize bl32 entrypoint. */
+void custom_prepare_bl32(entry_point_info_t *bl32_ep_info);
 #endif /* __ARM_TF_H__ */

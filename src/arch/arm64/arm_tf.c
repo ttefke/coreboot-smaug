@@ -83,6 +83,12 @@ void __attribute__((weak)) *soc_get_bl31_plat_params(bl31_params_t *params)
 	return NULL;
 }
 
+void __attribute__((weak)) custom_prepare_bl32(entry_point_info_t *ep_info)
+{
+	/* Default weak implementation. */
+	return;
+}
+
 static entry_point_info_t *prepare_bl32(void)
 {
 	const char *bl32_filename = CONFIG_CBFS_PREFIX"/secure_os";
@@ -146,6 +152,8 @@ static entry_point_info_t *prepare_bl32(void)
 	SET_PARAM_HEAD(&bl32_ep_info, PARAM_EP, VERSION_1, PARAM_EP_SECURE);
 	bl32_ep_info.pc = (uintptr_t)pc;
 	bl32_ep_info.spsr = SPSR_EXCEPTION_MASK | get_eret_el(EL1, SPSR_USE_L);
+
+	custom_prepare_bl32(&bl32_ep_info);
 
 	return &bl32_ep_info;
 }
