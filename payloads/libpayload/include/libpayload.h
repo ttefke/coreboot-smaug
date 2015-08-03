@@ -232,8 +232,8 @@ int clear_screen(uint32_t red, uint32_t green, uint32_t blue);
  * draw a box filled with a color on screen
  *
  * x_rel, y_rel: coordinate of the left upper corner of the box relative to the
- * campus (0 - 100%).
- * width_rel, height_rel: width and height relative to the campus (0 - 100%)
+ *               canvas (0 - 100%).
+ * width_rel, height_rel: width and height relative to the canvas (0 - 100%)
  * red, green, blue: color in RGB
  *
  * return: 0 on success or non-zero on error.
@@ -241,6 +241,19 @@ int clear_screen(uint32_t red, uint32_t green, uint32_t blue);
 int draw_box(uint32_t x_rel, uint32_t y_rel,
 	     uint32_t width_rel, uint32_t height_rel,
 	     uint32_t red, uint32_t green, uint32_t blue);
+/*
+ * Draw a bitmap image on screen.
+ *
+ * x_rel, y_rel: coordinate of the top left corner of the image relative to the
+ *               canvas (0 - 100%).
+ * scale_rel: scale factor relative to the canvas width (0 - 100%).
+ * bitmap: pointer to the bitmap data, starting from the file header.
+ * size: size of the bitmap data
+ *
+ * return: 0 success or non-zero on error.
+ */
+int draw_bitmap(uint8_t x_rel, uint8_t y_rel,
+		uint32_t scale_rel, uint8_t *bitmap, uint32_t size);
 /** @} */
 
 /**
