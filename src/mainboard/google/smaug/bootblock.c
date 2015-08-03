@@ -87,8 +87,16 @@ static const struct pad_config uart_console_pads[] = {
 	PAD_CFG_SFIO(UART1_CTS, PINMUX_PULL_UP, UARTA),
 };
 
+/********************* CAM ************************************/
+/* Avoid interference with TPM on GEN3_I2C */
+static const struct pad_config cam_i2c_pads[] = {
+	PAD_CFG_SFIO(CAM_I2C_SCL, PINMUX_PULL_NONE, I2CVI),
+	PAD_CFG_SFIO(CAM_I2C_SDA, PINMUX_PULL_NONE, I2CVI),
+};
+
 void bootblock_mainboard_early_init(void)
 {
+	soc_configure_pads(cam_i2c_pads, ARRAY_SIZE(cam_i2c_pads));
 	soc_configure_pads(uart_console_pads, ARRAY_SIZE(uart_console_pads));
 }
 
