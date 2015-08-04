@@ -118,10 +118,10 @@ config SEC_COMPONENT_SIZE_MB
 	  Maximum size of resident EL3 components in MiB including BL31 and
 	  Secure OS.
 
-# Default to 700MHz. This value is based on nv bootloader setting.
+# Set to 1.3GHz. VDD needs to be set to 1.0V in PMIC code.
 config PLLX_KHZ
         int
-        default 700000
+        default 1300000
 endif
 
 config HAVE_MTC
