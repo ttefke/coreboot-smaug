@@ -155,6 +155,8 @@ static entry_point_info_t *prepare_bl32(void)
 
 	custom_prepare_bl32(&bl32_ep_info);
 
+	dcache_clean_by_mva(&bl32_ep_info, sizeof(bl32_ep_info));
+
 	return &bl32_ep_info;
 }
 
