@@ -39,7 +39,12 @@ romstage-$(CONFIG_ARCH_ROMSTAGE_X86_32) += vboot.c
 ramstage-$(CONFIG_ELOG) += elog.c
 ramstage-$(CONFIG_HAVE_ACPI_TABLES) += gnvs.c
 ramstage-$(CONFIG_CHROMEOS_RAMOOPS) += ramoops.c
-ramstage-y += vpd_decode.c cros_vpd.c vpd_mac.c vpd_serialno.c vpd_calibration.c
+ramstage-y += vpd_decode.c
+ramstage-y += cros_vpd.c
+ramstage-y += vpd_mac.c
+ramstage-y += vpd_serialno.c
+ramstage-y += vpd_calibration.c
+ramstage-y += vpd_eks.c
 ifneq ($(wildcard src/mainboard/$(MAINBOARDDIR)/chromeos.c),)
 ramstage-srcs += src/mainboard/$(MAINBOARDDIR)/chromeos.c
 romstage-srcs += src/mainboard/$(MAINBOARDDIR)/chromeos.c
