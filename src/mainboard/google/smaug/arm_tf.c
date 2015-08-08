@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <symbols.h>
+#include <vendorcode/google/chromeos/vpd_eks.h>
 
 void *bl32_get_load_addr(size_t bl32_len)
 {
@@ -105,6 +106,7 @@ static void bl32_fill_args(aapcs64_params_t *args)
 	uintptr_t base_mib;
 	size_t size_mib;
 	uint64_t start, end;
+	int ret;
 
 	carveout_range(CARVEOUT_TZ, &base_mib, &size_mib);
 	args->arg0 = (base_mib + size_mib) * MiB -
@@ -130,6 +132,13 @@ static void bl32_fill_args(aapcs64_params_t *args)
 	carveout_range(CARVEOUT_TSEC, &base_mib, &size_mib);
 	boot_params.tsec_carveout_base_mib = base_mib;
 	boot_params.tsec_carveout_size_mib = size_mib;
+
+	ret = vpd_read_eks(boot_params.encrypted_keys, MAX_EKS_SIZE);
+	if (ret < 0) {
+		printk(BIOS_ERR, "WARNING: No EKS\n");
+		boot_params.encrypted_key_size = 0;
+	} else
+		boot_params.encrypted_key_size = ret;
 
 	dcache_clean_by_mva(&boot_params, sizeof(boot_params));
 
