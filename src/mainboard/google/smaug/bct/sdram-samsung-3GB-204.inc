@@ -408,7 +408,7 @@
   .McGeneralizedCarveout1ForceInternalAccess2 = 0x00000000,
   .McGeneralizedCarveout1ForceInternalAccess3 = 0x00000000,
   .McGeneralizedCarveout1ForceInternalAccess4 = 0x00000000,
-  .McGeneralizedCarveout1Cfg0               = 0x04000c75,
+  .McGeneralizedCarveout1Cfg0               = 0x04000c74,
   .McGeneralizedCarveout2Bom                = 0x00000000,
   .McGeneralizedCarveout2BomHi              = 0x00000000,
   .McGeneralizedCarveout2Size128kb          = 0x00000002,
