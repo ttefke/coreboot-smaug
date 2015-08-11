@@ -17,10 +17,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <2sha.h>
+#include <2struct.h>
 #include <arch/io.h>
 #include <bootblock_common.h>
+#include <cbfs.h>
 #include <console/console.h>
 #include <device/i2c.h>
+#include <fmap.h>
+#include <gbb_header.h>
 #include <soc/addressmap.h>
 #include <soc/clk_rst.h>
 #include <soc/clock.h>
@@ -30,6 +35,7 @@
 #include <soc/pmc.h>
 #include <soc/power.h>
 #include <soc/spi.h>
+#include <string.h>
 
 #include "pmic.h"
 
@@ -113,6 +119,174 @@ static const struct pad_config padcfgs[] = {
 	PAD_CFG_GPIO_INPUT(GPIO_PK0, PINMUX_PULL_NONE),
 };
 
+static const struct vb2_ryu_root_key_hash root_key_hash = {
+	.magic = RYU_ROOT_KEY_HASH_MAGIC,
+	.header_version_major = RYU_ROOT_KEY_HASH_VERSION_MAJOR,
+	.header_version_minor = RYU_ROOT_KEY_HASH_VERSION_MINOR,
+	.struct_size = EXPECTED_VB2_RYU_ROOT_KEY_HASH_SIZE,
+	/*
+	 * root_key_hash_digest field is filled in by an external entity with
+	 * the hash of root key. It is used to confirm that the hash on the root
+	 * key stored in GBB is the same as the hash stored in this field by the
+	 * external signer entity.
+	 */
+	.root_key_hash_digest = {0},
+};
+
+static int valid_ryu_root_header(const struct vb2_ryu_root_key_hash *hash,
+				 size_t size)
+{
+	if (memcmp(hash->magic, RYU_ROOT_KEY_HASH_MAGIC,
+		   RYU_ROOT_KEY_HASH_MAGIC_SIZE))
+		return 0;
+
+	if (hash->struct_size > size)
+		return 0;
+
+	return 1;
+}
+
+static int verify_root_key(void)
+{
+	if (!valid_ryu_root_header(&root_key_hash, sizeof(root_key_hash)))
+		return 0;
+
+	uintptr_t gbb_addr;
+	size_t gbb_size;
+
+	gbb_size = find_fmap_entry("GBB", (void **)&gbb_addr);
+
+	printk(BIOS_ERR, "gbb_addr: %lx\n", (unsigned long)gbb_addr);
+
+	const GoogleBinaryBlockHeader *gbb_header;
+	struct cbfs_media media;
+
+	if (init_default_cbfs_media(&media)) {
+		printk(BIOS_ERR, "Failed to init default cbfs media\n");
+		return 0;
+	}
+
+	media.open(&media);
+	gbb_header = media.map(&media, gbb_addr,
+			       sizeof(GoogleBinaryBlockHeader));
+
+	if (gbb_header == CBFS_MEDIA_INVALID_MAP_ADDRESS) {
+		printk(BIOS_ERR, "Media map failed\n");
+		media.close(&media);
+		return 0;
+	}
+
+	if (memcmp(gbb_header->signature, "$GBB", GBB_SIGNATURE_SIZE)) {
+		printk(BIOS_ERR, "GBB Signature mismatch\n");
+		media.unmap(&media, gbb_header);
+		media.close(&media);
+		return 0;
+	}
+
+	uintptr_t rootkey_offset = gbb_header->rootkey_offset;
+	size_t rootkey_size = gbb_header->rootkey_size;
+	void *rootkey;
+
+	media.unmap(&media, gbb_header);
+	gbb_header = NULL;
+
+	rootkey = media.map(&media, gbb_addr + rootkey_offset, rootkey_size);
+
+	if (rootkey == CBFS_MEDIA_INVALID_MAP_ADDRESS) {
+		printk(BIOS_ERR, "Media map failed\n");
+		media.close(&media);
+		return 0;
+	}
+
+	printk(BIOS_ERR, "Root key found! ");
+	uint8_t digest[VB2_SHA256_DIGEST_SIZE] = {0};
+	if (vb2_digest_buffer(rootkey, rootkey_size, VB2_HASH_SHA256, digest,
+			      sizeof(digest))) {
+		printk(BIOS_ERR, "Root hash calculation failed\n");
+		media.unmap(&media, rootkey);
+		media.close(&media);
+		return 0;
+	}
+
+	media.unmap(&media, rootkey);
+	media.close(&media);
+
+	if (memcmp(root_key_hash.root_key_hash_digest, digest,
+		   VB2_SHA256_DIGEST_SIZE)) {
+		printk(BIOS_ERR, "HASH COMPARE FAILED!\n");
+		return 0;
+	}
+
+	printk(BIOS_INFO, "HASH COMPARE SUCCESSFUL!\n");
+
+	return 1;
+}
+
+enum {
+	SE_AES_SBK_KEY_SLOT = 14,
+	SE_AES_SBK_KEY_SIZE_BYTES = 16,
+
+	SE_CRYPTO_KEYTABLE_ADDR_0_WORD_NUM_SHIFT = 0,
+	SE_CRYPTO_KEYTABLE_ADDR_0_WORD_NUM_MASK  = 0xF,
+
+	SE_CRYPTO_KEYTABLE_ADDR_0_KEY_SLOT_NO_SHIFT = 4,
+	SE_CRYPTO_KEYTABLE_ADDR_0_KEY_SLOT_NO_MASK  = 0xF,
+
+	SE_CRYPTO_KEYTABLE_ADDR_0_TABLE_SEL_KEYIV = 0,
+	SE_CRYPTO_KEYTABLE_ADDR_0_TABLE_SEL_SHIFT = 8,
+	SE_CRYPTO_KEYTABLE_ADDR_0_TABLE_SEL_MASK = 0x1,
+
+	SE_CRYPTO_KEYTABLE_ADDR_0_OP_READ = 0,
+	SE_CRYPTO_KEYTABLE_ADDR_0_OP_WRITE = 1,
+	SE_CRYPTO_KEYTABLE_ADDR_0_OP_SHIFT = 9,
+	SE_CRYPTO_KEYTABLE_ADDR_0_OP_MASK = 0x1,
+
+	SE_APB_BASE = 0x70012000,
+	SE_CRYPTO_KEYTABLE_ADDR_0_OFFSET = 0x31c,
+	SE_CRYPTO_KEYTABLE_DATA_0_OFFSET = 0x320,
+};
+
+static void erase_key_slots(void)
+{
+	printk(BIOS_ERR, "Erasing key slots\n");
+
+	int word_num;
+	uint32_t val;
+	for (word_num = 0;
+	     word_num < (SE_AES_SBK_KEY_SIZE_BYTES / sizeof(uint32_t));
+	     word_num++) {
+
+		/* Word number */
+		val = (word_num & SE_CRYPTO_KEYTABLE_ADDR_0_WORD_NUM_MASK) <<
+			SE_CRYPTO_KEYTABLE_ADDR_0_WORD_NUM_SHIFT;
+
+		/* Key slot number */
+		val |= (SE_AES_SBK_KEY_SLOT &
+			SE_CRYPTO_KEYTABLE_ADDR_0_KEY_SLOT_NO_MASK) <<
+			SE_CRYPTO_KEYTABLE_ADDR_0_KEY_SLOT_NO_SHIFT;
+
+		/* KeyIV Table Selection */
+		val |= (SE_CRYPTO_KEYTABLE_ADDR_0_TABLE_SEL_KEYIV &
+			SE_CRYPTO_KEYTABLE_ADDR_0_TABLE_SEL_MASK) <<
+			SE_CRYPTO_KEYTABLE_ADDR_0_TABLE_SEL_SHIFT;
+
+		/* Write Operation */
+		val |= (SE_CRYPTO_KEYTABLE_ADDR_0_OP_WRITE &
+			SE_CRYPTO_KEYTABLE_ADDR_0_OP_MASK) <<
+			SE_CRYPTO_KEYTABLE_ADDR_0_OP_SHIFT;
+
+		/* Program KEYTABLE_ADDR_0 */
+		write32((void *)(uintptr_t)(SE_APB_BASE +
+					    SE_CRYPTO_KEYTABLE_ADDR_0_OFFSET),
+			val);
+
+		/* Write data(0xffffffff) into data registers */
+		write32((void *)(uintptr_t)(SE_APB_BASE +
+					    SE_CRYPTO_KEYTABLE_DATA_0_OFFSET),
+			0xffffffff);
+	}
+}
+
 void bootblock_mainboard_init(void)
 {
 	set_clock_sources();
@@ -139,4 +313,7 @@ void bootblock_mainboard_init(void)
 			     PMC_SDMMC3_RAIL_AO_MASK, PMC_GPIO_RAIL_AO_DISABLE |
 			     PMC_AUDIO_RAIL_AO_DISABLE |
 			     PMC_SDMMC3_RAIL_AO_DISABLE);
+
+	if (!verify_root_key())
+		erase_key_slots();
 }
