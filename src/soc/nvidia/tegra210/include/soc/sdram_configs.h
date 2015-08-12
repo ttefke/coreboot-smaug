@@ -24,5 +24,7 @@
 
 /* Loads SDRAM configurations for current system. */
 const struct sdram_params *get_sdram_config(void);
+/* Returns SDRAM params for current system, R/W so BCT can be updated if needed */
+struct sdram_params *get_sdram_params(void);
 
 #endif  /* __SOC_NVIDIA_TEGRA210_SDRAM_CONFIGS_H__ */

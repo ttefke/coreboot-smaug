@@ -52,3 +52,20 @@ const struct sdram_params *get_sdram_config()
 
 	return &sdram_configs[ramcode];
 }
+
+/* Returns SDRAM params for current system, R/W so BCT can be updated if needed */
+struct sdram_params *get_sdram_params(void)
+{
+	uint32_t ramcode = sdram_get_ram_code();
+	/*
+	 * If we need to apply some special hacks to RAMCODE mapping (ex, by
+	 * board_id), do that now.
+	 */
+
+	if (ramcode >= sizeof(sdram_configs) / sizeof(sdram_configs[0]) ||
+	    sdram_configs[ramcode].MemoryType == NvBootMemoryType_Unused) {
+		die("Invalid RAMCODE.");
+	}
+
+	return &sdram_configs[ramcode];
+}

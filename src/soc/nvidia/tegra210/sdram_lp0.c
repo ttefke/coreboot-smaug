@@ -15,12 +15,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <arch/io.h>
 #include <arch/cache.h>
 #include <console/console.h>
 #include <soc/addressmap.h>
 #include <soc/pmc.h>
 #include <soc/sdram.h>
 #include <stdlib.h>
+#include <soc/mc.h>
+
+/*
+ * 'Flush' the MC carveout regs that might have changed back to the BCT
+ * so that they'll be properly restored on resume. BOM and CFG0 only for now.
+ * Must be called before sdram_lp0_save_params().
+ */
+
+void update_bct_carveout_values(struct sdram_params *sdram)
+{
+	struct tegra_mc_regs *mc = (void *)TEGRA_MC_BASE;
+
+	/* NVDEC */
+	sdram->McGeneralizedCarveout1Bom = read32(&mc->security_carveout1_bom);
+	sdram->McGeneralizedCarveout1Cfg0 = read32(&mc->security_carveout1_cfg0);
+	/* GPU/GSC */
+	sdram->McGeneralizedCarveout2Bom = read32(&mc->security_carveout2_bom);
+	sdram->McGeneralizedCarveout2Cfg0 = read32(&mc->security_carveout2_cfg0);
+	sdram->McGeneralizedCarveout3Bom = read32(&mc->security_carveout3_bom);
+	sdram->McGeneralizedCarveout3Cfg0 = read32(&mc->security_carveout3_cfg0);
+	/* TSECA/B */
+	sdram->McGeneralizedCarveout4Bom = read32(&mc->security_carveout4_bom);
+	sdram->McGeneralizedCarveout4Cfg0 = read32(&mc->security_carveout4_cfg0);
+	sdram->McGeneralizedCarveout5Bom = read32(&mc->security_carveout5_bom);
+	sdram->McGeneralizedCarveout5Cfg0 = read32(&mc->security_carveout5_cfg0);
+	/* VPR */
+	sdram->McVideoProtectBom = read32(&mc->video_protect_bom);
+	sdram->McVideoProtectSizeMb = read32(&mc->video_protect_size_mb);
+	sdram->McVideoProtectWriteAccess = read32(&mc->video_protect_reg_ctrl);
+}
 
 /*
  * This function reads SDRAM parameters from the common BCT format and

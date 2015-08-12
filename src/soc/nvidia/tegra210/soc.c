@@ -127,6 +127,13 @@ static void tegra210_init(void *chip_info)
 	printk(BIOS_INFO, "chip %x rev %02x.%x\n",
 		rev.chip_id, rev.major, rev.minor);
 
+	/*
+	 * Before saving the SDRAM MC regs to scratch,
+	 * make sure any configured carveout values have
+	 * been saved back to the BCT in sdram_params.
+	 */
+	update_bct_carveout_values(get_sdram_params());
+
 	/* Save sdram parameters to scratch regs to be used in LP0 resume */
 	sdram_lp0_save_params(get_sdram_config());
 	printk(BIOS_INFO, "sdram params saved.\n");
