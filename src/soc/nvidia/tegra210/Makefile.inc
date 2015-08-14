@@ -95,6 +95,7 @@ ramstage-y += ../tegra/usb.c
 ramstage-$(CONFIG_ARM64_USE_SECURE_MONITOR) += secmon.c
 ramstage-$(CONFIG_HAVE_MTC) += mtc.c
 ramstage-y += stage_entry.S
+ramstage-y += fuses.c
 
 secmon-y += cpu.c
 secmon-y += cpu_lib.S
