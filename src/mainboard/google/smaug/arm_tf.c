@@ -23,6 +23,7 @@
 #include <arm_tf_temp.h>
 #include <console/console.h>
 #include <soc/addressmap.h>
+#include <soc/fuses.h>
 #include <stdlib.h>
 #include <string.h>
 #include <symbols.h>
@@ -72,7 +73,7 @@ typedef struct plat_bl32_atf_params {
 	 */
 	uint32_t uart_id;
 	/* TODO(furquan): Where to read these from? */
-	uint32_t chip_uid[4];
+	uint32_t chip_uid[FUSE_UID_ELEMENT_NUM];
 	/* Primary DRAM is DRAM memory below 32-bit address space. */
 	uint64_t primary_dram_base_mib;
 	uint64_t primary_dram_size_mib;
@@ -116,7 +117,7 @@ static void bl32_fill_args(aapcs64_params_t *args)
 	boot_params.version = 1;
 	boot_params.uart_id = get_uart_id();
 
-	/* TODO(furquan): Add proper fuse reading for chip_uid */
+	fuse_get_uid(boot_params.chip_uid, sizeof(boot_params.chip_uid));
 
 	memory_in_range_below_4gb(&start, &end);
 	boot_params.primary_dram_base_mib = start;
