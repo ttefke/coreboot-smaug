@@ -94,17 +94,16 @@ static void fill_vboot_handoff(struct vboot_handoff *vboot_handoff,
 			vb_sd->flags |= VBSD_BOOT_REC_SWITCH_ON;
 		*oflags |= VB_INIT_OUT_ENABLE_RECOVERY;
 		*oflags |= VB_INIT_OUT_CLEAR_RAM;
-		*oflags |= VB_INIT_OUT_ENABLE_DISPLAY;
 		*oflags |= VB_INIT_OUT_ENABLE_USB_STORAGE;
 	}
 	if (vb2_sd->flags & VB2_SD_DEV_MODE_ENABLED) {
 		*oflags |= VB_INIT_OUT_ENABLE_DEVELOPER;
 		*oflags |= VB_INIT_OUT_CLEAR_RAM;
-		*oflags |= VB_INIT_OUT_ENABLE_DISPLAY;
 		*oflags |= VB_INIT_OUT_ENABLE_USB_STORAGE;
 		vb_sd->flags |= VBSD_BOOT_DEV_SWITCH_ON;
 		vb_sd->flags |= VBSD_LF_DEV_SWITCH_ON;
 	}
+	*oflags |= VB_INIT_OUT_ENABLE_DISPLAY;
 	/* TODO: Set these in depthcharge */
 	if (CONFIG_VIRTUAL_DEV_SWITCH)
 		vb_sd->flags |= VBSD_HONOR_VIRT_DEV_SWITCH;
