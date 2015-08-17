@@ -23,15 +23,17 @@
 #include <bootblock_common.h>
 #include <cbfs.h>
 #include <console/console.h>
+#include <delay.h>
+#include <reset.h>
 #include <soc/addressmap.h>
 #include <soc/clock.h>
 #include <soc/nvidia/tegra/apbmisc.h>
+#include <soc/padconfig.h>
 #include <soc/pmc.h>
 #include <soc/power.h>
 #include <soc/verstage.h>
 #include <timestamp.h>
 #include <vendorcode/google/chromeos/chromeos.h>
-#include <delay.h>
 
 #define BCT_OFFSET_IN_BIT	0x4c
 #define ODMDATA_OFFSET_IN_BCT	0x508
@@ -161,6 +163,10 @@ static void mbist_workaround(void)
 	}
 }
 
+static const struct pad_config force_reset_pads[] = {
+	PAD_CFG_GPIO_OUT0(WIFI_RST, PINMUX_PULL_DOWN),
+};
+
 void main(void)
 {
 	timestamp_early_init(0);
@@ -192,12 +198,32 @@ void main(void)
 		printk(BIOS_INFO, "T210: Bootblock here\n");
 	}
 
+	pmc_print_rst_status();
+
+	/*
+	 * If system reset reason is set to anything other than POR, then the
+	 * system could be in an inconsistent state with TPM and other parts not
+	 * reset properly. Thus, we need to reset the whole system using
+	 * SYS_RESET GPIO.
+	 *
+	 * There is a known issue with SYS_RESET GPIO that if WIFI_EN pin is
+	 * pulled up, then boot strap changes and system reset results booting
+	 * from boot medium other than SPI flash. Thus, we need to ensure that
+	 * WIFI_RST pin is pulled down before asserting SYS_RESET GPIO. We do
+	 * not need to worry about pulling down this pin anywhere else in
+	 * coreboot / depthcharge, because none of them touches the wifi module.
+	 */
+	if (pmc_rst_status() != PMC_RST_STATUS_SOURCE_POR) {
+		printk(BIOS_INFO, "T210: Reset reason not set to POR. "
+		       "Asserting system reset via GPIO.\n");
+		soc_configure_pads(force_reset_pads,
+				   ARRAY_SIZE(force_reset_pads));
+		cpu_reset();
+	}
+
 	clock_init();
 
 	printk(BIOS_INFO, "T210 bootblock: Clock init done\n");
-
-	pmc_print_rst_status();
-
 
 	bootblock_mainboard_init();
 
