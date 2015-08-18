@@ -218,6 +218,7 @@ void main(void)
 		       "Asserting system reset via GPIO.\n");
 		soc_configure_pads(force_reset_pads,
 				   ARRAY_SIZE(force_reset_pads));
+		mdelay(11);
 		cpu_reset();
 	}
 
