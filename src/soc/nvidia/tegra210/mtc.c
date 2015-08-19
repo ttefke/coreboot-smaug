@@ -17,11 +17,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <assert.h>
 #include <cbfs_core.h>
 #include <cbmem.h>
 #include <console/console.h>
 #include <soc/mtc.h>
 #include <string.h>
+#include <vendorcode/google/chromeos/vboot_handoff.h>
 
 static size_t mtc_table_size;
 
@@ -29,10 +31,24 @@ static size_t mtc_table_size;
 #define MTC_TABLE_ENTRY_SIZE	4880
 #define MTC_TABLE_MAX_SIZE	(MAX_MTC_TABLE_ENTRIES * MTC_TABLE_ENTRY_SIZE)
 
+static struct firmware_component *vboot_find_comp(uint8_t index)
+{
+	struct firmware_component *component;
+
+	struct vboot_handoff *handoff = cbmem_find(CBMEM_ID_VBOOT_HANDOFF);
+
+	if (!handoff)
+		return NULL;
+
+	assert(index < MAX_PARSED_FW_COMPONENTS);
+	component = &handoff->components[index];
+
+	return component;
+}
+
 int tegra210_run_mtc(void)
 {
 	struct cbfs_file file;
-	ssize_t offset;
 	size_t nread;
 
 	void * const mtc = (void *)(uintptr_t)CONFIG_MTC_ADDRESS;
@@ -40,22 +56,41 @@ int tegra210_run_mtc(void)
 	void *dvfs_table;
 	size_t (*mtc_fw)(void **dvfs_table) = (void *)mtc;
 
-	offset = cbfs_locate_file(media, &file, CONFIG_MTC_FILE);
-	if (offset < 0) {
-		printk(BIOS_ERR, "MTC file not found: %s\n", CONFIG_MTC_FILE);
-		return -1;
+	size_t mtc_size = 0;
+	ssize_t mtc_offset = 0;
+	const char *mtc_filename = CONFIG_CBFS_PREFIX"/tegra_mtc";
+
+	if (IS_ENABLED(CONFIG_VBOOT2_VERIFY_FIRMWARE)) {
+		struct firmware_component *comp;
+		comp = vboot_find_comp(CONFIG_VBOOT_TEGRA_MTC_INDEX);
+
+		if (comp != NULL) {
+			mtc_offset = comp->address;
+			mtc_size = comp->size;
+		}
+	}
+
+	if (mtc_size == 0) {
+		mtc_offset = cbfs_locate_file(media, &file, mtc_filename);
+		if (mtc_offset < 0) {
+			printk(BIOS_ERR, "MTC file not found: %s\n",
+			       mtc_filename);
+			return -1;
+		}
+		mtc_size = file.len;
 	}
 
 	/* Read MTC file into predefined region. */
-	nread = cbfs_read(media, mtc, offset, file.len);
+	nread = cbfs_read(media, mtc, mtc_offset, mtc_size);
 
-	if (nread != file.len) {
-		printk(BIOS_ERR, "MTC bytes read (%zu) != file length(%u)!\n",
-		       nread, file.len);
+	if (nread != mtc_size) {
+		printk(BIOS_ERR, "MTC bytes read (%zu) != file length(%zu)!\n",
+		       nread, mtc_size);
 		return -1;
 	}
 
-	printk(BIOS_INFO, "MTC: %zu bytes loaded @ %p\n", nread, mtc);
+	printk(BIOS_INFO, "MTC: %zu bytes loaded from offset %p @ %p\n", nread,
+	       (void *)mtc_offset, mtc);
 
 	mtc_table_size = (*mtc_fw)(&dvfs_table);
 
