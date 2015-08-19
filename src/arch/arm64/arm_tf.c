@@ -95,7 +95,7 @@ static entry_point_info_t *prepare_bl32(void)
 	void *pc = NULL;
 
 	if (IS_ENABLED(CONFIG_ARM64_SECURE_OS_LOAD_RAW)) {
-		uintptr_t bl32_offset = 0;
+		ssize_t bl32_offset = 0;
 		size_t bl32_size = 0;
 		size_t nread;
 
