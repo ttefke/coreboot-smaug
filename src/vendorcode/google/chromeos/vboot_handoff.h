@@ -32,7 +32,7 @@
  * number of parsed firmware components (address and size) included in the
  * handoff structure.
  */
-#define MAX_PARSED_FW_COMPONENTS 6
+#define MAX_PARSED_FW_COMPONENTS 7
 
 struct firmware_component {
 	uint32_t address;
