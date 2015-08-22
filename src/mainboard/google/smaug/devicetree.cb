@@ -33,8 +33,8 @@ chip soc/nvidia/tegra210
 	register "color_depth" = "12"
 
 	# framebuffer resolution
-	register "display_xres" = "1280"
-	register "display_yres" = "800"
+	register "display_xres" = "2560"
+	register "display_yres" = "1800"
 
 	register "href_to_sync" = "1"
 	register "hfront_porch" = "80"
