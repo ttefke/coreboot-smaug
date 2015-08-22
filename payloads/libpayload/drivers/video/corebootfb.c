@@ -36,6 +36,8 @@
 
 struct video_console coreboot_video_console;
 
+/* For smaug (2560x1800 on 10" screen) */
+static int scale = 2;
 static unsigned int cursor_x = 0, cursor_y = 0, cursor_en = 0;
 
 /* color definitions for the 16 standard colors */
@@ -73,11 +75,11 @@ static unsigned long chars;
 static void corebootfb_scroll_up(void)
 {
 	unsigned char *dst = FB;
-	unsigned char *src = FB + (FI->bytes_per_line * FONT_HEIGHT);
+	unsigned char *src = FB + (FI->bytes_per_line * FONT_HEIGHT*scale);
 	int y;
 
 	/* Scroll all lines up */
-	for(y = 0; y < FI->y_resolution - FONT_HEIGHT; y++) {
+	for (y = 0; y < FI->y_resolution - FONT_HEIGHT*scale; y++) {
 		memcpy(dst, src, FI->x_resolution * (FI->bits_per_pixel >> 3));
 
 		dst += FI->bytes_per_line;
@@ -85,7 +87,7 @@ static void corebootfb_scroll_up(void)
 	}
 
 	/* Erase last line */
-	dst = FB + (FI->y_resolution - FONT_HEIGHT) * FI->bytes_per_line;
+	dst = FB + (FI->y_resolution - FONT_HEIGHT*scale) * FI->bytes_per_line;
 
 	for(; y < FI->y_resolution; y++) {
 		memset(dst, 0, FI->x_resolution * (FI->bits_per_pixel >> 3));
@@ -144,40 +146,40 @@ static void corebootfb_putchar(u8 row, u8 col, unsigned int ch)
 	}
 
 
-	dst = FB + ((row * FONT_HEIGHT) * FI->bytes_per_line);
-	dst += (col * FONT_WIDTH * (FI->bits_per_pixel >> 3));
+	dst = FB + ((row * FONT_HEIGHT*scale) * FI->bytes_per_line);
+	dst += (col * FONT_WIDTH*scale * (FI->bits_per_pixel >> 3));
 
-	for(y = 0; y < FONT_HEIGHT; y++) {
-		for(x = FONT_WIDTH - 1; x >= 0; x--) {
+	for (y = 0; y < FONT_HEIGHT*scale; y++) {
+		for (x = FONT_WIDTH*scale - 1; x >= 0; x--) {
 
 			switch (FI->bits_per_pixel) {
 			case 8: /* Indexed */
-				dst[(FONT_WIDTH - x) * (FI->bits_per_pixel >> 3)] = (*glyph & (1 << x)) ?  fg : bg;
+				dst[(FONT_WIDTH*scale - x) * (FI->bits_per_pixel >> 3)] = (*glyph & (1 << x)) ?  fg : bg;
 				break;
 			case 16: /* 16 bpp */
-				dst16 = (u16 *)(dst + (FONT_WIDTH - x) * (FI->bits_per_pixel >> 3));
+				dst16 = (u16 *)(dst + (FONT_WIDTH*scale - x) * (FI->bits_per_pixel >> 3));
 				*dst16 = (*glyph & (1 << x)) ? fgval : bgval;
 				break;
 			case 24: /* 24 bpp */
 				if (*glyph & (1 << x)) {
-					dst[(FONT_WIDTH - x) * (FI->bits_per_pixel >> 3) + 0] = fgval & 0xff;
-					dst[(FONT_WIDTH - x) * (FI->bits_per_pixel >> 3) + 1] = (fgval >> 8) & 0xff;
-					dst[(FONT_WIDTH - x) * (FI->bits_per_pixel >> 3) + 2] = (fgval >> 16) & 0xff;
+					dst[(FONT_WIDTH*scale - x) * (FI->bits_per_pixel >> 3) + 0] = fgval & 0xff;
+					dst[(FONT_WIDTH*scale - x) * (FI->bits_per_pixel >> 3) + 1] = (fgval >> 8) & 0xff;
+					dst[(FONT_WIDTH*scale - x) * (FI->bits_per_pixel >> 3) + 2] = (fgval >> 16) & 0xff;
 				} else {
-					dst[(FONT_WIDTH - x) * (FI->bits_per_pixel >> 3) + 0] = bgval & 0xff;
-					dst[(FONT_WIDTH - x) * (FI->bits_per_pixel >> 3) + 1] = (bgval >> 8) & 0xff;
-					dst[(FONT_WIDTH - x) * (FI->bits_per_pixel >> 3) + 2] = (bgval >> 16) & 0xff;
+					dst[(FONT_WIDTH*scale - x) * (FI->bits_per_pixel >> 3) + 0] = bgval & 0xff;
+					dst[(FONT_WIDTH*scale - x) * (FI->bits_per_pixel >> 3) + 1] = (bgval >> 8) & 0xff;
+					dst[(FONT_WIDTH*scale - x) * (FI->bits_per_pixel >> 3) + 2] = (bgval >> 16) & 0xff;
 				}
 				break;
 			case 32: /* 32 bpp */
-				dst32 = (u32 *)(dst + (FONT_WIDTH - x) * (FI->bits_per_pixel >> 3));
-				*dst32 = (*glyph & (1 << x)) ? fgval : bgval;
+				dst32 = (u32 *)(dst + (FONT_WIDTH*scale - x) * (FI->bits_per_pixel >> 3));
+				*dst32 = (*glyph & (1 << x/scale)) ? fgval : bgval;
 				break;
 			}
 		}
 
 		dst += FI->bytes_per_line;
-		glyph++;
+		glyph += y % scale;
 	}
 }
 
@@ -236,8 +238,8 @@ static int corebootfb_init(void)
 
 	fbaddr = FI->physical_address;
 
-	coreboot_video_console.columns = FI->x_resolution / FONT_WIDTH;
-	coreboot_video_console.rows = FI->y_resolution / FONT_HEIGHT;
+	coreboot_video_console.columns = FI->x_resolution / (FONT_WIDTH*scale);
+	coreboot_video_console.rows = FI->y_resolution / (FONT_HEIGHT*scale);
 
 	chars = (unsigned long) malloc(coreboot_video_console.rows *
 			coreboot_video_console.columns * 2);
