@@ -23,6 +23,7 @@
 #include <boot/coreboot_tables.h>
 #include <device/device.h>
 #include <device/i2c.h>
+#include <elog.h>
 #include <soc/addressmap.h>
 #include <soc/clk_rst.h>
 #include <soc/clock.h>
@@ -206,6 +207,9 @@ static void mainboard_init(device_t dev)
 		configure_display_blocks();
 
 	powergate_unused_partitions();
+
+	elog_init();
+	elog_add_boot_reason();
 }
 
 void display_startup(device_t dev)
