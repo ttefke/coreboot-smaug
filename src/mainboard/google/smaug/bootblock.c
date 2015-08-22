@@ -130,19 +130,7 @@ static const struct vb2_ryu_root_key_hash root_key_hash = {
 	 * key stored in GBB is the same as the hash stored in this field by the
 	 * external signer entity.
 	 */
-	/*
-	 * TODO(furquan): Filling in hash of dev root key here. We need to
-	 * update the BCT after external entity fills in the root key
-	 * hash. cbootimage currently does not support updating of AES signature
-	 * in BCT. Until that is done, put dev-key root hash here. This needs to
-	 * be removed as soon as cbootimage is updated. crosbug.com/p/44338
-	 *
-	 */
-	.root_key_hash_digest = {0x81, 0xc7, 0x6f, 0x2b, 0x62, 0x80, 0xdf, 0x18,
-				 0xa1, 0xee, 0x95, 0x92, 0x70, 0xc6, 0xa3, 0x77,
-				 0x6e, 0xf2, 0xdb, 0x79,  0x97, 0x73, 0x60,
-				 0x14, 0x7a, 0xd7, 0x52, 0xe1, 0xdd, 0x01, 0x16,
-				 0xa0},
+	.root_key_hash_digest = {0},
 };
 
 static int valid_ryu_root_header(const struct vb2_ryu_root_key_hash *hash,
