@@ -16,10 +16,10 @@ struct resolution {
 };
 
 /*
- * 'Canvas' is the drawing area located in the center of the screen.
- * It extends to the top and bottom edges of the screen and leaves unused
- * (non-drawing) areas on the left and the right if the aspect ratios of the
- * display and the canvas do not match.
+ * 'canvas' is the drawing area located in the center of the screen. It's a
+ * square area, stretching vertically to the edges of the screen, leaving
+ * non-drawing areas on the left and right. The screen is assumed to be
+ * landscape.
  */
 
 /* This determines the size of the actual drawing area. */
@@ -27,12 +27,6 @@ static struct resolution canvas;
 
 /* number of pixels from the left edge of the screen to the drawing area. */
 static uint32_t canvas_offset;
-
-/* aspect ratio of the canvas */
-static const struct resolution canvas_aspect_ratio = {
-	.width = 1280,
-	.height = 800,
-};
 
 static struct resolution display;
 static struct cb_framebuffer *fbinfo;
@@ -83,8 +77,7 @@ static int cbgfx_init(void)
 
 	/* calculate canvas size, assuming the screen is landscape */
 	canvas.height = display.height;
-	canvas.width = display.height *
-			canvas_aspect_ratio.width / canvas_aspect_ratio.height;
+	canvas.width = display.height;
 	canvas_offset = (display.width - canvas.width) / 2;
 
 	initialized = 1;
