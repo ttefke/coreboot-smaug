@@ -208,6 +208,23 @@ void google_chromeec_early_pd_init(void)
 		google_chromeec_check_pd_image(EC_IMAGE_RO);
 	}
 }
+
+uint32_t google_chromeec_get_ec_image_type(void)
+{
+	struct chromeec_command cec_cmd;
+	struct ec_response_get_version cec_resp = { { 0 } };
+
+	cec_cmd.cmd_code = EC_CMD_GET_VERSION;
+	cec_cmd.cmd_version = 0;
+	cec_cmd.cmd_data_out = &cec_resp;
+	cec_cmd.cmd_size_in = 0;
+	cec_cmd.cmd_size_out = sizeof(cec_resp);
+	cec_cmd.cmd_dev_index = 0;
+	google_chromeec_command(&cec_cmd);
+
+	return cec_resp.current_image;
+}
+
 #endif
 
 u16 google_chromeec_get_board_version(void)

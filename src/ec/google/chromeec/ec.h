@@ -43,6 +43,7 @@ void google_chromeec_early_pd_init(void);
 /* Reboot if EC firmware is not expected type. */
 void google_chromeec_check_ec_image(int expected_type);
 void google_chromeec_check_pd_image(int expected_type);
+uint32_t google_chromeec_get_ec_image_type(void);
 #endif
 
 uint8_t google_chromeec_calc_checksum(const uint8_t *data, int size);
