@@ -23,9 +23,11 @@
 #include <ec/google/chromeec/ec.h>
 #include <ec/google/chromeec/ec_commands.h>
 #include <string.h>
+#include <vboot_nvstorage.h>
 #include <vendorcode/google/chromeos/chromeos.h>
 
 #include "gpio.h"
+#include "chromeos.h"
 
 void fill_lb_gpios(struct lb_gpios *gpios)
 {
@@ -108,4 +110,21 @@ int get_recovery_mode_switch(void)
 int get_write_protect_state(void)
 {
 	return !gpio_get(WRITE_PROTECT_L);
+}
+
+uint8_t get_recovery_reason(uint8_t reason)
+{
+	/* If reason is not manual, do not change it. */
+	if (reason != VBNV_RECOVERY_RO_MANUAL)
+		return reason;
+
+	/*
+	 * If reason is manual and fastboot mask is set, set reason to
+	 * VBNV_RECOVERY_US_FASTBOOT.
+	 */
+	uint32_t ec_events = google_chromeec_get_events_b();
+	if (ec_events & EC_HOST_EVENT_MASK(EC_HOST_EVENT_KEYBOARD_FASTBOOT))
+		return VBNV_RECOVERY_US_FASTBOOT;
+
+	return reason;
 }
