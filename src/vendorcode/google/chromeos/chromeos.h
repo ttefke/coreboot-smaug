@@ -45,6 +45,7 @@ extern int oprom_is_loaded;
 
 void read_vbnv(uint8_t *vbnv_copy);
 void save_vbnv(const uint8_t *vbnv_copy);
+void vbnv_update_recovery(uint8_t reason);
 
 #if CONFIG_CHROMEOS
 /* functions implemented in chromeos.c: */
