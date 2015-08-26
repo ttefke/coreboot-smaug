@@ -139,13 +139,13 @@ static int enable_lcd_vdd(void)
 
 	/* Enable VDD_LCD */
 	gpio_set(EN_VDD_LCD, 1);
-	/* wait for 2ms */
-	mdelay(2);
+	/* wait for 4ms */
+	mdelay(4);
 
 	/* Enable PP1800_LCDIO to panel */
 	gpio_set(EN_VDD18_LCD, 1);
-	/* wait for 1ms */
-	mdelay(1);
+	/* wait for 2ms */
+	mdelay(2);
 
 	/* Set panel EN and RST signals */
 	gpio_set(LCD_EN, 1);		/* enable */
