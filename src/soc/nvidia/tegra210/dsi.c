@@ -725,10 +725,13 @@ static ssize_t tegra_dsi_host_transfer(struct mipi_dsi_host *host,
 	}
 
 	value = tegra_dsi_readl(dsi, DSI_POWER_CONTROL);
-	value |= DSI_POWER_CONTROL_ENABLE;
-	tegra_dsi_writel(dsi, value, DSI_POWER_CONTROL);
 
-	udelay(7000);	//usleep_range(5000, 10000);
+	/* Enable display only if it is not already enabled. */
+	if ((value & DSI_POWER_CONTROL_ENABLE) == 0) {
+		value |= DSI_POWER_CONTROL_ENABLE;
+		tegra_dsi_writel(dsi, value, DSI_POWER_CONTROL);
+		udelay(7000);	//usleep_range(5000, 10000);
+	}
 
 	value = DSI_HOST_CONTROL_CRC_RESET | DSI_HOST_CONTROL_TX_TRIG_HOST |
 		DSI_HOST_CONTROL_CS | DSI_HOST_CONTROL_ECC;
