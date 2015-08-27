@@ -100,7 +100,7 @@ static void setup_audio(void)
 	clock_configure_source(extperiph1, PLLP, 12000);
 
 	/* Configure AUD_MCLK pad drive strength */
-	write32((unsigned int *)TEGRA_APB_MISC_GP_BASE + 0xF4,
+	write32(TEGRA_APB_MISC_GP_REGS(AUD_MCLK),
 		(0x10 << PINGROUP_DRVUP_SHIFT | 0x10 << PINGROUP_DRVDN_SHIFT));
 
 	/* Set up audio peripheral clocks/muxes */
@@ -207,10 +207,31 @@ static void powergate_unused_partitions(void)
 		power_gate_partition(partitions[i]);
 }
 
+static void set_touch_and_camera_pads(void)
+{
+	/* Configure CAMERA pad drive strength */
+	write32(TEGRA_APB_MISC_GP_REGS(CAM1_MCLK),
+		(0x10 << PINGROUP_DRVUP_SHIFT | 0x10 << PINGROUP_DRVDN_SHIFT));
+	write32(TEGRA_APB_MISC_GP_REGS(CAM2_MCLK),
+		(0x10 << PINGROUP_DRVUP_SHIFT | 0x10 << PINGROUP_DRVDN_SHIFT));
+	write32(TEGRA_APB_MISC_GP_REGS(CAM_AF_EN),
+		(0x10 << PINGROUP_DRVUP_SHIFT | 0x10 << PINGROUP_DRVDN_SHIFT));
+	write32(TEGRA_APB_MISC_GP_REGS(CAM_FLASH_EN),
+		(0x10 << PINGROUP_DRVUP_SHIFT | 0x10 << PINGROUP_DRVDN_SHIFT));
+	write32(TEGRA_APB_MISC_GP_REGS(GPIO_PZ0),
+		(0x10 << PINGROUP_DRVUP_SHIFT | 0x10 << PINGROUP_DRVDN_SHIFT));
+	write32(TEGRA_APB_MISC_GP_REGS(GPIO_PZ1),
+		(0x10 << PINGROUP_DRVUP_SHIFT | 0x10 << PINGROUP_DRVDN_SHIFT));
+	/* Configure TOUCH pad drive strength */
+	write32(TEGRA_APB_MISC_GP_REGS(TOUCH_CLK),
+		(0x1F << PINGROUP_DRVUP_SHIFT | 0x1F << PINGROUP_DRVDN_SHIFT));
+}
+
 static void mainboard_init(device_t dev)
 {
 	soc_configure_pads(padcfgs, ARRAY_SIZE(padcfgs));
 	soc_configure_funits(funits, ARRAY_SIZE(funits));
+	set_touch_and_camera_pads();
 
 	/* I2C6 bus (audio, etc.) */
 	soc_configure_i2c6pad();

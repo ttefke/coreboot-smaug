@@ -81,6 +81,21 @@ struct pad_config {
 		.unused = 1,				\
 		.pad_has_gpio = PAD_HAS_GPIO_##ball_,	\
 	}
+
+/* CFGPADCTRL regs for audio, camera and touch */
+enum {
+	AUD_MCLK = 0xF4,
+	CAM1_MCLK = 0x118,
+	CAM2_MCLK = 0x124,
+	CAM_AF_EN = 0x12C,
+	CAM_FLASH_EN = 0x130,
+	GPIO_PZ0 = 0x1FC,
+	GPIO_PZ1 = 0x200,
+	TOUCH_CLK = 0x310
+};
+
+#define TEGRA_APB_MISC_GP_REGS(x)	((unsigned char *)TEGRA_APB_MISC_GP_BASE + (x))
+
 /*
  * Configure the pads associated with entry according to the configuration.
  */
