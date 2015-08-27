@@ -78,6 +78,21 @@ static const struct funit_cfg funits[] = {
 	FUNIT_CFG(I2C6, PLLP, 400, audio_codec_pads, ARRAY_SIZE(audio_codec_pads)),
 };
 
+/* thermal config */
+static void setup_thermal(void)
+{
+	/*
+	 * Set remote temperature THERM limit to 105degC.  This thermistor
+	 * resides inside the SOC
+	 */
+	i2c_writeb(I2C6_BUS, 0x4c, 0x19, 105);
+	/*
+	 * Set local temperature THERM limit to 60degC.  This thermistor resides
+	 * within the TMP451 and approximates the board temperature
+	 */
+	i2c_writeb(I2C6_BUS, 0x4c, 0x20, 60);
+}
+
 /* Audio init: clocks and enables/resets */
 static void setup_audio(void)
 {
@@ -200,6 +215,7 @@ static void mainboard_init(device_t dev)
 	/* I2C6 bus (audio, etc.) */
 	soc_configure_i2c6pad();
 	i2c_init(I2C6_BUS);
+	setup_thermal();
 	setup_audio();
 
 	/* if panel needs to bringup */
