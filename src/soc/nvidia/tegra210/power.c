@@ -110,6 +110,33 @@ void pmc_print_rst_status(void)
 	       pmc_rst_status_str[rst_status]);
 }
 
+void pmc_set_bootreason(uint8_t reason)
+{
+	uint32_t val = read32(&pmc->scratch202);
+
+	val &= ~PMC_BOOTREASON_MASK;
+	val |= reason;
+
+	write32(&pmc->scratch202, val);
+}
+
+void pmc_update_bootreason(void)
+{
+	uint8_t rst_status = pmc_rst_status();
+
+	int update_required = 0;
+
+	if (rst_status == PMC_RST_STATUS_SOURCE_WATCHDOG)
+		update_required = PMC_BOOTREASON_WATCHDOG;
+	else if (rst_status == PMC_RST_STATUS_SOURCE_SENSOR)
+		update_required = PMC_BOOTREASON_SENSOR;
+
+	if (update_required == 0)
+		return;
+
+	pmc_set_bootreason(update_required);
+}
+
 static int partition_clamp_on(int id)
 {
 	return read32(&pmc->clamp_status) & (1 << id);

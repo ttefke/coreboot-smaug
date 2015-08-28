@@ -22,11 +22,21 @@
 
 #include <soc/pmc.h>
 
+enum {
+	PMC_BOOTREASON_MASK = 0x7,
+	PMC_BOOTREASON_REBOOT = 0x1,
+	PMC_BOOTREASON_PANIC = 0x2,
+	PMC_BOOTREASON_WATCHDOG = 0x3,
+	PMC_BOOTREASON_SENSOR = 0x4,
+};
+
 void power_ungate_partition(uint32_t id);
 void power_gate_partition(uint32_t id);
 
 uint8_t pmc_rst_status(void);
 void pmc_print_rst_status(void);
+void pmc_set_bootreason(uint8_t reason);
+void pmc_update_bootreason(void);
 void remove_clamps(int id);
 void pmc_override_pwr_det(uint32_t bits, uint32_t override);
 

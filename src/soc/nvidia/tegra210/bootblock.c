@@ -216,6 +216,14 @@ void main(void)
 	if (pmc_rst_status() != PMC_RST_STATUS_SOURCE_POR) {
 		printk(BIOS_INFO, "T210: Reset reason not set to POR. "
 		       "Asserting system reset via GPIO.\n");
+
+		/*
+		 * After reset, the boot reason would be set to POR. So save
+		 * appropriate reason to SCRATCH202[2:0] in case later stages
+		 * want to use it after reboot.
+		 */
+		pmc_update_bootreason();
+
 		soc_configure_pads(force_reset_pads,
 				   ARRAY_SIZE(force_reset_pads));
 		mdelay(11);
