@@ -23,6 +23,7 @@
 #include <bootblock_common.h>
 #include <cbfs.h>
 #include <console/console.h>
+#include <delay.h>
 #include <device/i2c.h>
 #include <fmap.h>
 #include <gbb_header.h>
@@ -287,6 +288,95 @@ static void erase_key_slots(void)
 	}
 }
 
+enum {
+	MAX77620_RTC_ADDR = 0x68,
+	MAX77620_RTC_RTCUPDATE0_REG = 0x04,
+	UDR_BIT = 0x1,
+	FCUR_BIT = 0x2,
+	RBUDR_BIT = 0x10,
+	MAX77620_RTC_RTCSECA2_REG = 0x15,
+	WARM_BOOT_BIT = 0x1,
+};
+
+/*
+ * Handling of bootreason:
+ *
+ * PMC_SCRATCH202 register bits 2:0 have been assigned to store boot reason and
+ * communicate between OS and bootloader. However, this register is not
+ * guaranteed to have any sane value in case of cold boot. Thus, we need a
+ * different way to distinguish cold vs warm boot.
+ *
+ * Thus, in case of warm-boot, OS sets bit0 in PMIC RTCSECA2 REG. Bootloader is
+ * expected to check the value of this bit to identify if current boot is cold
+ * or warm boot. If it is cold boot, we need to clear value PMC_SCRATCH202
+ * register to reason=reboot. However, if it is a warm boot, PMC_SCRATCH202
+ * would contain valid value and thus, we just need to clear bit 0 of RTCSECA2
+ * reg.
+ *
+ * Since the OS uses BOOTROM I2C commands to configure the PMIC bit, we need to
+ * ensure that write buffers are flushed properly, before trying to update the
+ * read buffers.
+ *
+ */
+static void validate_boot_reason(void)
+{
+	uint8_t val;
+
+	/*
+	 * Flush the write buffers.  This *should* be done by now, but it
+	 * doesn't hurt to make sure.
+	 */
+	val = UDR_BIT | FCUR_BIT;
+	if (i2c_writeb(I2CPWR_BUS, MAX77620_RTC_ADDR,
+		       MAX77620_RTC_RTCUPDATE0_REG, val)) {
+		printk(BIOS_ERR, "ERROR: Could not write RTCUPDATE0\n");
+		pmc_set_bootreason(PMC_BOOTREASON_REBOOT);
+		return;
+	}
+
+	mdelay(16);
+
+	/* Update the read buffers. */
+	val = RBUDR_BIT | FCUR_BIT;
+	if (i2c_writeb(I2CPWR_BUS, MAX77620_RTC_ADDR,
+		       MAX77620_RTC_RTCUPDATE0_REG, val)) {
+		printk(BIOS_ERR, "ERROR: Could not write RTCUPDATE0\n");
+		pmc_set_bootreason(PMC_BOOTREASON_REBOOT);
+		return;
+	}
+
+	mdelay(16);
+
+	if (i2c_readb(I2CPWR_BUS, MAX77620_RTC_ADDR, MAX77620_RTC_RTCSECA2_REG,
+		      &val)) {
+		printk(BIOS_ERR, "ERROR: Could not read warm-boot flag\n");
+		pmc_set_bootreason(PMC_BOOTREASON_REBOOT);
+		return;
+	}
+
+	/* This is a cold boot, so set bootreason to reboot. */
+	if ((val & WARM_BOOT_BIT) == 0) {
+		printk(BIOS_ERR, "Cold boot: Setting bootreason to reboot\n");
+		pmc_set_bootreason(PMC_BOOTREASON_REBOOT);
+		return;
+	}
+
+	/* This is warm boot, do not touch boot reason in scratch202. */
+	val &= ~WARM_BOOT_BIT;
+	if (i2c_writeb(I2CPWR_BUS, MAX77620_RTC_ADDR, MAX77620_RTC_RTCSECA2_REG,
+		       val)) {
+		printk(BIOS_ERR, "ERROR: Could not clear warm-boot bit\n");
+		return;
+	}
+
+	val = FCUR_BIT | UDR_BIT;
+	if (i2c_writeb(I2CPWR_BUS, MAX77620_RTC_ADDR,
+		       MAX77620_RTC_RTCUPDATE0_REG, val))
+		printk(BIOS_ERR, "ERROR: Could not write RTCUPDATE0\n");
+
+	printk(BIOS_ERR, "Warm boot: validated boot reason\n");
+}
+
 void bootblock_mainboard_init(void)
 {
 	set_clock_sources();
@@ -313,6 +403,9 @@ void bootblock_mainboard_init(void)
 			     PMC_SDMMC3_RAIL_AO_MASK, PMC_GPIO_RAIL_AO_DISABLE |
 			     PMC_AUDIO_RAIL_AO_DISABLE |
 			     PMC_SDMMC3_RAIL_AO_DISABLE);
+
+	/* Validate boot reason */
+	validate_boot_reason();
 
 	if (!verify_root_key())
 		erase_key_slots();
