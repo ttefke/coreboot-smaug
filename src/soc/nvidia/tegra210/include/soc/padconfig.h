@@ -76,10 +76,20 @@ struct pad_config {
 
 #define PAD_CFG_UNUSED(ball_)				\
 	{						\
+		.pinmux_flags = 0,			\
 		.gpio_index = PAD_TO_GPIO_##ball_,	\
 		.pinmux_index = PINMUX_##ball_##_INDEX,	\
 		.unused = 1,				\
 		.pad_has_gpio = PAD_HAS_GPIO_##ball_,	\
+	}
+
+#define PAD_CFG_UNUSED_WITH_RES(ball_, res_)			\
+	{							\
+		.pinmux_flags = PINMUX_##ball_##_FUNC_##res_,	\
+		.gpio_index = PAD_TO_GPIO_##ball_,		\
+		.pinmux_index = PINMUX_##ball_##_INDEX,	\
+		.unused = 1,					\
+		.pad_has_gpio = PAD_HAS_GPIO_##ball_,		\
 	}
 
 /* CFGPADCTRL regs for audio, camera and touch */

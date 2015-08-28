@@ -76,17 +76,15 @@ static void configure_unused_pad(const struct pad_config * const entry)
 	uint32_t reg;
 
 	/*
-	 * Tristate the pad and disable input. If power-on-reset state is a
-	 * pullup maintain that. Otherwise enable pulldown.
+	 * As per nvidia recommendations, if a pad is unused,
+	 * INPUT -> disabled
+	 * TRISTATE -> enabled
+	 * PULL -> pull down
+	 * FUNC -> RES*
 	 */
-	reg = pad_get_pinmux(entry->pinmux_index);
-	reg &= ~PINMUX_INPUT_ENABLE;
-	reg |= PINMUX_TRISTATE;
-	reg &= ~PINMUX_PULL_MASK;
-	if (entry->por_pullup)
-		reg |= PINMUX_PULL_UP;
-	else
-		reg |= PINMUX_PULL_DOWN;
+	reg = PINMUX_TRISTATE | PINMUX_PULL_DOWN;
+	reg |= entry->pinmux_flags;
+
 	pad_set_pinmux(entry->pinmux_index, reg);
 
 	/*
