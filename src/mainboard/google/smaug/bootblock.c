@@ -33,6 +33,7 @@
 #include <soc/funitcfg.h>
 #include <soc/nvidia/tegra/i2c.h>
 #include <soc/padconfig.h>
+#include <soc/pinmux.h>
 #include <soc/pmc.h>
 #include <soc/power.h>
 #include <soc/spi.h>
@@ -49,16 +50,14 @@ static const struct pad_config pmic_pads[] = {
 /********************** SPI Flash *****************************/
 static const struct pad_config spiflash_pads[] = {
 	/* QSPI fLash: mosi, miso, clk, cs0, hold, wp  */
-	PAD_CFG_SFIO(QSPI_IO0, PINMUX_INPUT_ENABLE | PINMUX_PULL_UP |
+	PAD_CFG_SFIO(QSPI_IO0, PINMUX_INPUT_ENABLE | PINMUX_PULL_NONE |
 		     PINMUX_DRIVE_2X, QSPI),
-	PAD_CFG_SFIO(QSPI_IO1, PINMUX_INPUT_ENABLE | PINMUX_PULL_UP |
+	PAD_CFG_SFIO(QSPI_IO1, PINMUX_INPUT_ENABLE | PINMUX_PULL_NONE |
 		     PINMUX_DRIVE_2X, QSPI),
 	PAD_CFG_SFIO(QSPI_SCK, PINMUX_INPUT_ENABLE | PINMUX_DRIVE_2X, QSPI),
 	PAD_CFG_SFIO(QSPI_CS_N, PINMUX_INPUT_ENABLE | PINMUX_DRIVE_2X, QSPI),
-	PAD_CFG_SFIO(QSPI_IO2, PINMUX_INPUT_ENABLE | PINMUX_PULL_UP |
-		     PINMUX_DRIVE_2X, QSPI),
-	PAD_CFG_SFIO(QSPI_IO3, PINMUX_INPUT_ENABLE | PINMUX_PULL_UP |
-		     PINMUX_DRIVE_2X, QSPI),
+	PAD_CFG_UNUSED_WITH_RES(QSPI_IO2, RES1),
+	PAD_CFG_UNUSED_WITH_RES(QSPI_IO3, RES1),
 };
 
 /********************* TPM ************************************/
@@ -69,8 +68,8 @@ static const struct pad_config tpm_pads[] = {
 
 /********************* EC *************************************/
 static const struct pad_config ec_i2c_pads[] = {
-	PAD_CFG_SFIO(GEN2_I2C_SCL, PINMUX_INPUT_ENABLE, I2C2),
-	PAD_CFG_SFIO(GEN2_I2C_SDA, PINMUX_INPUT_ENABLE, I2C2),
+	PAD_CFG_SFIO(GEN2_I2C_SCL, PINMUX_INPUT_ENABLE | PINMUX_IO_HV, I2C2),
+	PAD_CFG_SFIO(GEN2_I2C_SDA, PINMUX_INPUT_ENABLE | PINMUX_IO_HV, I2C2),
 };
 
 /********************* Funits *********************************/
@@ -87,18 +86,16 @@ static const struct funit_cfg funits[] = {
 
 /********************* UART ***********************************/
 static const struct pad_config uart_console_pads[] = {
-	/* UARTA: tx, rx, rts, cts */
+	/* UARTA: tx, rx */
 	PAD_CFG_SFIO(UART1_TX, PINMUX_PULL_NONE, UARTA),
-	PAD_CFG_SFIO(UART1_RX, PINMUX_INPUT_ENABLE | PINMUX_PULL_UP, UARTA),
-	PAD_CFG_SFIO(UART1_RTS, PINMUX_PULL_UP, UARTA),
-	PAD_CFG_SFIO(UART1_CTS, PINMUX_PULL_UP, UARTA),
+	PAD_CFG_SFIO(UART1_RX, PINMUX_INPUT_ENABLE, UARTA),
 };
 
 /********************* CAM ************************************/
 /* Avoid interference with TPM on GEN3_I2C */
 static const struct pad_config cam_i2c_pads[] = {
-	PAD_CFG_SFIO(CAM_I2C_SCL, PINMUX_PULL_NONE, I2CVI),
-	PAD_CFG_SFIO(CAM_I2C_SDA, PINMUX_PULL_NONE, I2CVI),
+	PAD_CFG_SFIO(CAM_I2C_SCL, PINMUX_INPUT_ENABLE, I2CVI),
+	PAD_CFG_SFIO(CAM_I2C_SDA, PINMUX_INPUT_ENABLE, I2CVI),
 };
 
 void bootblock_mainboard_early_init(void)

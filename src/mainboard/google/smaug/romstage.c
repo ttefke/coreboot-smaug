@@ -39,7 +39,7 @@
 
 static const struct pad_config padcfgs[] = {
 	/* AP_SYS_RESET_L - active low*/
-	PAD_CFG_GPIO_OUT1(SDMMC1_DAT0, PINMUX_PULL_UP),
+	PAD_CFG_GPIO_OUT1(SDMMC1_DAT0, PINMUX_PULL_NONE),
 	/* WP_L - active low */
 	PAD_CFG_GPIO_INPUT(GPIO_PK2, PINMUX_PULL_NONE),
 	/* BTN_AP_PWR_L - active low */
@@ -47,7 +47,7 @@ static const struct pad_config padcfgs[] = {
 	/* BTN_AP_VOLD_L - active low */
 	PAD_CFG_GPIO_INPUT(BUTTON_VOL_DOWN, PINMUX_PULL_UP),
 	/* BTN_AP_VOLU_L - active low */
-	PAD_CFG_GPIO_INPUT(SDMMC1_DAT1, PINMUX_PULL_UP),
+	PAD_CFG_GPIO_INPUT(SDMMC1_DAT1, PINMUX_PULL_NONE),
 };
 
 void romstage_mainboard_init(void)
