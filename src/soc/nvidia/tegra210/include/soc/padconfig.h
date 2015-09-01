@@ -101,7 +101,8 @@ enum {
 	CAM_FLASH_EN = 0x130,
 	GPIO_PZ0 = 0x1FC,
 	GPIO_PZ1 = 0x200,
-	TOUCH_CLK = 0x310
+	TOUCH_CLK = 0x310,
+	QSPI_COMP_CONTROL = 0x370
 };
 
 #define TEGRA_APB_MISC_GP_REGS(x)	((unsigned char *)TEGRA_APB_MISC_GP_BASE + (x))

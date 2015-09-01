@@ -234,6 +234,9 @@ void main(void)
 
 	printk(BIOS_INFO, "T210 bootblock: Clock init done\n");
 
+	/* Clear PAD_E_INPUT (bit 1) of APB_MISC_GP_QSPI_COMP_CONTROL reg. */
+	clrbits_le32(TEGRA_APB_MISC_GP_REGS(QSPI_COMP_CONTROL), (1 << 1));
+
 	bootblock_mainboard_init();
 
 	printk(BIOS_INFO, "T210 bootblock: Mainboard bootblock init done\n");
