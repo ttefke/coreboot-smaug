@@ -18,22 +18,10 @@
 #include <soc/sdram_configs.h>
 
 static struct sdram_params sdram_configs[] = {
-#include "bct/sdram-unused.inc"				/* ram_code = 0000 */
-#include "bct/sdram-unused.inc"				/* ram_code = 0001 */
-#include "bct/sdram-samsung-3GB-204.inc"		/* ram_code = 0010 */
-#include "bct/sdram-samsung-4GB-204.inc"		/* ram_code = 0011 */
-#include "bct/sdram-unused.inc"				/* ram_code = 0100 */
-#include "bct/sdram-unused.inc"				/* ram_code = 0101 */
-#include "bct/sdram-unused.inc"				/* ram_code = 0110 */
-#include "bct/sdram-unused.inc"				/* ram_code = 0111 */
-#include "bct/sdram-unused.inc"				/* ram_code = 1000 */
-#include "bct/sdram-unused.inc"				/* ram_code = 1001 */
-#include "bct/sdram-unused.inc"				/* ram_code = 1010 */
-#include "bct/sdram-unused.inc"				/* ram_code = 1011 */
-#include "bct/sdram-unused.inc"				/* ram_code = 1100 */
-#include "bct/sdram-unused.inc"				/* ram_code = 1101 */
-#include "bct/sdram-unused.inc"				/* ram_code = 1110 */
-#include "bct/sdram-unused.inc"				/* ram_code = 1111 */
+#include "bct/sdram-unused.inc"				/* ram_code = 00 */
+#include "bct/sdram-unused.inc"				/* ram_code = 01 */
+#include "bct/sdram-samsung-3GB-204.inc"		/* ram_code = 10 */
+#include "bct/sdram-samsung-4GB-204.inc"		/* ram_code = 11 */
 };
 
 const struct sdram_params *get_sdram_config()
