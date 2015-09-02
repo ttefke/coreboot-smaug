@@ -440,7 +440,7 @@ static void mainboard_init(device_t dev)
 {
 	soc_configure_pads(additional_padcfgs, ARRAY_SIZE(additional_padcfgs));
 
-	if (board_id() <= BOARD_ID_EVT)
+	if (board_id() <= BOARD_ID_EVT2)
 		soc_configure_pads(evt_padcfgs, ARRAY_SIZE(evt_padcfgs));
 	else
 		soc_configure_pads(dvt_padcfgs, ARRAY_SIZE(dvt_padcfgs));
