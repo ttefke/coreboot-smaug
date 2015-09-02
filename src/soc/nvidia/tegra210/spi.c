@@ -582,9 +582,8 @@ static int tegra_spi_dma_finish(struct tegra_spi_channel *spi)
 
 	struct apb_dma * const apb_dma = (struct apb_dma *)TEGRA_APB_DMA_BASE;
 
-	todo = read32(&spi->dma_in->regs->wcount);
-
 	if (spi->dma_in) {
+		todo = read32(&spi->dma_in->regs->wcount);
 		while ((read32(&spi->dma_in->regs->dma_byte_sta) < todo) ||
 				dma_busy(spi->dma_in))
 			;
@@ -597,6 +596,7 @@ static int tegra_spi_dma_finish(struct tegra_spi_channel *spi)
 	}
 
 	if (spi->dma_out) {
+		todo = read32(&spi->dma_out->regs->wcount);
 		while ((read32(&spi->dma_out->regs->dma_byte_sta) < todo) ||
 				dma_busy(spi->dma_out))
 			;
