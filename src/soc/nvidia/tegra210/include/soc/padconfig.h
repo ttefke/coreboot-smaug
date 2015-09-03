@@ -107,6 +107,12 @@ enum {
 
 #define TEGRA_APB_MISC_GP_REGS(x)	((unsigned char *)TEGRA_APB_MISC_GP_BASE + (x))
 
+/* SDMMC1/3 pads & bits */
+#define VENDOR_IO_TRIM_CNTRL	0x1AC
+#define SEL_VREG		(1 << 2)
+#define SDMEMCOMPPADCTRL	0x1E0
+#define PAD_E_INPUT		(1 << 31)
+
 /*
  * Configure the pads associated with entry according to the configuration.
  */

@@ -436,6 +436,31 @@ static void set_touch_and_camera_pads(void)
 		(0x1F << PINGROUP_DRVUP_SHIFT | 0x1F << PINGROUP_DRVDN_SHIFT));
 }
 
+static void low_power_sdmmc_pads(void)
+{
+	u32 lclks = CLK_L_SDMMC1;
+	u32 uclks = CLK_U_SDMMC3;
+
+	/*
+	 * SDMMC1/SDMMC3, although unused on Smaug, need some
+	 * bits cleared to reduce leakage.
+	 */
+	clock_enable_clear_reset(lclks, 0, uclks, 0, 0, 0, 0);
+	clrbits_le32((void *)TEGRA_SDMMC1_BASE + VENDOR_IO_TRIM_CNTRL, SEL_VREG);
+	clrbits_le32((void *)TEGRA_SDMMC3_BASE + VENDOR_IO_TRIM_CNTRL, SEL_VREG);
+	clrbits_le32((void *)TEGRA_SDMMC1_BASE + SDMEMCOMPPADCTRL, PAD_E_INPUT);
+	clrbits_le32((void *)TEGRA_SDMMC3_BASE + SDMEMCOMPPADCTRL, PAD_E_INPUT);
+	/* Re-read the last regs to ensure the write goes thru before disabling clocks */
+	read32((void *)TEGRA_SDMMC1_BASE + SDMEMCOMPPADCTRL);
+	read32((void *)TEGRA_SDMMC3_BASE + SDMEMCOMPPADCTRL);
+
+	/*
+	 * Disable SDMMC1/3 clocks, but do NOT place back in reset,
+	 * or the bits will revert to POR settings.
+	 */
+	clock_disable(lclks, 0, uclks, 0, 0, 0, 0);
+}
+
 static void mainboard_init(device_t dev)
 {
 	soc_configure_pads(additional_padcfgs, ARRAY_SIZE(additional_padcfgs));
@@ -447,6 +472,7 @@ static void mainboard_init(device_t dev)
 
 	soc_configure_funits(funits, ARRAY_SIZE(funits));
 	set_touch_and_camera_pads();
+	low_power_sdmmc_pads();
 
 	/* I2C6 bus (audio, etc.) */
 	soc_configure_i2c6pad();
