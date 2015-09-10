@@ -21,12 +21,16 @@
 #include <arch/lib_helpers.h>
 #include <arm_tf.h>
 #include <arm_tf_temp.h>
+#include <cbfs.h>
 #include <console/console.h>
+#include <fmap.h>
+#include <gbb_header.h>
 #include <soc/addressmap.h>
 #include <soc/fuses.h>
 #include <stdlib.h>
 #include <string.h>
 #include <symbols.h>
+#include <vendorcode/google/chromeos/chromeos.h>
 #include <vendorcode/google/chromeos/vpd_eks.h>
 
 void *bl32_get_load_addr(size_t bl32_len)
@@ -63,6 +67,7 @@ static inline uint32_t get_uart_id(void)
 	return 0;
 }
 
+#define MAX_KEYMASTER_KEY_SIZE	4096
 #define MAX_EKS_SIZE		2048
 
 typedef struct plat_bl32_atf_params {
@@ -73,7 +78,6 @@ typedef struct plat_bl32_atf_params {
 	 * None = 0, UARTA = 1, UARTB = 2, UARTC = 3, UARTD = 4, UARTE = 5
 	 */
 	uint32_t uart_id;
-	/* TODO(furquan): Where to read these from? */
 	uint32_t chip_uid[FUSE_UID_ELEMENT_NUM];
 	/* Primary DRAM is DRAM memory below 32-bit address space. */
 	uint64_t primary_dram_base_mib;
@@ -84,14 +88,65 @@ typedef struct plat_bl32_atf_params {
 	/* TSEC carveout base address in MiB. */
 	uint64_t tsec_carveout_base_mib;
 	uint64_t tsec_carveout_size_mib;
-	/* DTB - TODO(furquan): Do we need this? */
+	/* DTB - unused. */
 	uint64_t dtb_load_addr;
+	/* Keymaster params */
+	/* Set to 1 if device is unlocked. */
+	uint8_t is_unlocked;
+	uint32_t keymaster_key_size;
+	uint8_t keymaster_key[MAX_KEYMASTER_KEY_SIZE];
 	/* EKS params */
 	uint32_t encrypted_key_size;
 	uint8_t encrypted_keys[MAX_EKS_SIZE];
 } plat_bl32_atf_params_t;
 
 static plat_bl32_atf_params_t boot_params;
+
+static size_t read_root_key(void *key, size_t max_size)
+{
+	uintptr_t gbb_addr;
+	size_t gbb_size;
+
+	gbb_size = find_fmap_entry("GBB", (void **)&gbb_addr);
+
+	const GoogleBinaryBlockHeader *gbb_header;
+	struct cbfs_media media;
+
+	if (init_default_cbfs_media(&media)) {
+		printk(BIOS_ERR, "Failed to init default cbfs media\n");
+		return 0;
+	}
+
+	media.open(&media);
+	gbb_header = media.map(&media, gbb_addr,
+			       sizeof(GoogleBinaryBlockHeader));
+
+	if (gbb_header == CBFS_MEDIA_INVALID_MAP_ADDRESS) {
+		printk(BIOS_ERR, "Media map failed\n");
+		media.close(&media);
+		return 0;
+	}
+
+	if (memcmp(gbb_header->signature, "$GBB", GBB_SIGNATURE_SIZE)) {
+		printk(BIOS_ERR, "GBB Signature mismatch\n");
+		media.unmap(&media, gbb_header);
+		media.close(&media);
+		return 0;
+	}
+
+	uintptr_t rootkey_offset = gbb_header->rootkey_offset;
+	size_t rootkey_size = gbb_header->rootkey_size;
+
+	media.unmap(&media, gbb_header);
+	gbb_header = NULL;
+
+	size_t ret = media.read(&media, boot_params.keymaster_key,
+				gbb_addr + rootkey_offset, rootkey_size);
+
+	media.close(&media);
+
+	return ret;
+}
 
 /*
  * Arguments to be passed to TLK(bl32):
@@ -132,6 +187,12 @@ static void bl32_fill_args(aapcs64_params_t *args)
 	carveout_range(CARVEOUT_TSEC, &base_mib, &size_mib);
 	boot_params.tsec_carveout_base_mib = base_mib;
 	boot_params.tsec_carveout_size_mib = size_mib;
+
+	boot_params.is_unlocked = developer_mode_enabled();
+
+	boot_params.keymaster_key_size =
+		read_root_key(boot_params.keymaster_key,
+			      MAX_KEYMASTER_KEY_SIZE);
 
 	ret = vpd_read_eks(boot_params.encrypted_keys, MAX_EKS_SIZE);
 	if (ret < 0) {
