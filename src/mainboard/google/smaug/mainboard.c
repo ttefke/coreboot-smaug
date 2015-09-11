@@ -374,8 +374,8 @@ static int enable_lcd_vdd(void)
 
 	/* Set panel EN and RST signals */
 	gpio_set(LCD_EN, 1);		/* enable */
-	/* wait for min 10ms */
-	mdelay(10);
+	/* wait for min 12ms */
+	mdelay(12);
 	gpio_set(LCD_RST_L, 1);		/* clear reset */
 	/* wait for min 3ms */
 	mdelay(3);
