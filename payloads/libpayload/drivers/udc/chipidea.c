@@ -430,7 +430,13 @@ static void chipidea_shutdown(struct usbdev_ctrl *this)
 	struct chipidea_pdata *p = CI_PDATA(this);
 	int i, j;
 	int is_empty = 0;
-	while (!is_empty) {
+
+	uint64_t shutdown_timer_us = timer_us(0);
+	/* Wait upto 3 seconds for packets to be flushed out. */
+	uint64_t shutdown_timeout_us = 3 * 1000 * 1000UL;
+
+	while ((!is_empty) &&
+	       (timer_us(shutdown_timer_us) < shutdown_timeout_us)) {
 		is_empty = 1;
 		this->poll(this);
 		for (i = 0; i < 16; i++)
