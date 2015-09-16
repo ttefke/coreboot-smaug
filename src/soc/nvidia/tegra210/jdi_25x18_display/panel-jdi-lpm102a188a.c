@@ -89,12 +89,12 @@ int panel_jdi_prepare(struct panel_jdi *jdi)
 	if (ret < 0)
 		printk(BIOS_ERR, "failed to set pixel format: %d\n", ret);
 
-	data = 0xFF;
+	data = 0x55;
 	ret = mipi_dsi_dcs_write(jdi->dsi, 0x51, &data, 1);
 	if (ret < 0)
 		printk(BIOS_ERR, "failed to set 0x51: %d\n", ret);
 
-	data = 0xFF;
+	data = 0x55;
 	ret = mipi_dsi_dcs_write(jdi->dsi->slave, 0x51, &data, 1);
 	if (ret < 0)
 		printk(BIOS_ERR, "failed to set 0x51: %d\n", ret);
