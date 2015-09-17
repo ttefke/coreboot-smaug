@@ -257,13 +257,25 @@ void verstage_main(void)
 	/* Do early init (set up secdata and NVRAM, load GBB) */
 	printk(BIOS_INFO, "Phase 1\n");
 	rv = vb2api_fw_phase1(&ctx);
+
 	if (rv) {
-		printk(BIOS_INFO, "Recovery requested (%x)\n", rv);
-		/* If we need recovery mode, leave firmware selection now */
+		/*
+		 * If vb2api_fw_phase1 fails, check for return value.
+		 * If it is set to VB2_ERROR_API_PHASE1_RECOVERY, then continue
+		 * into recovery mode.
+		 * For any other error code, save context if needed and reboot.
+		 */
+		if (rv == VB2_ERROR_API_PHASE1_RECOVERY) {
+			printk(BIOS_INFO, "Recovery requested (%x)\n", rv);
+			save_if_needed(&ctx);
+			extend_pcrs(&ctx);	/* ignore failures */
+			timestamp_add_now(TS_END_VBOOT);
+			return;
+		}
+
+		printk(BIOS_INFO, "Reboot reqested (%x)\n", rv);
 		save_if_needed(&ctx);
-		extend_pcrs(&ctx);	/* ignore failures */
-		timestamp_add_now(TS_END_VBOOT);
-		return;
+		vboot_reboot();
 	}
 
 	/* Determine which firmware slot to boot (based on NVRAM) */
