@@ -128,6 +128,42 @@ void pmic_init(unsigned bus)
 	 */
 	pmic_write_reg_77620(bus, MAX77620_CNFG1_L2_REG, 0x14, 1);
 
+	/*
+	 * MAX77620: Set TFPS0 and TFPS1 to 0x7 i.e. 5.120 ms. Required to
+	 * ensure that 1.8V rails decay prior to RTC turn off in power down
+	 * sequence.
+	 */
+	if (pmic_read_reg_77620(bus, MAX77620_CNFGFPS0_REG, &data) != 0)
+		printk(BIOS_ERR, "PMIC Error: Cannot set PMIC TFPS0.\n");
+	else {
+		data &= ~MAX77620_TFPS_MASK;
+		data |= (0x7 << MAX77620_TFPS_SHIFT);
+		pmic_write_reg_77620(bus, MAX77620_CNFGFPS0_REG, data, 1);
+	}
+
+	if (pmic_read_reg_77620(bus, MAX77620_CNFGFPS1_REG, &data) != 0)
+		printk(BIOS_ERR, "PMIC Error: Cannot set PMIC TFPS1.\n");
+	else {
+		data &= ~MAX77620_TFPS_MASK;
+		data |= (0x7 << MAX77620_TFPS_SHIFT);
+		pmic_write_reg_77620(bus, MAX77620_CNFGFPS1_REG, data, 1);
+	}
+
+	/* MAX77620: Move RTC to slot 7 */
+	pmic_write_reg_77620(bus, MAX77620_FPS_L4_REG, 0x0F, 1);
+
+	/* MAX77620: Mov SOC to slot 7 */
+	pmic_write_reg_77620(bus, MAX77620_FPS_SD0_REG, 0x4F, 1);
+
+	/* MAX77620: Move DRAM-1.1V to slot 1 */
+	pmic_write_reg_77620(bus, MAX77620_FPS_SD1_REG, 0x29, 1);
+
+	/* MAX77620: Move 1.8V to slot 3 */
+	pmic_write_reg_77620(bus, MAX77620_FPS_SD3_REG, 0x1B, 1);
+
+	/* MAX77620: Move 3.3V to slot 2 */
+	pmic_write_reg_77620(bus, MAX77620_FPS_GPIO3_REG, 0x22, 1);
+
 	/* MAX77621: Set VOUT_REG to 1.0V - CPU VREG */
 	pmic_write_reg_77621(bus, MAX77621_VOUT_REG, 0xBF, 1);
 
