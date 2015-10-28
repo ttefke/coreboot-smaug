@@ -338,6 +338,8 @@ enum {
 static uint32_t *pmc_set_sw_clamp_ptr = (void *)(PMC_CTLR_BASE + 0x47c);
 
 /* Memory controller registers. */
+static uint32_t *mc_intstatus_ptr = (void *)(MC_CTLR_BASE);
+static uint32_t *mc_intmask_ptr = (void *)(MC_CTLR_BASE + 0x4);
 static uint32_t *mc_video_protect_size_mb_ptr = (void *)(MC_CTLR_BASE + 0x64c);
 
 static uint32_t *mc_video_protect_reg_ctrl_ptr =
@@ -981,6 +983,13 @@ void lp0_resume(void)
 	/* Clear PMC_DPD_SAMPLE */
 	write32(pmc_dpd_sample_ptr, 0);
 	udelay(10);
+
+	/* Clear the MC_INTSTATUS if MC_INTMASK was 0. */
+	if (!read32(mc_intmask_ptr)) {
+		uint32_t mc_intst_val = read32(mc_intstatus_ptr);
+		if (mc_intst_val)
+			write32(mc_intstatus_ptr, mc_intst_val);
+	}
 
 	/*
 	 * Set both _ACCESS bits so that kernel/secure code
