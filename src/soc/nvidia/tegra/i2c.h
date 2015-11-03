@@ -125,6 +125,9 @@ enum {
 	I2C_CONFIG_LOAD_MSTR_CONFIG_LOAD_ENABLE = 0x1 << 0
 };
 
+#define I2C_BUS_CLEAR_SUCCESS	I2C_BUS_CLEAR_STATUS_CLEARED
+#define I2C_BUS_CLEAR_FAILED	-1
+
 struct tegra_i2c_bus_info {
 	void *base;
 	uint32_t reset_bit;

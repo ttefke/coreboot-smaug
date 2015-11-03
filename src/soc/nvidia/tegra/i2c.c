@@ -26,7 +26,7 @@
 #include <soc/addressmap.h>
 #include "i2c.h"
 
-static void do_bus_clear(int bus)
+static int do_bus_clear(int bus)
 {
 	struct tegra_i2c_bus_info *info = &tegra_i2c_info[bus];
 	struct tegra_i2c_regs * const regs = info->base;
@@ -36,9 +36,10 @@ static void do_bus_clear(int bus)
 	// BUS CLEAR regs (from TRM):
 	// 1. Reset the I2C controller (already done)
 	// 2. Set the # of clock pulses required (using default of 9)
-	// 3. Select STOP condition (using default of 1 = STOP)
+	// 3. Select STOP condition: NO_STOP
 	// 4. Set TERMINATE condition (1 = IMMEDIATE)
 	bc = read32(&regs->bus_clear_config);
+	bc &= ~(I2C_BUS_CLEAR_CONFIG_BC_STOP_COND_STOP);
 	bc |= I2C_BUS_CLEAR_CONFIG_BC_TERMINATE_IMMEDIATE;
 	write32(&regs->bus_clear_config, bc);
 	// 4.1 Set MSTR_CONFIG_LOAD and wait for clear
@@ -57,12 +58,31 @@ static void do_bus_clear(int bus)
 			__func__);
 		udelay(100);
 	}
+
+	if (i < timeout_ms * 10) {
+		printk(BIOS_DEBUG, "%s: bus (%d) clear completed\n", __func__,
+			bus);
+		return I2C_BUS_CLEAR_SUCCESS;
+	} else {
+		printk(BIOS_DEBUG, "%s: bus (%d) clear timeout\n", __func__,
+			bus);
+		return I2C_BUS_CLEAR_FAILED;
+	}
 }
 
+/*
+ * return:
+ *  0 = Send/recv success
+ *  1 = Send/recv failure but bus clear operation successful
+ *       (caller can retry if required)
+ * -1 = Send/recv failure, and bus clear failed when lost arbitration
+ *	 (retry possible, but might fail again)
+ */
 static int tegra_i2c_send_recv(int bus, int read,
 			       uint32_t *headers, int header_words,
 			       uint8_t *data, int data_len)
 {
+	int ret;
 	struct tegra_i2c_bus_info *info = &tegra_i2c_info[bus];
 	struct tegra_i2c_regs * const regs = info->base;
 
@@ -128,13 +148,13 @@ static int tegra_i2c_send_recv(int bus, int read,
 			info->reset_func(info->reset_bit);
 
 			/* Use Tegra bus clear registers to unlock SDA */
-			do_bus_clear(bus);
+			ret = do_bus_clear(bus);
 
 			/* re-init i2c controller */
 			i2c_init(bus);
 
 			/* Return w/error, let caller decide what to do */
-			return -1;
+			return ret;
 		}
 	}
 
@@ -182,9 +202,10 @@ static int i2c_transfer_segment(unsigned bus, unsigned chip, int restart,
 	while (len) {
 		int todo = MIN(len, max_payload);
 		int cont = (todo < len);
-		if (tegra_i2c_request(bus, chip, cont, restart,
-				      read, buf, todo))
-			return -1;
+		int ret = tegra_i2c_request(bus, chip, cont, restart,
+				      read, buf, todo);
+		if (ret)
+			return ret;
 		len -= todo;
 		buf += todo;
 	}
@@ -203,9 +224,10 @@ int platform_i2c_transfer(unsigned bus, struct i2c_seg *segments, int count)
 	}
 
 	for (i = 0; i < count; seg++, i++) {
-		if (i2c_transfer_segment(bus, seg->chip, i < count - 1,
-					 seg->read, seg->buf, seg->len))
-			return -1;
+		int ret = i2c_transfer_segment(bus, seg->chip, i < count - 1,
+					 seg->read, seg->buf, seg->len);
+		if (ret)
+			return ret;
 	}
 	return 0;
 }
