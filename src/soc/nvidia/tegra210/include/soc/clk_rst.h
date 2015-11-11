@@ -284,7 +284,9 @@ struct  __attribute__ ((__packed__)) clk_rst_ctlr {
 	u32 plldp_base;			/* _PLLDP_BASE,             0x590 */
 	u32 plldp_misc;			/* _PLLDP_MISC,             0x594 */
 	u32 plldp_ss_cfg;		/* _PLLDP_SS_CFG,           0x598 */
-	u32 _rsrv32_2[25];
+	u32 plldp_ss_ctrl1;		/* _PLLDP_SS_CTRL1,         0x59C */
+	u32 plldp_ss_ctrl2;		/* _PLLDP_SS_CTRL2,         0x5A0 */
+	u32 _rsrv32_2[23];
 	u32 clk_src_xusb_core_host;	/* _CLK_SOURCE_XUSB_CORE_HOST 0x600 */
 	u32 clk_src_xusb_falcon;	/* _CLK_SOURCE_XUSB_FALCON  0x604 */
 	u32 clk_src_xusb_fs;		/* _CLK_SOURCE_XUSB_FS      0x608 */
@@ -404,9 +406,11 @@ enum {
 #define PLLD_N_SHIFT			11
 #define PLLD_M_SHIFT			0
 #define PLLD_P_SHIFT			20
-#define PLLD_MISC1_SETUP		0x20
 #define PLLD_MISC_EN_SDM		(1 << 16)
 #define PLLD_MISC_SDM_DIN		0x9aa
+#define PLLD_MISC1_SETUP		0x20
+#define PLLDP_MISC_SETUP		0x20
+#define PLLX_MISC1_SETUP		0x20
 
 /* PLLM specific registers */
 #define PLLM_MISC1_SETUP_SHIFT		0

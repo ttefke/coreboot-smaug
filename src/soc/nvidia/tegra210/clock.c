@@ -55,6 +55,8 @@ struct pll_reg_info {
 	u32	kcp_shift:5;	/* kcp bits location */
 	u32	kvco_shift:5;	/* kvco bit location */
 	u32	rsvd:7;
+	u32	*setup_reg;
+	u32	setup_val;
 } static const pll_reg_table[] = {
 	[PLLX_INDEX] = { .base_reg = CLK_RST_REG(pllx_base),
 			 .lock_enb_reg = CLK_RST_REG(pllx_misc),
@@ -63,12 +65,15 @@ struct pll_reg_info {
 			 .pll_lock_val = PLL_BASE_LOCK,
 			 .kcp_kvco_reg = CLK_RST_REG(pllx_misc3),
 			 .n_shift = 8, .m_shift = 0, .p_shift = 20,
-			 .kcp_shift = 1, .kvco_shift = 0, },
+			 .kcp_shift = 1, .kvco_shift = 0,
+			 .setup_reg = CLK_RST_REG(pllx_misc1),
+			 .setup_val = PLLX_MISC1_SETUP, },
 	[PLLC_INDEX] = { .base_reg = CLK_RST_REG(pllc_base),
 			 .lock_enb_reg = CLK_RST_REG(pllc_misc),
 			 .pll_lock_reg = CLK_RST_REG(pllc_base),
 			 .pll_lock_val = PLL_BASE_LOCK,
-			 .n_shift = 10, .m_shift = 0, .p_shift = 20, },
+			 .n_shift = 10, .m_shift = 0, .p_shift = 20,
+			 .setup_reg = 0, },
 	[PLLU_INDEX] = { .base_reg = CLK_RST_REG(pllu_base),
 			 .lock_enb_reg = CLK_RST_REG(pllu_misc),
 			 .lock_enb_val = PLLU_MISC_LOCK_ENABLE,
@@ -76,7 +81,8 @@ struct pll_reg_info {
 			 .pll_lock_val = PLL_BASE_LOCK,
 			 .kcp_kvco_reg = CLK_RST_REG(pllu_misc),
 			 .n_shift = 8, .m_shift = 0, .p_shift = 16,
-			 .kcp_shift = 25, .kvco_shift = 24, },
+			 .kcp_shift = 25, .kvco_shift = 24,
+			 .setup_reg = 0, },
 	[PLLDP_INDEX] = { .base_reg = CLK_RST_REG(plldp_base),
 			  .lock_enb_reg = CLK_RST_REG(plldp_misc),
 			  .lock_enb_val = PLLDPD2_MISC_LOCK_ENABLE,
@@ -84,7 +90,9 @@ struct pll_reg_info {
 			  .pll_lock_val = PLL_BASE_LOCK,
 			  .kcp_kvco_reg = CLK_RST_REG(plldp_misc),
 			  .n_shift = 8, .m_shift = 0, .p_shift = 19,
-			  .kcp_shift = 25, .kvco_shift = 24, },
+			  .kcp_shift = 25, .kvco_shift = 24,
+			  .setup_reg = CLK_RST_REG(plldp_misc),
+			  .setup_val = PLLDP_MISC_SETUP, },
 	[PLLD_INDEX] = { .base_reg = CLK_RST_REG(plld_base),
 			 .lock_enb_reg = CLK_RST_REG(plld_misc),
 			 .lock_enb_val = PLLD_MISC_LOCK_ENABLE | PLLD_MISC_CLK_ENABLE,
@@ -92,7 +100,9 @@ struct pll_reg_info {
 			 .pll_lock_val = PLL_BASE_LOCK,
 			 .kcp_kvco_reg = CLK_RST_REG(plld_misc),
 			 .n_shift = 11, .m_shift = 0, .p_shift = 20,
-			 .kcp_shift = 23, .kvco_shift = 22, },
+			 .kcp_shift = 23, .kvco_shift = 22,
+			 .setup_reg = CLK_RST_REG(plld_misc1),
+			 .setup_val = PLLD_MISC1_SETUP, },
 };
 
 struct pll_fields {
@@ -288,6 +298,10 @@ static void init_pll(u32 index, u32 osc)
 			     pll->kcp << pll_reg->kcp_shift |
 			     pll->kvco << pll_reg->kvco_shift);
 
+	/* Set SETUP field if needed */
+	if (pll_reg->setup_reg)
+		setbits_le32(pll_reg->setup_reg, pll_reg->setup_val);
+
 	/* Enable PLL and take it back out of BYPASS */
 	write32(pll_reg->base_reg, dividers | PLL_BASE_ENABLE);
 
@@ -388,6 +402,17 @@ static void graphics_pll(void)
 	/* leave dither and undoc bits set, release clamp */
 	scfg = (1<<28) | (1<<24);
 	write32(cfg, scfg);
+
+	/*
+	 * Kernel is expecting some 'default' settings in PLLDP regs.
+	 * Don't know why these aren't the HW POR defaults.
+	 * Set them here willy-nilly.
+	 */
+	u32 *ssctrl1 = CLK_RST_REG(plldp_ss_ctrl1);
+	u32 *ssctrl2 = CLK_RST_REG(plldp_ss_ctrl2);
+	write32(cfg, 0xC0000000);
+	write32(ssctrl1, 0xF400F0DA);
+	write32(ssctrl2, 0x2004F400);
 }
 
 /*
