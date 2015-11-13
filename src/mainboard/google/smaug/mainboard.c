@@ -385,6 +385,15 @@ static int enable_lcd_vdd(void)
 
 static int configure_display_blocks(void)
 {
+	/* Slam some 'defaults' for random PLLs as per syseng */
+	write32(CLK_RST_REG(pllx_misc1), PLLX_MISC1_SETUP);
+	write32(CLK_RST_REG(plld_misc1), PLLD_MISC1_SETUP);
+	setbits_le32(CLK_RST_REG(plldp_misc), PLLDP_MISC_SETUP);
+
+	write32(CLK_RST_REG(plldp_ss_cfg), PLLDP_SS_CFG_VAL);
+	write32(CLK_RST_REG(plldp_ss_ctrl1), PLLDP_SS_CTRL1_VAL);
+	write32(CLK_RST_REG(plldp_ss_ctrl2), PLLDP_SS_CTRL2_VAL);
+
 	/* enable display related clocks */
 	configure_display_clocks();
 

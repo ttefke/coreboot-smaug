@@ -616,4 +616,9 @@ enum {
 #define TIMERUS_USEC_CFG		0x4
 #define TIMERUS_USEC_CFG_19P2_CLK_M	0x045F
 
+// PLLDP 'defaults' as per NV syseng
+#define PLLDP_SS_CFG_VAL	0xC0000000
+#define PLLDP_SS_CTRL1_VAL	0xF400F0DA
+#define PLLDP_SS_CTRL2_VAL	0x2004F400
+
 #endif	/* _TEGRA210_CLK_RST_H_ */
