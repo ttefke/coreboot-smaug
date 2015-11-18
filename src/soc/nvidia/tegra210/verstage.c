@@ -22,6 +22,7 @@
 #include <arch/hlt.h>
 #include <arch/stages.h>
 #include <console/console.h>
+#include <delay.h>
 #include <soc/verstage.h>
 #include <timestamp.h>
 #include <vendorcode/google/chromeos/chromeos.h>
@@ -37,6 +38,13 @@ static void verstage(void)
 
 	timestamp_add_now(TS_START_VBOOT);
 	verstage_mainboard_init();
+
+	/*
+	 * SLB9645 implies TPM requires 150 ms power-on tests.
+	 * add +5 ms margin
+	 */
+	while (timestamp_get() < (uint64_t)155000)
+		mdelay(1);
 
 	entry = vboot2_verify_firmware();
 	if (entry != (void *)-1)
