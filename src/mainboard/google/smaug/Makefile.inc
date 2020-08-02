@@ -52,3 +52,4 @@ ramstage-y += memlayout.ld
 BL31_MAKEARGS += SPD=tlkd
 
 INCLUDES += -I3rdparty/vboot/firmware/2lib/include
+INCLUDES += -I3rdparty/vboot_reference/firmware/include
