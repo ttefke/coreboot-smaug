@@ -1,0 +1,4 @@
+[submodule "3rdparty/vboot"]
+	path = 3rdparty/vboot
+	url = https://chromium.googlesource.com/chromiumos/platform/vboot_reference
+	branch = firmware-smaug-7900.B
