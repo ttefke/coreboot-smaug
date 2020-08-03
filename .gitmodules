@@ -6,3 +6,7 @@
 	path = 3rdparty/arm-trusted-firmware
 	url = https://chromium.googlesource.com/chromiumos/third_party/arm-trusted-firmware
 	branch = firmware-smaug-7900.B
+[submodule "3rdparty/blobs"]
+	path = 3rdparty/blobs
+	url = https://chromium.googlesource.com/chromiumos/third_party/coreboot/blobs
+	branch = firmware-smaug-7900.B
